@@ -1,0 +1,239 @@
+main {
+    display: grid;
+    grid-template-columns: 0.75fr 1.25fr;
+}
+
+.section {
+    height: 100vh;
+}
+
+#hero-section {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  color: white;
+  background: linear-gradient(to bottom, rgba(15, 41, 73, 0.90) 100%), url("../../assets/images/Illustrative\ barangay\ hall.png") center / cover no-repeat;
+}
+
+#logo {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 24px;
+    height: 10%;
+    margin: 48px 0 0 6vw;
+}
+
+#logo-img {
+    padding: 20px 24px;
+    background-color: var(--primary-color);
+    border: 1px solid var(--tertiary-color);
+    border-radius: 100%;
+}
+
+#logo-name {
+    margin-top: 8px;
+    font-family: var(--font-family-headers);
+    font-size: 24px;
+}
+
+#logo-system {
+    font-family: var(--font-family-headers);
+    font-size: 18px;
+    color: var(--tertiary-color);
+}
+
+#hero-introduction {
+    margin-left: 6vw;
+}
+
+#hero-introduction > p:first-child {
+    margin-bottom: 5vh;
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--secondary-color);
+}
+
+#hero-introduction h1 {
+    font-size: 48px;
+    line-height: 1.35;
+    color: var(--secondary-color);
+}
+
+#hero-introduction p {
+    margin-top: 24px;
+    letter-spacing: 0.3px;
+    line-height: 1.6;
+    color: var(--secondary-color);
+}
+
+#yellow-line {
+    border-top: 2px solid var(--tertiary-color);
+    width: 10%;
+    margin-left: 6vw;
+}
+
+#login-form, #login-note {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 10vh auto 0 auto;
+}
+
+#login-form {
+    width: 50%;
+}
+
+#return-main {
+    text-align: left;
+    margin: 16px auto 0 0;
+    text-decoration: none;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+#login-highlight {
+    margin: 16px auto 0 0;
+}
+
+#login-highlight h1 {
+    line-height: 1.6;
+    margin-top: 24px;
+    color: var(--primary-color);
+    font-size: 38px;
+}
+
+#login-highlight p {
+    line-height: 1.6;
+    margin: 24px 0 24px 0;
+    font-size: 16px;
+    color: #344054;
+}
+
+form {
+    margin: 0 auto 0 0;
+    width: 100%;
+}
+
+form label {
+    color: #344054;
+    font-size: 14px;
+}
+
+form label span {
+    color: red;
+}
+
+form input {
+    padding: 16px 24px 16px 16px;
+    width: 100%;
+    margin: 16px 0;
+    border: 1px solid #DCE2EA;
+    border-radius: 8px;
+}
+
+#form-line {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 100%;
+}
+
+#form-line label {
+    margin: 0 auto 0 0;
+    color: #344054;
+    font-size: 14px;
+}
+
+#remember-me {
+    margin-right: 8px;
+    border-radius: 8px;
+}
+
+#forgot-password {
+    text-decoration: none;
+    color: var(--primary-color);
+    font-weight: bold;
+    font-size: 14px;
+}
+
+#login-form button {
+    padding: 16px 24px;
+    width: 100%;
+    margin-top: 24px;
+    border-radius: 8px;
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    border: none;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+#divider {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    width: 100%;
+    margin: 24px 0;
+    color: #787879;
+}
+
+#divider::before,
+#divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background-color: gray;
+}
+
+#register {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    width: 100%;
+}
+
+#register p {
+    color: #344054;
+    font-size: 14px;
+}
+
+#register a {
+    text-decoration: none;
+    color: var(--primary-color);
+    padding: 16px 45%;
+    margin-top: 24px;
+    border: solid 1px rgb(77, 76, 76);
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+#comment {
+    display: flex;
+    flex-direction: row;
+    margin-top: 32px;
+}
+
+#comment img {
+    width: 20px;
+    height: 20px; 
+}
+
+#comment p {
+    font-size: 14px;
+    margin-left: 16px;
+    color: #667085;
+    line-height: 1.6;
+}
+
+#login-note {
+    margin-top: 5vh;
+    color: #667085;
+    font-size: 12px;
+}
+
