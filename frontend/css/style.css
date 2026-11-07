@@ -7,6 +7,10 @@
     --font-family-headers: 'Outfit', 'Inter';
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 * {
     margin: 0;
     padding: 0;
