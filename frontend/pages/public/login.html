@@ -33,21 +33,23 @@
                     <h1>Welcome Back</h1>
                     <p>Log in to access your account and barangay services.</p>
                 </div>
-                <form>
+                <form id="form">
                     <label for="email">Email Address <span>*</span></label><br>
-                    <input type="email" id="email" name="email" placeholder="you@example.com"><br>
+                    <input type="email" id="email" name="email" placeholder="you@example.com" required><br>
                     <label for="password">Password <span>*</span></label><br>
-                    <input type="password" id="password" name="password" placeholder="Enter your password"><br>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required><br>
+                    <div id="form-line">
+                        <div id="remember-group">
+                            <input type="checkbox" id="remember-me" name="remember-me" value="remember-me">
+                            <label for="remember-me">Remember Me</label>
+                        </div>
+                        <a href="..." id="forgot-password">Forgot Password?</a>
+                    </div>
+                    <button type="submit" id="login">Login</button>
+                    <div id="divider">
+                        <span>or</span>
+                    </div>
                 </form>
-                <div id="form-line">
-                    <input type="checkbox" id="remember-me" name="remember-me" value="remember-me">
-                    <label for="remember-me">Remember Me</label>
-                    <a href="..." id="forgot-password">Forgot Password?</a>
-                </div>
-                <button type="submit" id="login">Login</button>
-                <div id="divider">
-                    <span>or</span>
-                </div>
                 <div id="register">
                     <p>Need to the community portal?</p>
                     <a href="../public/register.html">Register</a>
@@ -60,5 +62,7 @@
             <p id="login-note">Privary Policy · Terms of Service · Academic proposal</p>
         </section>
     </main>
+
+    <script type="module" src="../../js/pages/public/login.js"></script>
 </body>
 </html>

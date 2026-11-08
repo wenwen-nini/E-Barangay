@@ -1,3 +1,5 @@
+import { documents } from "../../mock-data/document.js";
+
 const documentIcons = {
     "Barangay Clearance": "Barangay Clearance (landing page).png",
     "Certificate of Residency": "Certificate of Residency (landing page).png",
@@ -9,49 +11,26 @@ const documentIcons = {
 
 const documentList = document.getElementById("document-list");
 
-async function loadDocuments() {
-    try {
-        const response = await fetch("/api/public/documents");
+function displayDocuments(data) {
+    documentList.innerHTML = "";
 
-        if (!response.ok) {
-            throw new Error("Failed to load documents.");
-        }
+    data.forEach(item => {
+        const icon = documentIcons[item.document_name];
+        const iconPath = icon
+            ? new URL(`../../../assets/icons/Landing Page/Available Documents Section/${icon}`, import.meta.url).href
+            : "";
 
-        const documents = await response.json();
+        const card = document.createElement("div");
+        card.classList.add("document-card");
 
-        documentList.innerHTML = "";
+        card.innerHTML = `
+            <img src="${iconPath}" alt="${item.document_name}">
+            <h3>${item.document_name}</h3>
+            <p>${item.description}</p>
+        `;
 
-        documents.forEach(document => {
-            const card = document.createElement("article");
-            card.classList.add("document-card");
-
-            const name = document.createElement("h3");
-            name.textContent = document.document_name;
-
-            const description = document.createElement("p");
-            description.textContent = document.description;
-
-            const fee = document.createElement("p");
-            fee.textContent =
-                `₱${Number(document.fee_per_copy).toFixed(2)} / copy`;
-
-            const status = document.createElement("span");
-            status.textContent = document.availability;
-            status.classList.add(
-                "document-status",
-                document.availability.toLowerCase()
-            );
-
-            card.append(name, description, fee, status);
-            documentList.appendChild(card);
-        });
-
-    } catch (error) {
-        console.error(error);
-
-        documentList.textContent =
-            "Unable to load available documents at the moment.";
-    }
+        documentList.appendChild(card);
+    });
 }
 
-loadDocuments();
+displayDocuments(documents);
