@@ -1,0 +1,22 @@
+:root {
+    --primary-color: #17365D;
+    --secondary-color: #F5F4EC;
+    --tertiary-color: #D4AF37;
+    --gray-color: #344054;
+    --font-family: 'Inter', sans-serif;
+    --font-family-headers: 'Outfit', 'Inter';
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+}
