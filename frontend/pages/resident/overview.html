@@ -12,9 +12,38 @@
     <app-navbar></app-navbar>
 
     <main>
-        
+        <header>
+            <div class="introduction">
+                <h4>Resident Portal / Overview</h4>
+                <h1>Good day, <em id="name"></em></h1>
+                <p>Welcome back, Here's an overview of your document requests.</p>
+            </div>
+            <app-timestamp></app-timestamp>
+        </header>
+        <section class="request-summary">
+            <h1>My Request Summary</h1>
+            <status-cards id="status-list"></status-cards>
+        </section>
+        <section class="recent-requests">
+
+        </section>
+        <section class="notification">
+
+        </section>
+        <section class="announcement">
+
+        </section>
+        <section class="quick-action">
+            
+        </section>
     </main>
 
+    <!-- Component Script -->
     <script type="module" src="../../js/components/sidebar.js"></script>
+    <script type="module" src="../../js/components/timestamp.js"></script>
+    <script type="module" src="../../js/components/status_cards.js"></script>
+
+    <!-- Page Logic Script -->
+    <script type="module" src="../../js/pages/resident/overview.js"></script>
 </body>
 </html>
