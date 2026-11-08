@@ -12,7 +12,7 @@ main {
   min-height: 100vh;
   display: grid;
   color: white;
-  background: linear-gradient(to bottom, rgba(15, 41, 73, 0.90) 100%), url("../../assets/images/Illustrative\ barangay\ hall.png") center / cover no-repeat;
+  background: linear-gradient(to bottom, rgba(15, 41, 73, 0.90) 100%), url("../../assets/images/brgy_hall_images/Illustrative\ barangay\ hall.png") center / cover no-repeat;
 }
 
 #logo {
@@ -137,19 +137,25 @@ form input {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
     width: 100%;
 }
 
+#remember-group {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
 #form-line label {
-    margin: 0 auto 0 0;
+    margin: 0;
     color: #344054;
     font-size: 14px;
 }
 
 #remember-me {
     margin-right: 8px;
-    border-radius: 8px;
 }
 
 #forgot-password {
@@ -169,6 +175,7 @@ form input {
     border: none;
     font-weight: bold;
     font-size: 14px;
+    cursor: pointer;
 }
 
 #divider {
