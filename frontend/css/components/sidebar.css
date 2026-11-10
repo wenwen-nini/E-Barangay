@@ -1,0 +1,102 @@
+aside {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    background: linear-gradient(to bottom, rgb(24, 46, 71) 0%, rgb(24, 46, 71) 60%, rgb(24, 69, 120) 100%);
+    height: 100vh;
+    width: 150%;
+    color: var(--secondary-color);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 48px 28px;
+}
+
+.logo img {
+    border-radius: 100%;
+    padding: 17px 19px;
+    border: solid 2px var(--tertiary-color);
+}
+
+.logo-name {
+    line-height: 1.5;
+    font-family: var(--font-family-headers);
+}
+
+.logo-name h4 {
+    color: var(--tertiary-color);
+}
+
+.profile {
+    display: flex;
+    flex-direction: row;
+    background: linear-gradient(to bottom, rgba(24, 46, 71, 1) 0%, rgba(24, 46, 71, 0.40) 50%, rgba(24, 46, 71, 1) 100%), url("../../assets/images/brgy_hall_images/Illustrative\ barangay\ hall.png") center / cover no-repeat;
+    height: 18vh;
+    align-items: center;
+    align-self: stretch;
+    gap: 16px;
+    padding: 32px;
+}
+
+.profile img {
+    padding: 15px 19px;
+    width: 3.5vw;
+    height: 7vh;
+    background-color: var(--secondary-color);
+    border-radius: 100%;
+}
+
+.profile h1 {
+    font-size: 20px;
+}
+
+.profile p {
+    font-size: 14px;
+    font-weight: none;
+}
+
+nav {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    justify-content: space-between;
+    height: 100vh;
+    align-self: stretch;
+}
+
+nav a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--secondary-color);
+    font-weight: bold;
+    gap: 8px;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    transition: 0.3s ease;
+    padding: 12px 56px;
+}
+
+.top-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.bottom-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-self: center;
+    margin-top: auto;
+    margin-bottom: 48px;
+}
+
+.top-nav #active {
+    background-color: var(--tertiary-color);
+}
