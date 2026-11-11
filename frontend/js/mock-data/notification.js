@@ -4,9 +4,9 @@ export const notifications = [
         user_id: 1,
         request_id: 1,
         title: "Request Approved",
-        message: "Your Barangay Clearance request has been approved.",
+        message: "Your Barangay Clearance request has been approved. Please proceed to the barangay hall for release.",
         is_read: false,
-        created_at: "2026-11-04 10:05:00"
+        created_at: "2026-11-04"
     },
     {
         notification_id: 2,
@@ -15,7 +15,7 @@ export const notifications = [
         title: "Request Under Review",
         message: "Your Certificate of Indigency request is currently being reviewed.",
         is_read: false,
-        created_at: "2026-11-06 08:35:00"
+        created_at: "2026-11-06"
     },
     {
         notification_id: 3,
@@ -24,7 +24,7 @@ export const notifications = [
         title: "Action Required",
         message: "Please upload a clearer image of your identification.",
         is_read: true,
-        created_at: "2026-11-03 09:05:00"
+        created_at: "2026-11-03"
     },
     {
         notification_id: 4,
@@ -33,7 +33,7 @@ export const notifications = [
         title: "Document Ready for Pickup",
         message: "Your Barangay Clearance is ready for collection at the barangay hall.",
         is_read: true,
-        created_at: "2026-10-27 10:00:00"
+        created_at: "2026-10-27"
     },
     {
         notification_id: 5,
@@ -42,6 +42,6 @@ export const notifications = [
         title: "New Barangay Announcement",
         message: "A new announcement about the barangay office schedule has been published.",
         is_read: false,
-        created_at: "2026-11-01 08:10:00"
+        created_at: "2026-11-01"
     }
 ];
