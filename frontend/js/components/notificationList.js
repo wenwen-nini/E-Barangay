@@ -17,16 +17,26 @@ class NotificationList extends HTMLElement {
         }
 
         this.innerHTML = `
-            <div class="notification-group">
-                ${this._notifications.map(notif => `
-                    <div class="notification-item ${notif.isRead ? 'read' : 'unread'}">
-                        <div class="notif-content">
-                            <h3>${notif.title}</h3>
-                            <p>${notif.message}</p>
+                <div class="notification-list">
+                    ${this._notifications.map(notif => `
+                        <div class="notification-item ${notif.isRead ? 'read' : 'unread'}">
+                            <div class="notif-content">
+                                <div class="notif-card-header">
+                                    <img src="../../assets/icons/Resident Portal/Overview Page/Notification.png" alt="Notif Icon" class="notif-icon">
+                                    <h4>${notif.title || 'System Alert'}</h4>
+                                </div>
+                                <p class="notif-message">${notif.message}</p>
+                            </div>
+
+                            <div class="notif-status">
+                                <span class="notif-date">${notif.created_at || 'Just now'}</span>
+                                <span class="status-pill ${notif.isRead ? 'read' : 'unread'}">
+                                    ${notif.isRead ? 'Read' : 'Unread'}
+                                </span>
+                            </div>
                         </div>
-                        <span class="notif-status">${notif.created_at} • ${notif.isRead ? 'read' : 'unread'}</span>
-                    </div>
-                `).join('')}
+                    `).join('')}
+                </div>
             </div>
         `;
     }

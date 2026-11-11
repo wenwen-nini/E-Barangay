@@ -4,7 +4,7 @@ export const notifications = [
         user_id: 1,
         request_id: 1,
         title: "Request Approved",
-        message: "Your Barangay Clearance request has been approved.",
+        message: "Your Barangay Clearance request has been approved. Please proceed to the barangay hall for release.",
         is_read: false,
         created_at: "2026-11-04"
     },

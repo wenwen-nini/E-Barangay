@@ -1,15 +1,263 @@
 body {
     display: grid;
     min-height: 100vh;
-    grid-template-columns: 250px 1fr 200px;
+    grid-template-columns: 0.28fr 1fr 100px;
     grid-template-rows: auto 1fr auto;
     grid-template-areas:
-        "aside  header  header"
-        "aside  main    main"
-        "aside  main    main";
-    gap: 1rem;
+        "aside  header"
+        "aside  main";
+    gap: 0.7rem;
+    margin: 0;
+    font-family: 'Poppins', 'Inter';
+    background-color: #F5F7FA;
 }
 
-header { grid-area: header; }
-aside { grid-area: aside; }
-main { grid-area: main; }
+app-navbar { 
+    grid-area: aside; 
+    display: block;
+}
+main { 
+    display: grid;
+    min-height: 100vh;
+    grid-template-columns: 1.50fr 0.50fr;
+    grid-template-rows: auto auto;
+    grid-template-areas:
+        "header             header"
+        "request-summary    request-summary"
+        "recent-requests    notifications"
+        "announcement       quick-action";
+    gap: 1rem;
+    grid-area: main;
+    color: var(--primary-color);
+    margin-left: 3vw;
+}
+
+header { 
+    grid-area: header; 
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.request-summary {
+    grid-area: request-summary;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.recent-requests {
+    grid-area: recent-requests;
+}
+
+.notifications {
+    grid-area: notifications;
+}
+
+.announcement {
+    grid-area: announcement;
+}
+
+.quick-action {
+    grid-area: quick-action;
+}
+
+.quick-action, .announcement {
+    margin-bottom: 8vh;
+}
+
+.introduction {
+    line-height: 1.6;
+    margin-top: 3vh;
+}
+
+.introduction p {
+    font-size: 16px;
+}
+
+.introduction h1, em {
+    font-size: 32px;
+}
+
+.timestamp {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.date-time {
+    line-height: 1.20;
+}
+
+#current-date {
+    font-size: 16px;
+}
+
+.status-cards-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-right: 4vw;
+    gap: 3%;
+}
+
+.status-card {
+    padding: 24px;
+    width: 100%;
+    height: 145px;
+    border: 1px solid #DCE2EA;
+    border-radius: 16px;
+    background-color: #FFFFFF;
+    line-height: 1.4;
+}
+
+.status-card h2 {
+    font-size: 36px;
+}
+
+.status-card p {
+    font-size: 14px;
+}
+
+.recent-requests-list {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.card-header-line {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-right: 32px;
+}
+
+.request-card {
+    background-color: #FFFFFF;
+    border: 1px solid #DCE2EA;
+    border-radius: 16px;
+    padding: 16px 24px 24px 24px;
+}
+
+.card-header {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.document-name {
+    font-size: 24px;
+}
+
+.status-badge {
+    font-size: 16px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 16px;
+    border: 1px solid;
+}
+
+.status-approved { background-color: rgb(113, 255, 77, 0.20); color: #065F46; border-color: #0EA700;}
+.status-pending { background-color: rgb(190, 131, 5, 0.20); color: #B87E02; border-color: #FFD374;}
+.status-rejected { background-color: #FF7C7C; color: #980A0A; border-color: #E00505;}
+.status-released { background-color: rgb(113, 255, 77, 0.20); color: #065F46; border-color: #0EA700;}
+
+.card-header-line h1 {
+    font-size: 24px;
+}
+
+.card-header-line a {
+    text-decoration: none;
+    color: var(--primary-color);
+}
+
+.notification-list {
+    display: flex;
+    flex-direction: column;
+    background-color: #FFFFFF;
+    border: 1px solid #DCE2EA;
+    border-radius: 16px;
+    padding: 24px;
+    height: 85%;
+}
+
+.notif-card-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 2vh;
+}
+
+.title {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 2vh;
+}
+
+.notification-item {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: space-between;
+}
+
+.notification-item.unread {
+    background-color: #FFFFFF;
+}
+
+.announcement-card {
+    background-color: #FFFFFF;
+    padding: 16px 24px;
+    border: 1px solid #DCE2EA;
+    border-radius: 16px;
+    height: 15vh;
+}
+
+.announcement-header h3 {
+    font-size: 24px;
+    line-height: 1;
+    margin-top: 8px;
+}
+
+.date {
+    color: #797C80;
+    font-size: 12px;
+    margin-top: 0;
+}
+
+.quick-action-item {
+    background-color: #FFFFFF;
+    border: 1px solid #DCE2EA;
+    border-radius: 16px;
+    padding: 16px 24px;
+}
+
+.quick-action-item h2, p {
+    font-size: 16px
+}
+
+.quick-action-item button {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    font-family: var(--font-family-portals);
+    padding: 16px;
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    font-weight: bold;
+    margin-top: 8px;
+    cursor: pointer;
+}
+
+
+
+
+

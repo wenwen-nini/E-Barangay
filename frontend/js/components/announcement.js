@@ -22,7 +22,7 @@ class AnnouncementCard extends HTMLElement {
                     <div class="announcement-card">
                         <div class="announcement-header">
                             <h3>${item.title}</h3>
-                            <span class="date">${item.published_at}</span>
+                            <span class="date">Published ${item.published_at}</span>
                         </div>
                         <p>${item.content}</p>
                     </div>

@@ -17,17 +17,19 @@ class Sidebar extends HTMLElement {
                     </div>
                 </div>
                 <nav>
-                    <div class="top-nav">
-                        <a href="#..." id="active"><img src="../../assets/icons/Resident Portal/Navigation Bar/Overview.png">Overview</a>
-                        <a href="#..."><img src="../../assets/icons/Resident Portal/Navigation Bar/My Requests.png">My Requests</a>
-                        <a href="#..."><img src="../../assets/icons/Resident Portal/Navigation Bar/Document Catalog.png">Document Catalog</a>
-                        <a href="#..."><img src="../../assets/icons/Resident Portal/Navigation Bar/Document Request.png">Document Request</a>
-                        <a href="#..."><img src="../../assets/icons/Resident Portal/Navigation Bar/Announcements.png">Announcements</a>
-                        <a href="#..."><img src="../../assets/icons/Resident Portal/Navigation Bar/Notification (Navbar).png">Notifications</a>
-                    </div>
-                    <div class="bottom-nav">
-                        <a href="#..."><img src="../../assets/icons/Resident Portal/Navigation Bar/Help Icon (white).png">Help & Support</a>
-                        <a href="#..."><img src="../../assets/icons/Resident Portal/Navigation Bar/Settings Icon.png">Settings</a>
+                    <div class="nav-links">
+                        <div class="top-nav">
+                            <a href="../resident/overview.html" class="active"><img src="../../assets/icons/Resident Portal/Navigation Bar/Overview.png">Overview</a>
+                            <a href="../resident/my_request.html"><img src="../../assets/icons/Resident Portal/Navigation Bar/My Requests.png">My Requests</a>
+                            <a href="../resident/document_catalog.html"><img src="../../assets/icons/Resident Portal/Navigation Bar/Document Catalog.png">Document Catalog</a>
+                            <a href="../resident/document_request.html"><img src="../../assets/icons/Resident Portal/Navigation Bar/Document Request.png">Document Request</a>
+                            <a href="../resident/announcement.html"><img src="../../assets/icons/Resident Portal/Navigation Bar/Announcements.png">Announcements</a>
+                            <a href="../resident/notification.html"><img src="../../assets/icons/Resident Portal/Navigation Bar/Notification (Navbar).png">Notifications</a>
+                        </div>
+                        <div class="bottom-nav">
+                            <a href="../resident/help.html"><img src="../../assets/icons/Resident Portal/Navigation Bar/Help Icon (white).png">Help & Support</a>
+                            <a href="../resident/settings.html"><img src="../../assets/icons/Resident Portal/Navigation Bar/Settings Icon.png">Settings</a>
+                        </div>
                     </div>
                 </nav>
             </aside>
@@ -36,3 +38,18 @@ class Sidebar extends HTMLElement {
 }
 
 customElements.define('app-navbar', Sidebar);
+
+const navLinks = document.querySelectorAll(".nav-links a");
+
+function setActive(id) {
+    navLinks.forEach(link => {
+        link.classList.toggle("active", link.getAttribute("href") === `#${id}`);
+    });
+}
+
+navLinks.forEach(link => {
+    link.addEventListener("click", (e) => {
+        e.preventDefault();
+        setActive(link.getAttribute("href").slice(1));
+    });
+});   
