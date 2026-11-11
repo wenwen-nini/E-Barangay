@@ -1,34 +1,55 @@
-import {users} from "../../mock-data/users.js";
 
-const loginform = document.getElementById("form");
+import { users } from "../../mock-data/users.js";
+import { setCurrentUser } from "../../core/session.js";
 
-function getRoleFromEmail(email) {
-    const domain = email.toLowerCase().split('@')[1];
+const loginForm = document.getElementById("form");
 
-    return domain === 'balagtas.gov.ph' ? 'Staff' : 'Resident';
-}
+if (loginForm) {
 
-if (loginform) {
-    loginform.addEventListener("submit", function(event) {
+    loginForm.addEventListener("submit", function(event) {
+
         event.preventDefault();
 
-        const email = document.getElementById("email").value.trim().toLowerCase();
+        const email = document.getElementById("email")
+            .value.trim().toLowerCase();
+
         const password = document.getElementById("password").value;
 
-        const role = getRoleFromEmail(email);
+        const matchedUser = users.find(
+            user => user.email.toLowerCase() === email
+        );
 
-        const matchedUser = users.find(user => user.email.toLowerCase() === email);
-
-        if (matchedUser) {
-            if (role === 'Resident') {
-                window.location.href = "../resident/overview.html";
-            } else if (role === 'Staff') {
-                window.location.href = "../staff/dashboard.html";
-            } else {
-            window.alert("Location pickup error!");
-            }
-        } else {
-            window.alert("Account not found. Please check your credentials.")
+        if (!matchedUser) {
+            window.alert("Account not found. Please check your credentials.");
+            return;
         }
+
+        if (matchedUser.password !== password) {
+            window.alert("Incorrect password.");
+            return;
+        }
+
+        try {
+
+            const currentUser = setCurrentUser(matchedUser);
+
+            if (currentUser.role === "Resident") {
+
+                window.location.href = "../resident/overview.html";
+
+            } else if (currentUser.role === "Staff") {
+
+                window.location.href = "../staff/dashboard.html";
+
+            }
+
+        } catch (error) {
+
+            console.error("Login error:", error);
+            window.alert(error.message);
+
+        }
+
     });
+
 }

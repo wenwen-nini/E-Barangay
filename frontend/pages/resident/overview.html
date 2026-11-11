@@ -14,37 +14,33 @@
 
     <main>
         <header>
-            <div class="introduction">
-                <p>Resident Portal / Overview</>
-                <h1>Good day, <em id="name"></em></h1>
-                <p>Welcome back, Here's an overview of your document requests.</p>
-            </div>
+            <div class="introduction"></div>
             <app-timestamp></app-timestamp>
         </header>
         <section class="request-summary">
             <h1>My Request Summary</h1>
-            <status-cards id="status-list"></status-cards>
+            <div class="status-card-container"></div>
         </section>
         <section class="recent-requests">
             <div class="card-header-line">
                 <h1>Recent Requests</h1>
                 <a href="../resident/my_request.html">View all →</a>
             </div>
-            <recent-requests-cards id="request-list"></recent-requests-cards>
+            <div class="request-list"></div>
         </section>
         <section class="notification">
             <div class="card-header-line">
                 <h1>Notifications</h1>
                 <a href="../resident/notification.html">View all →</a>
             </div>
-            <notification-list id="notifications"></notification-list>
+            <div class="notifications"></div>
         </section>
         <section class="announcement">
             <div class="card-header-line">
                 <h1>Barangay Announcements</h1>
                 <a href="../resident/announcement.html">View all →</a>
             </div>
-            <announcement-card id="announcement"></announcement-card>
+           <div class="announcements"></div>
         </section>
         <section class="quick-action">
             <div class="quick-action-item">
@@ -58,10 +54,6 @@
     <!-- Component Script -->
     <script type="module" src="../../js/components/sidebar.js"></script>
     <script type="module" src="../../js/components/timestamp.js"></script>
-    <script type="module" src="../../js/components/status_cards.js"></script>
-    <script type="module" src="../../js/components/recent_ request.js"></script>
-    <script type="module" src="../../js/components/announcement.js"></script>
-    <script type="module" src="../../js/components/notificationList.js"></script>
 
     <!-- Page Logic Script -->
     <script type="module" src="../../js/pages/resident/overview.js"></script>

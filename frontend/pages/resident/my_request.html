@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resident Portal</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components/sidebar.css">
+    <link rel="stylesheet" href="../../css/pages/resident/my_request.css">
+</head>
+<body>
+    
+    <app-navbar></app-navbar>
+
+    <main>
+        <header>
+            <div class="introduction">
+                <p>Resident Portal / Overview</>
+                <h1>Good day, <em id="name"></em></h1>
+                <p>Welcome back, Here's an overview of your document requests.</p>
+            </div>
+            <button id="new-request"><img src="../../assets/icons/General Icons/+ icon.png"> New Request</button>
+        </header>
+        <section class="filter-rows">
+            <button id="all">All</button>
+            <button id="pending">Pending</button>
+            <button id="Processing">Processing</button>
+            <button id="Approved">Approved</button>
+            <button id="Released">Released</button>
+            <button id="Rejected">Rejected</button>
+        </section>
+        <section class="request-list">
+            <div id="request-cards-container"></div>
+        </section>
+        <section class="request-timeline-card">
+            <div id="request-timeline-container"></div>
+        </section>
+    </main>
+
+    <script type="module" src="../../js/components/sidebar.js"></script>
+</body>
+</html>

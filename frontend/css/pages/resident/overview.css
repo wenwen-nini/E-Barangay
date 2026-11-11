@@ -2,14 +2,14 @@ body {
     display: grid;
     min-height: 100vh;
     grid-template-columns: 0.28fr 1fr 100px;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto;
     grid-template-areas:
-        "aside  header"
         "aside  main";
     gap: 0.7rem;
     margin: 0;
     font-family: 'Poppins', 'Inter';
     background-color: #F5F7FA;
+    align-items: stretch;
 }
 
 app-navbar { 
@@ -18,9 +18,8 @@ app-navbar {
 }
 main { 
     display: grid;
-    min-height: 100vh;
     grid-template-columns: 1.50fr 0.50fr;
-    grid-template-rows: auto auto;
+    grid-template-rows: auto auto auto auto;
     grid-template-areas:
         "header             header"
         "request-summary    request-summary"
@@ -63,10 +62,6 @@ header {
     grid-area: quick-action;
 }
 
-.quick-action, .announcement {
-    margin-bottom: 8vh;
-}
-
 .introduction {
     line-height: 1.6;
     margin-top: 3vh;
@@ -94,7 +89,24 @@ header {
     font-size: 16px;
 }
 
-.status-cards-container {
+.card-header-line {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-right: 32px;
+}
+
+.card-header-line h1 {
+    font-size: 24px;
+}
+
+.card-header-line a {
+    text-decoration: none;
+    color: var(--primary-color);
+}
+
+.status-card-container {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -112,37 +124,25 @@ header {
     line-height: 1.4;
 }
 
-.status-card h2 {
-    font-size: 36px;
+.status-info h3{
+    font-size: 32px;
 }
 
-.status-card p {
-    font-size: 14px;
-}
-
-.recent-requests-list {
+.request-list {
     display: flex;
     flex-direction: column;
     flex-wrap: wrap;
-    gap: 16px;
-}
-
-.card-header-line {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    margin-right: 32px;
+    gap: 8px;
 }
 
 .request-card {
     background-color: #FFFFFF;
     border: 1px solid #DCE2EA;
     border-radius: 16px;
-    padding: 16px 24px 24px 24px;
+    padding: 16px 24px;
 }
 
-.card-header {
+.name-status-line {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -150,33 +150,43 @@ header {
     justify-content: space-between;
 }
 
-.document-name {
+.name-status-line h1 {
     font-size: 24px;
 }
 
-.status-badge {
-    font-size: 16px;
-    font-weight: 600;
-    padding: 3px 10px;
+.name-status-line p {
+    margin-right: 1vw;
+}
+
+.id-date-line {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 0;
+}
+
+.id-date-line p, .id-date-line span {
+    color: #686868;
+    font-size: 12px;
+}
+
+.name-status-line span {
+    font-weight: bold;
     border-radius: 16px;
+    font-size: 16px;
+    padding: 3px 10px;
     border: 1px solid;
 }
 
 .status-approved { background-color: rgb(113, 255, 77, 0.20); color: #065F46; border-color: #0EA700;}
-.status-pending { background-color: rgb(190, 131, 5, 0.20); color: #B87E02; border-color: #FFD374;}
+.status-pending, .status-under-review { background-color: rgb(190, 131, 5, 0.20); color: #B87E02; border-color: #FFD374;}
 .status-rejected { background-color: #FF7C7C; color: #980A0A; border-color: #E00505;}
 .status-released { background-color: rgb(113, 255, 77, 0.20); color: #065F46; border-color: #0EA700;}
+.status-returned { background-color: rgb(40, 136, 246, 0.20); color: #1D61F3; border-color: #1D61F3;}
 
-.card-header-line h1 {
-    font-size: 24px;
-}
-
-.card-header-line a {
-    text-decoration: none;
-    color: var(--primary-color);
-}
-
-.notification-list {
+.notifications {
     display: flex;
     flex-direction: column;
     background-color: #FFFFFF;
@@ -186,7 +196,7 @@ header {
     height: 85%;
 }
 
-.notif-card-header {
+.notif-title {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -194,23 +204,17 @@ header {
     margin-bottom: 2vh;
 }
 
-.title {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 2vh;
-}
-
-.notification-item {
+.notification-card {
     display: flex;
     flex-direction: column;
     flex: 1;
     justify-content: space-between;
 }
 
-.notification-item.unread {
-    background-color: #FFFFFF;
+.notif-status {
+    margin-top: auto;
+    color: #686868;
+    font-size: 14px;
 }
 
 .announcement-card {
@@ -227,10 +231,22 @@ header {
     margin-top: 8px;
 }
 
-.date {
-    color: #797C80;
+.announcement-title {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 16px;
+}
+
+.announcement-card span {
+    color: #686868;
     font-size: 12px;
-    margin-top: 0;
+}
+
+.announcement-card p {
+    color: var(--primary-color);
+    margin-top: 1vh;
 }
 
 .quick-action-item {
