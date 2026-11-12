@@ -15,28 +15,74 @@
     <main>
         <header>
             <div class="introduction">
-                <p>Resident Portal / Overview</>
-                <h1>Good day, <em id="name"></em></h1>
-                <p>Welcome back, Here's an overview of your document requests.</p>
+                <p>Resident Portal / My Requests</p>
+                <h1>My Requests</h1>
+                <p>Track of all your document requests</p>
             </div>
             <button id="new-request"><img src="../../assets/icons/General Icons/+ icon.png"> New Request</button>
         </header>
         <section class="filter-rows">
-            <button id="all">All</button>
-            <button id="pending">Pending</button>
-            <button id="Processing">Processing</button>
-            <button id="Approved">Approved</button>
-            <button id="Released">Released</button>
-            <button id="Rejected">Rejected</button>
+            <button class="filter-btns" id="all">All</button>
+            <button class="filter-btns" id="pending">Pending</button>
+            <button class="filter-btns" id="Processing">Processing</button>
+            <button class="filter-btns" id="Approved">Approved</button>
+            <button class="filter-btns" id="Released">Released</button>
+            <button class="filter-btns" id="Rejected">Rejected</button>
         </section>
-        <section class="request-list">
+        <section class="request-list-layout">
             <div id="request-cards-container"></div>
-        </section>
-        <section class="request-timeline-card">
-            <div id="request-timeline-container"></div>
+
+            
+            <dialog id="request-modal" class="request-modal">
+
+                <div class="modal-header">
+                    <div>
+                        <h2 id="modal-title"></h2>
+                        <p id="modal-description"></p>
+                    </div>
+
+                    <button type="button" id="close-modal">
+                        &times;
+                    </button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div id="modal-request-info"></div>
+
+                    <div id="modal-notice"></div>
+
+                    <form id="modal-form">
+                        <div id="modal-content"></div>
+
+                        <div class="modal-footer">
+                            <button type="button" id="cancel-modal">
+                                Cancel
+                            </button>
+
+                            <button type="submit" id="modal-submit">
+                                Submit
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+
+            </dialog>
+
+
+            <div class="request-timeline">
+                <div id="timeline-header">
+                    <h3 id="timeline-request-number">Request #</h3>
+                    <p id="timeline-document-name"></p>
+                </div>
+
+                <div class="timeline-list"></div>
+            </div>
         </section>
     </main>
 
     <script type="module" src="../../js/components/sidebar.js"></script>
+    <script type="module" src="../../js/pages/resident/my-request.js"></script>
 </body>
 </html>
