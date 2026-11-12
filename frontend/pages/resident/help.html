@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resident Portal</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components/sidebar.css">
+    <link rel="stylesheet" href="../../css/pages/resident/help.css">
+</head>
+<body>
+    <app-navbar></app-navbar>
+
+    <main>
+        <header>
+            <div class="introduction">
+                <p>Resident Portal / Help & Support</p>
+                <h1>Help & Support</h1>
+                <p>Find guidance for your document requests and everyday portal tasks.</p>
+            </div>
+            <app-timestamp></app-timestamp>
+        </header>
+        <section class="search-feature">
+
+        </section>
+        <section class="help-guidance-container">
+            <h2>How can we help you?</h2>
+            <div id="card-container"></div>
+        </section>
+        <section class="frequently-asked-container">
+            <div class="fqa-title">
+                <h2>Frequently Asked Questions</h2>
+                <p>Quick answers for common resident tasks.</p>
+            </div>
+            <span></span>
+            <div class="questions">
+                <h3>What does my request status mean?</h3>
+                <p>Pending: awaiting review. Under Review: being handled by the barangay. Approved: approved; check the instructions for next steps. Released: the document has been handed over. Rejected: read the reason in your request. Cancelled: the request is no longer active. Always check the latest staff remarks.</p>
+            </div>
+            <div class="questions">
+                <h3>How do I upload missing documents?</h3>
+                <p>Open My Request and select the affected request. Read the staff remarks, choose Submit Missing Documents when available, and attach the requested files. Follow the displayed file type and size limits, check that each file is readable, then submit. If the upload fails, check the file and try again.</p>
+            </div>
+            <div class="questions">
+                <h3>Can I follow up or cancel a pending request?</h3>
+                <p>Open the pending request in My Request. Use Follow up to send a clear message, or Cancel Pending Request if you no longer need it. Review the confirmation before cancelling. If an action is unavailable or you need to correct submitted details, contact the barangay rather than submitting a duplicate request.</p>
+            </div>
+        </section>
+        <section class="need-more-help">
+            <div class="need-help-title">
+                <img src="../../assets/icons/Staff Portal/Help & Support Page/Help icon (blue).png">
+                <h2>Need more help?</h2>
+            </div>
+            <p>For questions about requirements, a submitted request or collection, contact the barangay office.</p>
+            <div class="office-card">
+                <h3>Barangay office / portal administrator</h3>
+                <p>Use the official contact channel published by your barangay, or ask at the barangay hall. For login or portal errors, ask to be referred to the portal administrator.</p>
+            </div>
+            <h3>What to include?</h3>
+            <p>Provide your request ID, a document name, submission date, and current status. Explain what happened, any error message and the steps you tried. For an upload issue, include the file type and size.</p>
+            <div class="important-reminder">
+                <img src="../../assets/icons/Staff Portal/Help & Support Page/Shield Check Icon.png">
+                <p>Hide sensitive details in screenshots. Never share your password or unnecessary identity documents.</p>
+            </div>
+        </section>
+    </main>
+    
+    <script type="module" src="../../js/components/sidebar.js"></script>
+    <script type="module" src="../../js/components/timestamp.js"></script>
+    <script type="module" src="../../js/pages/resident/help.js"></script>
+</body>
+</html>

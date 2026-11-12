@@ -1,0 +1,61 @@
+body {
+    display: grid;
+    min-height: 100vh;
+    grid-template-columns: 0.28fr 1fr 100px;
+    grid-template-rows: auto;
+    grid-template-areas:
+        "aside  main";
+    gap: 0.75rem;
+    font-family: 'Poppins', 'Inter';
+    background-color: #F5F7FA;
+    align-items: stretch;
+}
+
+app-navbar {
+    grid-area: aside;
+    display: block;
+}
+
+main {
+    display: grid;
+    grid-template-columns: 1.50fr 0.50fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+        "header         header"
+        "filter         filter"
+        "notification   summary"
+        "notification   claiming";
+        row-gap: 1.5rem;
+        column-gap: 0.75rem;
+        align-content: start;
+        grid-area: main;
+        color: var(--primary-color);
+        margin-left: 3vw;
+}
+
+header {
+    grid-area: header;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 3rem;
+    line-height: 1.6;
+}
+
+.filter-group {
+    grid-area: filter;
+}
+
+.notification-list-container {
+    grid-area: notification;
+}
+
+.summary-card {
+    grid-area: summary;
+}
+
+.claiming-card {
+    grid-area: claiming;
+}

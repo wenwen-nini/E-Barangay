@@ -27,6 +27,7 @@ export const users = [
         user_id: 3,
         email: "staff@balagtas.gov.ph",
         role: "Staff",
+        password: "demo123",
         account_status: "Active",
         profile_image_path: "../../assets/images/profiles/staff.png",
         notify_request_updates: true,
