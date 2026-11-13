@@ -1,0 +1,107 @@
+body {
+    display: grid;
+    min-height: 100vh;
+    grid-template-columns: 0.28fr 1fr 100px;
+    grid-template-rows: auto;
+    grid-template-areas:
+        "aside  main";
+    gap: 0.75rem;
+    font-family: 'Poppins', 'Inter';
+    background-color: #F5F7FA;
+    align-items: stretch;
+}
+
+app-navbar {
+    grid-area: aside;
+    display: block;
+}
+
+main {
+    display: grid;
+    grid-template-columns: 1.50fr 0.50fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+        "header                 need-help"
+        "filter-group           need-help"
+        "available-documents    quick-steps";
+    row-gap: 1.5rem;
+    column-gap: 0.75rem;
+    align-content: start;
+    grid-area: main;
+    color: var(--primary-color);
+    margin-left: 3vw;
+}
+
+header {
+    grid-area: header;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 3rem;
+    line-height: 1.6;
+}
+
+.filter-group {
+    grid-area: filter-group;
+}
+
+.need-help-card {
+    grid-area: need-help;
+    margin-top: 3rem;
+    background-color: #AFDBFF;
+    border: 1px solid #91A9F9;
+    padding: 16px 24px;
+    border-radius: 16px;
+}
+
+.need-help-title {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.available-documents {
+    grid-area: available-documents;
+}
+
+.quick-steps-card {
+    grid-area: quick-steps;
+    background-color: #FFFFFF;
+    border: 1px solid #DCE2EA;
+    padding: 16px 24px;
+    border-radius: 16px;
+}
+
+.quick-steps-card h2 {
+    font-size: 16px;
+}
+
+.step-list {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.step-by-step {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    align-items: center;
+    margin-top: 16px;
+    line-height: 1.1;
+    height: 6vh;
+}
+
+.step-list .step-by-step h3 {
+    border: 1px solid #3D4DF5;
+    border-radius: 100%;
+    padding: 8px 8px;
+    width: 2vw;
+    text-align: center;
+}

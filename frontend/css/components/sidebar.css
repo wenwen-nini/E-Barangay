@@ -4,7 +4,7 @@ aside {
     align-items: center;
     gap: 24px;
     background: linear-gradient(to bottom, rgb(24, 46, 71) 0%, rgb(24, 46, 71) 60%, rgb(24, 69, 120) 100%);
-    height: 100vh;
+    height: 100%;
     width: 100%;
     color: var(--secondary-color);
 }

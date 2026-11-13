@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resident Portal</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components/sidebar.css">
+    <link rel="stylesheet" href="../../css/pages/resident/settings.css">
+</head>
+<body>
+    
+    <app-navbar></app-navbar>
+
+    <main>
+        <header>
+            <div class="introduction">
+                <p>Resident Portal / Settings</p>
+                <h1>Settings</h1>
+                <p>Keep your profile secure and choose the updates you want to see</p>
+            </div>
+            <button id="logout-btn">Log out</button>
+        </header>
+        <section class="personal-info-card">
+            <form>
+                <fieldset>
+                    <h2>Personal Information</h2>
+                    <p>Required fields are marked *. Other details are optional</p>
+                    <div class="name-field-line">
+                        <label for="first-name">First Name <span>*</span></label><br>
+                        <input type="text" id="first-name" name="first-name" placeholder="" required><br>
+                        <label for="middle-name">Middle Name • Optional</label><br>
+                        <input type="text" id="middle-name" name="middle-name" placeholder=""><br>
+                        <label for="last-name">Last Name <span>*</span></label><br>
+                        <input type="text" id="last-name" name="last-name" placeholder="" required><br>
+                    </div>
+                    <label for="address">Residential address <span>*</span></label><br>
+                    <input type="text" id="address" name="address" placeholder="Balagtas, Batangas" required><br>
+                    <div class="number-date">
+                        <label for="contact">Contact number <span>*</span></label><br>
+                        <input type="tel" pattern="[0-9]{4}-[0-9]{3}-[0-9]{4}" id="contact" name="contact" placeholder="09XX-XXX-XXXX" required><br>
+                        <label for="bday">Birthday • Optional</label><br>
+                        <input type="date" id="bday" name="bday" placeholder="Select date"><br>
+                    </div>
+                    <label for="email">Email Address • Optional</label><br>
+                    <input type="email" id="email" name="email" placeholder="Enter email address">
+                    <div class="quick-reminder">
+                        <img src="../../assets/icons/General Icons/basta i na nasa bilog.png">
+                        <p>Profile changes apply to future requests. They do not change information on already-submitted requests.</p>
+                    </div>
+                    <button type="reset">Cancel</button>
+                    <button type="submit">Save profile</button>
+                </fieldset>
+            </form>
+        </section>
+        <section class="password-security-card">
+            <form>
+                <fieldset>
+                    <h2>Password & Security</h2>
+                    <p>Use a strong, unique password for your portal account.</p>
+                    <label for="current-password">Current password <span>*</span></label><br>
+                    <input type="password" id="current-password" name="current-password" placeholder="Enter current password" required><br>
+                    <div class="new-password-line">
+                        <label for="new-password">New password <span>*</span></label><br>
+                        <input type="password" id="new-password" name="new-password" placeholder="Enter new password" required><br>
+                        <label for="confirmation">Confirm new password <span>*</span></label><br>
+                        <input type="password" id="confirmation" name="confirmation" placeholder="Re-enter new password" required><br> 
+                    </div>
+                    <p>Use the eye controls to show or hide each password.</p>
+                    <button type="reset">Cancel</button>
+                    <button type="submit">Update password</button>
+                </fieldset>
+            </form>
+        </section>
+        <section class="preferences-card">
+            <form>
+                <fieldset>
+                    <h2>Notification preferences</h2>
+                    <p>These preferences apply to in-portal notifications only.</p>
+                    <div class="checklist">
+                        <div class="checklist-info">
+                            <h3>Request updates</h3>
+                            <p>Review decisions and missing-file requests</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="request-updates" id="request-updates" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="checklist">
+                        <div class="checklist-info">
+                            <h3>Pickup reminders</h3>
+                            <p>See when your approved request is ready.</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="pickup-reminders" id="pickup-reminders" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="checklist">
+                        <div class="checklist-info">
+                            <h3>Announcements</h3>
+                            <p>Barangay service notices in your portal.</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="request-updates" id="request-updates">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <p>SMS and email notifications are not supported.</p>
+                    <button type="reset">Cancel</button>
+                    <button type="submit">Save preferences</button>
+                </fieldset>
+            </form>
+        </section>
+        <section class="account-support-container">
+            <div class="support-card">
+                <h2>Privacy & account support</h2>
+                <p>Your information is used to process barangay service requests. Contact the office if a submitted records needs connection.</p>
+                <strong>Privacy notice</strong>
+                <strong>Account Help</strong>
+                <span id="line"></span>
+                <p>Need access assistance? Visit the barangay hall.</p>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="../../js/components/sidebar.js"></script>
+    <script type="module" src="../../js/pages/resident/settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resident Portal</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components/sidebar.css">
+    <link rel="stylesheet" href="../../css/pages/resident/document-catalog.css">
+</head>
+<body>
+    <app-navbar></app-navbar>
+
+    <main>
+        <header>
+            <div class="introduction">
+                <p>Resident Portal / Document Catalog</p>
+                <h1>Document Catalog</h1>
+                <p>Browse available barangay documents, their requirements, fees, and current availability</p>
+            </div>
+        </header>
+        <section class="filter-group">
+
+        </section>
+        <article class="need-help-card">
+            <div class="need-help-title">
+                <img src="../../assets/icons/Resident Portal/Document catalog Page/Need Help Icon.png">
+                <h3>Need Help?</h3>
+            </div>
+            <p>If you're unsure about the requirements for a specific document, you may contact the barangay office or check the announcements for updates.</p>
+        </article>
+        <article class="quick-steps-card">
+            <h2>Quick Steps</h2>
+            <div class="step-list">
+                <div class="step-by-step">
+                    <h3>1</h3>
+                    <p>Browse the list of <br>available documents</p>
+                </div>
+                <div class="step-by-step">
+                    <h3>2</h3>
+                    <p>Click "View Details" to <br>see the requirements, <br>fees, and availability.</p>
+                </div>
+                <div class="step-by-step">
+                    <h3>3</h3>
+                    <p>Submit a request <br>through the <br>Document Request<br> page.</p>
+                </div>
+                <div class="step-by-step">
+                    <h3>4</h3>
+                    <p>Track your request <br>status in My Requests.</p>
+                </div>
+            </div>
+        </article>
+        <section class="available-documents">
+            <h1>Available Documents</h1>
+            <div id="documents-container"></div>
+        </section>
+    </main>
+
+    <script type="module" src="../../js/components/sidebar.js"></script>
+    <script type="module" src="document-catalog.js"></script>
+</body>
+</html>

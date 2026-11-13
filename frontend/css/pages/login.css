@@ -13,6 +13,7 @@ main {
   display: grid;
   color: white;
   background: linear-gradient(to bottom, rgba(15, 41, 73, 0.90) 100%), url("../../assets/images/brgy_hall_images/Illustrative\ barangay\ hall.png") center / cover no-repeat;
+  height: 100%;
 }
 
 #logo {
