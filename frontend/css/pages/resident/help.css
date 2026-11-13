@@ -31,6 +31,7 @@ main {
     grid-area: main;
     color: var(--primary-color);
     margin-left: 3vw;
+    margin-bottom: 3vh;
 }
 
 header {
