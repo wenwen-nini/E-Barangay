@@ -12,29 +12,47 @@
     <app-navbar></app-navbar>
 
     <main>
-        <header>
+        <header class="page-header">
             <div class="introduction">
                 <p>Resident Portal / Notifications</p>
                 <h1>Notifications</h1>
                 <p>Updates on your document requests.</p>
             </div>
         </header>
-        <section class="filter-group">
-            
-        </section>
-        <section class="notification-list-container">
 
+        <section class="notification-filter-row" aria-label="Filter notifications">
+            <button type="button" class="notification-filter active" data-filter="all" aria-pressed="true">
+                All (<span id="all-count">0</span>)
+            </button>
+            <button type="button" class="notification-filter" data-filter="unread" aria-pressed="false">
+                Unread (<span id="unread-count">0</span>)
+            </button>
         </section>
-        <article class="summary-card">
 
-        </article>
-        <article class="claiming-card">
-            <div class="claiming-card-title">
-                <img src="../../assets/icons/Resident Portal/Overview Page/Status Card Pending.png">
-                <h2>Claiming a document?</h2>
-            </div>
-            <p>Barangay Hall is open from <br>Mon to Fri, 8:00 AM to 5:00 PM</p>
-        </article>
+        <section id="notification-list-container" class="notification-list-container" aria-live="polite">
+            <p class="notification-loading">Loading notifications...</p>
+        </section>
+
+        <aside class="notification-sidebar">
+            <article class="summary-card">
+                <h2>
+                    <img src="../../assets/icons/Resident Portal/Overview Page/Notification.png" alt="">
+                    Summary
+                </h2>
+                <p><strong id="summary-unread">0</strong> Unread</p>
+                <p><strong id="summary-total">0</strong> Total</p>
+                <p class="summary-note">You’re notified each time staff update a request.</p>
+            </article>
+
+            <article class="claiming-card">
+                <h2>
+                    <img src="../../assets/icons/Resident Portal/Overview Page/Status Card Pending.png" alt="">
+                    Claiming a document?
+                </h2>
+                <p>Barangay Hall is open from Monday to Friday, 8:00 AM to 5:00 PM.</p>
+                <a href="../resident/help.html">See Office Hours →</a>
+            </article>
+        </aside>
     </main>
 
     <script type="module" src="../../js/components/sidebar.js"></script>
