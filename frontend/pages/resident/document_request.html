@@ -1,0 +1,216 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Document Request | E-Barangay</title>
+
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components/sidebar.css">
+    <link rel="stylesheet" href="../../css/pages/resident/document-request.css">
+</head>
+
+<body>
+
+    <app-navbar></app-navbar>
+
+    <main>
+        <header class="page-header">
+            <div>
+                <p class="breadcrumb">Resident Portal / Document Request</p>
+                <h1>Request details</h1>
+                <p class="page-description">
+                    Choose your document and tell us what you need it for.
+                </p>
+            </div>
+
+            <span class="page-count">Page 1 of 2</span>
+        </header>
+
+        <section class="request-progress">
+
+            <div class="progress-step active">
+                <span class="step-number">1</span>
+                <span>Request details</span>
+            </div>
+
+            <span class="progress-line"></span>
+
+            <div class="progress-step">
+                <span class="step-number">2</span>
+                <span>Requirements & review</span>
+            </div>
+
+        </section>
+
+        <form id="request-details-form">
+
+            <section class="request-details-card">
+
+                <div class="request-card-content">
+
+                    <div class="request-form-fields">
+
+                        <div class="section-heading">
+                            <h2>Tell us what you need</h2>
+                            <p>
+                                Start with the details below. Your resident
+                                information is taken from your account.
+                            </p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="document-type">
+                                Document Type
+                            </label>
+
+                            <select
+                                id="document-type"
+                                name="document-type"
+                                required
+                            >
+                                <option value="">Select a document</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="purpose">Purpose</label>
+
+                            <input
+                                type="text"
+                                id="purpose"
+                                name="purpose"
+                                placeholder="e.g. Work"
+                            >
+
+                            <small>
+                                Tell us where or why you will use this document.
+                            </small>
+                        </div>
+
+                        <div class="copies-group">
+                            <div class="form-group">
+                                <label for="number-of-copies">
+                                    Number of copies
+                                </label>
+
+                                <select
+                                    id="number-of-copies"
+                                    name="number-of-copies"
+                                    required
+                                >
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                </select>
+                            </div>
+
+                            <small>
+                                Select how many printed copies you need.
+                            </small>
+                        </div>
+
+                    </div>
+
+                    <aside class="resident-information-card">
+
+                        <div class="resident-information-heading">
+                            <span class="information-icon">
+                                <img
+                                    src="../../assets/icons/General Icons/Your Information Icon.png"
+                                    alt=""
+                                >
+                            </span>
+
+                            <h3>Your information</h3>
+                        </div>
+
+                        <p class="information-subtitle">
+                            From your resident account
+                        </p>
+
+                        <div class="resident-information-item">
+                            <span>Full name</span>
+                            <p id="resident-full-name">Loading...</p>
+                        </div>
+
+                        <div class="resident-information-item">
+                            <span>Address</span>
+                            <p id="resident-address">Loading...</p>
+                        </div>
+
+                        <div class="resident-information-item">
+                            <span>Contact number</span>
+                            <p id="resident-contact">Loading...</p>
+                        </div>
+
+                    </aside>
+
+                </div>
+
+                <div class="next-step-notice">
+
+                    <span class="notice-number">2</span>
+
+                    <div>
+                        <h3>Next: Requirements & review</h3>
+                        <p>
+                            The requirements for your selected document and
+                            a separate upload field for each will appear
+                            on the next page.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="collection-notice">
+                    <img
+                        src="../../assets/icons/General Icons/Claim on-site only Icon.png"
+                        alt=""
+                    >
+
+                    <div>
+                        <h3>Claim on-site only</h3>
+                        <p>
+                            Collect your document at the barangay hall.
+                            No delivery or issued soft copy (PDF).
+                        </p>
+                    </div>
+                </div>
+
+                <div class="request-form-footer">
+
+                    <button
+                        type="button"
+                        id="cancel-request-btn"
+                        class="btn-secondary"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        id="review-request-btn"
+                        class="btn-primary"
+                    >
+                        Review request
+                        <span>→</span>
+                    </button>
+
+                </div>
+
+            </section>
+
+        </form>
+
+    </main>
+
+    <script type="module" src="../../js/components/sidebar.js"></script>
+    <script type="module" src="../../js/pages/resident/document-request.js"></script>
+
+</body>
+</html>

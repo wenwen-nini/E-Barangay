@@ -70,7 +70,13 @@ form input {
     background-position: 10px center;
     background-size: 20px 20px;
 
-    outline-color: var(--tertiary-color);
+    outline: none;
+}
+
+form input:focus,
+.filters select:focus {
+    border-color: var(--tertiary-color);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.12);
 }
 
 .filter-cards {
@@ -104,7 +110,7 @@ form input {
     background-color: #FFFFFF;
     border: 1px solid #DCE2EA;
     border-radius: 12px;
-    outline-color: var(--tertiary-color);
+    outline: none;
     padding-right: 30px;
     cursor: pointer;
 }

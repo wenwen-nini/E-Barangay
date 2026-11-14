@@ -1,0 +1,368 @@
+.request-review-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 0.53fr);
+    align-items: start;
+    gap: 22px;
+}
+
+.review-requirements-card,
+.request-summary-card {
+    border: 1px solid #DCE2EA;
+    border-radius: 12px;
+    background-color: #FFFFFF;
+}
+
+.review-requirements-card {
+    padding: 20px;
+}
+
+.review-card-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.review-card-heading h2,
+.request-summary-card h2 {
+    margin-bottom: 8px;
+    font-size: 17px;
+    color: #193B64;
+}
+
+.review-card-heading p {
+    max-width: 560px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #64748B;
+}
+
+.attachment-count {
+    flex-shrink: 0;
+    padding-top: 3px;
+    font-size: 11px;
+    color: #64748B;
+}
+
+.requirements-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.requirement-card {
+    padding: 14px;
+    border: 1px solid #DCE2EA;
+    border-radius: 8px;
+}
+
+.requirement-card-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.requirement-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background-color: #F4F7FA;
+    color: #536B87;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.requirement-card-heading h3 {
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.requirement-status {
+    font-size: 10px;
+    color: #64748B;
+}
+
+.requirement-detail {
+    margin: 0 0 10px 30px;
+    font-size: 11px;
+    line-height: 1.5;
+    color: #64748B;
+}
+
+.requirement-card input[type="file"] {
+    display: block;
+    width: 100%;
+    min-height: 42px;
+    padding: 6px;
+    border: 1px solid #DCE2EA;
+    border-radius: 7px;
+    background-color: #F8FAFC;
+    color: #64748B;
+    font-family: inherit;
+    font-size: 11px;
+}
+
+.requirement-card input[type="file"]::file-selector-button {
+    min-height: 28px;
+    margin-right: 10px;
+    padding: 0 12px 0 28px;
+    border: 1px solid #AAB8C8;
+    border-radius: 5px;
+    background-color: #FFFFFF;
+    background-image: url("../../../assets/icons/Resident Portal/Help & Support Page/upload.png");
+    background-position: 8px center;
+    background-repeat: no-repeat;
+    background-size: 14px 14px;
+    color: #193B64;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.requirement-card input[type="file"]:focus-visible {
+    outline: 2px solid #193B64;
+    outline-offset: 2px;
+}
+
+.file-hint {
+    margin-top: 8px;
+    font-size: 10px;
+    color: #8290A3;
+}
+
+.requirements-error {
+    margin-top: 12px;
+    font-size: 12px;
+    color: #B42318;
+}
+
+.upload-guidance {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    font-size: 11px;
+    line-height: 1.5;
+    color: #64748B;
+}
+
+.upload-guidance span {
+    flex-shrink: 0;
+    color: #536B87;
+}
+
+.request-review-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.request-summary-card {
+    padding: 18px;
+}
+
+.request-summary-card h2 {
+    margin-bottom: 16px;
+}
+
+.summary-block {
+    min-width: 0;
+}
+
+.summary-label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 10px;
+    color: #8290A3;
+}
+
+.summary-document {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.summary-request-details {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.summary-request-details p,
+.summary-resident p {
+    font-size: 11px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.summary-copies {
+    min-width: 38px;
+}
+
+.summary-resident {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid #E7ECF2;
+}
+
+.summary-resident p + p {
+    margin-top: 2px;
+}
+
+.summary-back-link {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 14px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #193B64;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.summary-back-link:hover {
+    text-decoration: underline;
+}
+
+.claim-notice {
+    padding: 14px;
+    border: 1px solid #F3D28A;
+    border-radius: 9px;
+    background-color: #FFF8E8;
+}
+
+.claim-notice h3 {
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.claim-notice h3 img {
+    width: 14px;
+    height: 14px;
+    margin-right: 5px;
+    object-fit: contain;
+    vertical-align: -2px;
+}
+
+.claim-notice p {
+    font-size: 10px;
+    line-height: 1.6;
+    color: #64748B;
+}
+
+.review-page-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-top: 2px;
+}
+
+.review-page-footer > p {
+    max-width: 600px;
+    font-size: 11px;
+    line-height: 1.6;
+    color: #64748B;
+}
+
+.review-footer-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+}
+
+.review-back-button,
+.review-submit-button {
+    min-height: 42px;
+    padding: 0 18px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.review-back-button {
+    border-color: #E5B92E;
+    background-color: #F6C938;
+    color: #193B64;
+    cursor: pointer;
+}
+
+.review-back-button span {
+    margin-right: 5px;
+}
+
+.review-submit-button {
+    background-color: #193B64;
+    color: #FFFFFF;
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+.progress-step-complete {
+    color: #536B87;
+}
+
+.progress-step-complete .step-number {
+    border-color: #193B64;
+    background-color: #193B64;
+    color: #FFFFFF;
+}
+
+.request-progress .progress-step.active .step-number {
+    border-color: #F6C938;
+    background-color: #F6C938;
+    color: #193B64;
+}
+
+@media (max-width: 1000px) {
+    .request-review-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(220px, 0.62fr);
+        gap: 16px;
+    }
+}
+
+@media (max-width: 760px) {
+    .request-review-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 480px) {
+    .review-requirements-card,
+    .request-summary-card {
+        padding: 16px;
+    }
+
+    .review-card-heading {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .requirement-card-heading {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .review-footer-actions {
+        gap: 10px;
+    }
+}
