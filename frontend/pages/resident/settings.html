@@ -21,35 +21,56 @@
             </div>
             <button id="logout-btn">Log out</button>
         </header>
+        <div class="settings-columns">
+            <div class="settings-column">
         <section class="personal-info-card">
             <form>
                 <fieldset>
                     <h2>Personal Information</h2>
                     <p>Required fields are marked *. Other details are optional</p>
-                    <div class="name-field-line">
-                        <label for="first-name">First Name <span>*</span></label><br>
-                        <input type="text" id="first-name" name="first-name" placeholder="" required><br>
-                        <label for="middle-name">Middle Name • Optional</label><br>
-                        <input type="text" id="middle-name" name="middle-name" placeholder=""><br>
-                        <label for="last-name">Last Name <span>*</span></label><br>
-                        <input type="text" id="last-name" name="last-name" placeholder="" required><br>
+                    <div class="form-row name-field-line">
+                        <div class="form-group">
+                            <label for="first-name">First Name <span>*</span></label>
+                            <input type="text" id="first-name" name="first-name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="middle-name">Middle Name · Optional</label>
+                            <input type="text" id="middle-name" name="middle-name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="last-name">Last Name <span>*</span></label>
+                            <input type="text" id="last-name" name="last-name" required>
+                        </div>
                     </div>
-                    <label for="address">Residential address <span>*</span></label><br>
-                    <input type="text" id="address" name="address" placeholder="Balagtas, Batangas" required><br>
-                    <div class="number-date">
-                        <label for="contact">Contact number <span>*</span></label><br>
-                        <input type="tel" pattern="[0-9]{4}-[0-9]{3}-[0-9]{4}" id="contact" name="contact" placeholder="09XX-XXX-XXXX" required><br>
-                        <label for="bday">Birthday • Optional</label><br>
-                        <input type="date" id="bday" name="bday" placeholder="Select date"><br>
+                    <div class="address">
+                        <label for="address">Residential address <span>*</span></label>
+                        <input type="text" id="address" name="address" placeholder="Balagtas, Batangas" required><br>
                     </div>
-                    <label for="email">Email Address • Optional</label><br>
-                    <input type="email" id="email" name="email" placeholder="Enter email address">
+                    <div class="form-row number-date">
+                        <div class="form-group">
+                            <label for="contact">Contact number <span>*</span></label>
+                            <input type="tel" id="contact" name="contact" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bday">Birthday · Optional</label>
+                            <input type="date" id="bday" name="bday">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="email">Email Address • Optional</label>
+                        <input type="email" id="email" name="email" placeholder="Enter email address">
+                    </div>
                     <div class="quick-reminder">
                         <img src="../../assets/icons/General Icons/basta i na nasa bilog.png">
                         <p>Profile changes apply to future requests. They do not change information on already-submitted requests.</p>
                     </div>
-                    <button type="reset">Cancel</button>
-                    <button type="submit">Save profile</button>
+                    <div class="form-actions">
+                        <button type="reset">Cancel</button>
+                        <button type="submit">Save profile</button>
+                    </div>
                 </fieldset>
             </form>
         </section>
@@ -58,20 +79,28 @@
                 <fieldset>
                     <h2>Password & Security</h2>
                     <p>Use a strong, unique password for your portal account.</p>
-                    <label for="current-password">Current password <span>*</span></label><br>
-                    <input type="password" id="current-password" name="current-password" placeholder="Enter current password" required><br>
-                    <div class="new-password-line">
-                        <label for="new-password">New password <span>*</span></label><br>
-                        <input type="password" id="new-password" name="new-password" placeholder="Enter new password" required><br>
-                        <label for="confirmation">Confirm new password <span>*</span></label><br>
-                        <input type="password" id="confirmation" name="confirmation" placeholder="Re-enter new password" required><br> 
+                    <label for="current-password">Current password <span>*</span></label>
+                    <input type="password" id="current-password" name="current-password" placeholder="Enter current password" required>
+                    <div class="form-row new-password-line">
+                        <div class="form-group">
+                            <label for="new-password">New password <span>*</span></label>
+                            <input type="password" id="new-password" name="new-password" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirmation">Confirm new password <span>*</span></label>
+                            <input type="password" id="confirmation" name="confirmation" required>
+                        </div>
                     </div>
                     <p>Use the eye controls to show or hide each password.</p>
-                    <button type="reset">Cancel</button>
-                    <button type="submit">Update password</button>
-                </fieldset>
+                    <div class="form-actions">
+                        <button type="reset">Cancel</button>
+                        <button type="submit">Update Password</button>
+                    </div>
             </form>
         </section>
+            </div>
+            <div class="settings-column">
         <section class="preferences-card">
             <form>
                 <fieldset>
@@ -108,8 +137,10 @@
                         </label>
                     </div>
                     <p>SMS and email notifications are not supported.</p>
-                    <button type="reset">Cancel</button>
-                    <button type="submit">Save preferences</button>
+                    <div class="form-actions">
+                        <button type="reset">Cancel</button>
+                        <button type="submit">Save Preferences</button>
+                    </div>
                 </fieldset>
             </form>
         </section>
@@ -123,7 +154,47 @@
                 <p>Need access assistance? Visit the barangay hall.</p>
             </div>
         </section>
+            </div>
+        </div>
     </main>
+
+    <dialog id="logout-modal" class="logout-modal">
+        <div class="modal-content">
+
+            <div class="modal-icon">
+                <img
+                    src="../../assets/icons/General Icons/logout icon.png"
+                    alt=""
+                >
+            </div>
+
+            <h2>Log out of your resident account?</h2>
+
+            <p class="modal-description">
+                You will leave the resident portal and need to sign in again to continue.
+            </p>
+
+            <div class="modal-warning">
+                <span>ⓘ</span>
+                <p>
+                    Unsaved changes will be lost. Cancel and save your
+                    changes first if you wish to keep them.
+                </p>
+            </div>
+
+            <div class="modal-divider"></div>
+
+            <div class="modal-actions">
+                <button type="button" id="cancel-logout" class="cancel-btn">
+                    Cancel
+                </button>
+
+                <button type="button" id="confirm-logout" class="logout-btn">
+                    Log out
+                </button>
+            </div>
+        </div>
+    </dialog>
 
     <script type="module" src="../../js/components/sidebar.js"></script>
     <script type="module" src="../../js/pages/resident/settings.js"></script>
