@@ -20,7 +20,26 @@
             </div>
         </header>
         <section class="filter-group">
-
+            <form>
+                <input type="text" id="search" name="search" placeholder="Search for a document (e.g. Barangay Clearance, Certificate of Indigency...)">
+                <div class="filter-cards">
+                    <div class="filters">
+                        <div>
+                        <label for="availability">Availability</label><br>
+                        <select id="availability">
+                            <option value="">All</option>
+                        </select><br>
+                        </div>
+                        <div>
+                        <label for ="fee">Fee</label><br>
+                        <select id="fee">
+                            <option value="">All</option>
+                        </select><br>
+                        </div>
+                    </div>
+                    <button id="reset-filter"><img src="../../assets/icons/General Icons/Reset Icon.png">Reset Filter</button>
+                </div>
+            </form>
         </section>
         <article class="need-help-card">
             <div class="need-help-title">
@@ -57,6 +76,6 @@
     </main>
 
     <script type="module" src="../../js/components/sidebar.js"></script>
-    <script type="module" src="document-catalog.js"></script>
+    <script type="module" src="../../js/pages/resident/document-catalog.js"></script>
 </body>
 </html>

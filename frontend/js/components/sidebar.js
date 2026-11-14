@@ -1,6 +1,6 @@
 
 import { getCurrentUser } from "../core/session.js";
-import { getResidentInfo } from "../services/requestService.js";
+import { getResidentInfo } from "../services/getService.js";
 
 async function generateResidentName() {
     const currentUser = getCurrentUser();
