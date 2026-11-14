@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barangay Announcement | E-Barangay</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components/sidebar.css">
+    <link rel="stylesheet" href="../../css/pages/resident/announcement.css">
+</head>
+<body>
+    <app-navbar></app-navbar>
+
+    <main>
+        <header class="page-header">
+            <div class="introduction">
+                <p>Resident Portal / Announcement</p>
+                <h1>Barangay Announcement</h1>
+                <p>Important updates from the Barangay.</p>
+            </div>
+        </header>
+
+        <section class="announcement-search" role="search">
+            <label class="visually-hidden" for="announcement-search-input">
+                Search announcements
+            </label>
+            <input
+                id="announcement-search-input"
+                type="search"
+                placeholder="Search for announcement"
+                autocomplete="off"
+            >
+        </section>
+
+        <section class="announcement-content" aria-label="Announcements">
+            <div id="announcement-list" class="announcement-list" aria-live="polite">
+                <p class="announcement-loading">Loading announcements...</p>
+            </div>
+            <button type="button" id="load-older-announcements" class="load-older-button">
+                Load older announcement
+            </button>
+        </section>
+
+        <aside class="announcement-sidebar">
+            <article class="announcement-side-card">
+                <h2>
+                    <img src="../../assets/icons/Resident Portal/Overview Page/Status Card Pending.png" alt="">
+                    Office Hours
+                </h2>
+                <strong>Monday to Friday</strong>
+                <p>8:00 AM to 5:00 PM</p>
+                <p>Claim for documents on-site during these hours.</p>
+                <a href="../resident/help.html">See Office Hours →</a>
+            </article>
+
+            <article class="announcement-side-card">
+                <h2>
+                    <img src="../../assets/icons/Resident Portal/Overview Page/Notification.png" alt="">
+                    Your Updates
+                </h2>
+                <p><span id="unread-announcement-count">0</span> unread notifications about your requests.</p>
+                <a href="../resident/notification.html">View notifications →</a>
+            </article>
+        </aside>
+    </main>
+
+    <script type="module" src="../../js/components/sidebar.js"></script>
+    <script type="module" src="../../js/pages/resident/announcement.js"></script>
+</body>
+</html>
