@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Requirements &amp; Review | E-Barangay</title>
+
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components/sidebar.css">
+    <link rel="stylesheet" href="../../css/pages/resident/document-request.css">
+    <link rel="stylesheet" href="../../css/pages/resident/document-request-review.css">
+</head>
+
+<body>
+    <app-navbar></app-navbar>
+
+    <main>
+        <header class="page-header">
+            <div>
+                <p class="breadcrumb">Resident Portal / Document Request</p>
+                <h1>Requirements &amp; Review</h1>
+                <p class="page-description">
+                    Upload the requirements for your selected document, then review your request.
+                </p>
+            </div>
+            <span class="page-count">Page 2 of 2</span>
+        </header>
+
+        <section class="request-progress" aria-label="Request progress">
+            <div class="progress-step progress-step-complete">
+                <span class="step-number" aria-hidden="true">✓</span>
+                <span>Request details · Completed</span>
+            </div>
+            <span class="progress-line"></span>
+            <div class="progress-step active" aria-current="step">
+                <span class="step-number">2</span>
+                <span>Requirements &amp; review</span>
+            </div>
+        </section>
+
+        <div class="request-review-grid">
+            <section class="review-requirements-card" aria-labelledby="requirements-heading">
+                <div class="review-card-heading">
+                    <div>
+                        <h2 id="requirements-heading">Upload requirements</h2>
+                        <p id="requirements-intro">Loading document requirements...</p>
+                    </div>
+                    <span id="attachment-count" class="attachment-count" aria-live="polite">0 attached</span>
+                </div>
+
+                <div id="requirements-list" class="requirements-list" aria-live="polite"></div>
+                <p id="requirements-error" class="requirements-error" role="alert" hidden></p>
+
+                <p class="upload-guidance">
+                    <span aria-hidden="true">ⓘ</span>
+                    Use clear, readable files. Upload each requirement in its own field.
+                </p>
+            </section>
+
+            <aside class="request-review-sidebar">
+                <section class="request-summary-card" aria-labelledby="request-summary-heading">
+                    <h2 id="request-summary-heading">Request summary</h2>
+
+                    <div class="summary-block">
+                        <span class="summary-label">Selected document</span>
+                        <p id="summary-document" class="summary-document">Loading...</p>
+                    </div>
+
+                    <div class="summary-request-details">
+                        <div class="summary-block">
+                            <span class="summary-label">Purpose</span>
+                            <p id="summary-purpose">Not provided</p>
+                        </div>
+                        <div class="summary-block summary-copies">
+                            <span class="summary-label">Copies</span>
+                            <p id="summary-copies">1</p>
+                        </div>
+                    </div>
+
+                    <div class="summary-resident">
+                        <span class="summary-label">Your information</span>
+                        <p id="summary-resident-name">Loading...</p>
+                        <p id="summary-resident-address"></p>
+                        <p id="summary-resident-contact"></p>
+                    </div>
+
+                    <button type="button" id="back-to-details" class="summary-back-link">
+                        <span aria-hidden="true">←</span>
+                        Back to request details
+                    </button>
+                </section>
+
+                <section class="claim-notice" aria-labelledby="claim-notice-heading">
+                    <h3 id="claim-notice-heading">
+                        <img src="../../assets/icons/General Icons/Claim on-site only Icon.png" alt="">
+                        Claim on-site only
+                    </h3>
+                    <p>
+                        No delivery or issued soft copy (PDF). PDF files are accepted
+                        for requirement uploads only.
+                    </p>
+                </section>
+            </aside>
+        </div>
+
+        <footer class="review-page-footer">
+            <p id="submission-notice">
+                Check your request details and attach all required files before submitting.
+                Request submission is not connected yet, so files will not be uploaded or saved.
+            </p>
+            <div class="review-footer-actions">
+                <button type="button" id="back-button" class="review-back-button">
+                    <span aria-hidden="true">←</span>
+                    Back
+                </button>
+                <button
+                    type="button"
+                    class="review-submit-button"
+                    disabled
+                    aria-describedby="submission-notice"
+                >
+                    Submit Request
+                </button>
+            </div>
+        </footer>
+    </main>
+
+    <script type="module" src="../../js/components/sidebar.js"></script>
+    <script type="module" src="../../js/pages/resident/document-request-review.js"></script>
+</body>
+</html>
