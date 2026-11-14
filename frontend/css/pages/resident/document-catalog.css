@@ -207,6 +207,7 @@ form input {
 #documents-container {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
+    align-content: start;
     row-gap: 4vh;
     margin-right: 32px;
     column-gap: 8px;
@@ -214,6 +215,19 @@ form input {
     min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
+    scrollbar-color: var(--primary-color);
+    scrollbar-width: thin;
+}
+
+#documents-container::-webkit-scrollbar {
+  width: 8px;
+}
+#documents-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+#documents-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
 }
 
 .document-cards {
@@ -304,4 +318,187 @@ form input {
 .view-details-btn:hover {
     border-color: #3D4DF5;
     box-shadow: 0 0 10px rgba(61, 77, 245, 0.35);
+}
+
+/* Modal */
+.document-modal {
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    width: 90%;
+    max-width: 900px;
+    max-height: 90vh;
+    padding: 0;
+    border: none;
+    border-radius: 14px;
+    color: var(--primary-color);
+    background-color: #FFFFFF;
+    overflow: hidden;
+}
+
+.document-modal::backdrop {
+    background-color: rgba(20, 39, 61, 0.60);
+    backdrop-filter: blur(2px);
+}
+
+/* Header */
+.document-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 20px 24px;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.document-modal-header h2 {
+    margin: 0 0 6px;
+    font-size: 20px;
+}
+
+.document-modal-header p {
+    margin: 0;
+    color: #667085;
+    font-size: 12px;
+}
+
+.close-modal {
+    border: none;
+    background: transparent;
+    color: var(--primary-color);
+    font-size: 26px;
+    cursor: pointer;
+}
+
+/* Main content */
+.document-modal-body {
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 24px;
+    padding: 20px 24px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* Document preview */
+.document-preview {
+    grid-column: 1;
+}
+
+.document-preview img {
+    display: block;
+    width: 100%;
+    max-height: 350px;
+    object-fit: contain;
+    border: 1px solid #DCE2EA;
+}
+
+.document-preview p {
+    font-size: 11px;
+    color: #667085;
+    margin-top: 8px;
+}
+
+/* Document information */
+.document-information {
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.document-information h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.document-information h4 {
+    margin: 0;
+    font-size: 14px;
+}
+
+.document-information p,
+.document-information li {
+    font-size: 13px;
+    line-height: 1.5;
+    color: #475569;
+}
+
+.document-information p {
+    margin: 0;
+}
+
+.document-information ol {
+    padding-left: 20px;
+    margin: 0;
+}
+
+.availability-badge {
+    align-self: flex-start;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #067647;
+    background-color: #ECFDF3;
+    border: 1px solid #86EFAC;
+}
+
+.availability-badge.unavailable {
+    color: #B42318;
+    background-color: #FEF3F2;
+    border-color: #FDA29B;
+}
+
+.modal-divider {
+    height: 1px;
+    background-color: #E5E7EB;
+    margin: 4px 0;
+}
+
+.document-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 8px;
+    background-color: #EEF4FB;
+}
+
+.document-note p {
+    font-size: 12px;
+}
+
+/* Footer */
+.document-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid #E5E7EB;
+}
+
+.document-modal-footer button {
+    padding: 11px 16px;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cancel-btn {
+    color: var(--primary-color);
+    background-color: #FFFFFF;
+    border: 1px solid #DCE2EA;
+}
+
+.request-btn {
+    color: #FFFFFF;
+    background-color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+}
+
+.request-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
