@@ -1,4 +1,4 @@
-import { getRequestsWithDocuments, getRequestStatusHistory } from "../../services/requestService.js";
+import { getRequestsWithDocuments, getRequestStatusHistory } from "../../services/getService.js";
 import { getCurrentUser } from "../../core/session.js";
 import { requestStatusConfig } from "../../config/requestStatusConfig.js";
 import { modalConfig } from "../../config/modalConfig.js";

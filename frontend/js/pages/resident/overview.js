@@ -1,4 +1,4 @@
-import { getRequests, getRequestsWithDocuments, getNotificationOne, getAnnouncementOne, getResidentInfo } from "../../services/requestService.js";
+import { getRequests, getRequestsWithDocuments, getNotificationOne, getAnnouncementOne, getResidentInfo } from "../../services/getService.js";
 import { getCurrentUser } from "../../core/session.js";
 
 const currentUser = getCurrentUser();

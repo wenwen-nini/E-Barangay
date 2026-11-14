@@ -20,7 +20,26 @@
             </div>
         </header>
         <section class="filter-group">
-
+            <form>
+                <input type="text" id="search" name="search" placeholder="Search for a document (e.g. Barangay Clearance, Certificate of Indigency...)">
+                <div class="filter-cards">
+                    <div class="filters">
+                        <div>
+                        <label for="availability">Availability</label><br>
+                        <select id="availability">
+                            <option value="">All</option>
+                        </select><br>
+                        </div>
+                        <div>
+                        <label for ="fee">Fee</label><br>
+                        <select id="fee">
+                            <option value="">All</option>
+                        </select><br>
+                        </div>
+                    </div>
+                    <button id="reset-filter"><img src="../../assets/icons/General Icons/Reset Icon.png">Reset Filter</button>
+                </div>
+            </form>
         </section>
         <article class="need-help-card">
             <div class="need-help-title">
@@ -56,7 +75,69 @@
         </section>
     </main>
 
+    <dialog id="document-modal" class="document-modal">
+
+        <div class="document-modal-header">
+            <div>
+                <h2 id="modal-document-name">Barangay Clearance</h2>
+                <p>Document information</p>
+            </div>
+
+            <button type="button" id="close-document-modal" class="close-modal">
+                &times;
+            </button>
+        </div>
+
+        <div class="document-modal-body">
+
+            <div class="document-preview">
+                <img id="modal-document-image"
+                    src="../../assets/images/default.png"
+                    alt="Document sample">
+            </div>
+
+            <div class="document-information">
+
+                <span id="modal-document-availability" class="availability-badge">
+                    Available
+                </span>
+
+                <p id="modal-document-description"></p>
+
+                <div class="modal-divider"></div>
+
+                <h3 id="modal-document-fee">FREE</h3>
+                <p>Confirm the applicable fee with the barangay.</p>
+
+                <h3>Requirements</h3>
+                <ol id="modal-document-requirements"></ol>
+
+                <div class="document-note">
+                    <span>ⓘ</span>
+                    <p id="modal-document-note">
+                        Processing time and pickup arrangements are to be confirmed by the barangay.
+                    </p>
+                </div>
+
+                <h4>Collect printed copies on-site only.</h4>
+                <p id="modal-document-instructions"></p>
+
+            </div>
+        </div>
+
+        <div class="document-modal-footer">
+            <button type="button" id="close-document-footer" class="cancel-btn">
+                Close
+            </button>
+
+            <button type="button" id="request-document-btn" class="request-btn">
+                Request Document
+            </button>
+        </div>
+
+    </dialog>
+
     <script type="module" src="../../js/components/sidebar.js"></script>
-    <script type="module" src="document-catalog.js"></script>
+    <script type="module" src="../../js/pages/resident/document-catalog.js"></script>
 </body>
 </html>
