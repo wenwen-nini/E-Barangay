@@ -4,7 +4,7 @@ body {
     grid-template-columns: 0.28fr 1fr 100px;
     grid-template-areas: "aside main";
     margin: 0;
-    font-family: 'Poppins', 'Inter', sans-serif;
+    font-family: var(--font-family-portals);
     background-color: #F5F7FA;
     color: #193B64;
 }

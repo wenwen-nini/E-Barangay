@@ -7,7 +7,7 @@ body {
         "aside  main";
     gap: 0.7rem;
     margin: 0;
-    font-family: 'Poppins', 'Inter';
+    font-family: var(--font-family-portals);
     background-color: #F5F7FA;
     align-items: stretch;
 }

@@ -5,7 +5,7 @@ body {
     grid-template-areas: "aside main";
     gap: 12px;
 
-    font-family: 'Poppins', 'Inter', sans-serif;
+    font-family: var(--font-family-portals);
     background-color: #F5F7FA;
 }
 

@@ -5,7 +5,7 @@ body {
     margin: 0;
     background-color: #F5F7FA;
     color: #193B64;
-    font-family: 'Poppins', 'Inter', sans-serif;
+    font-family: var(--font-family-portals);
 }
 
 app-navbar {

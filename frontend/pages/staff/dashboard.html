@@ -4,16 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff Portal</title>
-    <link rel="stylesheet" href="../../css/components/sidebar.css"></link>
-    <link rel="stylesheet" href="../../css/style.css"><link>
+    <link rel="stylesheet" href="../../css/components/sidebar.css">
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/pages/staff/dashboard.css">
 </head>
 <body>
     <app-staff-sidebar></app-staff-sidebar>
 
     <main>
+        <header>
+            <div class="introduction">
+                <p>Brgy. Staff / Dashboard</p>
+                <h1>Staff Dashboard</h1>
+                <p>An overview of document requests and barangay services.</p>
+            </div>
+            <app-timestamp></app-timestamp>
+        </header>
 
+        <section class="status-card-container">
+            <div class="status-cards"></div>
+        </section>
+
+        <section class="recent-request-container">
+            <div class="recent-request card"></div>
+        </section>
+
+        <section class="notification-control-card">
+            <div class="notif-card">
+                <h3>Notification Control</h3>
+                <p id="notif-detail"></p>
+                <button id="open-request-managament-btn">Open Request Management</button>
+            </div>
+        </section>
+
+        <section class="quick-action-container">
+            <div class="qa-card">
+                <h3>Quick Actions</h3>
+                <p>Jump to the common staff tasks without leaving the dashboard</p>
+                <div class="quick-action-cards">
+                    <a href="#" class="quick-action-card">
+                        <img src="../../assets/icons/Staff Portal/Dashboard Page/Review Requests (Quick Actions).png">
+                        <h4>Review Requests</h4>
+                        <p>Open pending and under-review requests</p>
+                    </a>
+                    <a href="#" class="quick-action-card">
+                        <img src="../../assets/icons/Staff Portal/Dashboard Page/Release Documents (Quick Actions).png">
+                        <h4>Release Documents</h4>
+                        <p>Approve and release cleared documents</p>
+                    </a>
+                    <a href="#" class="quick-action-card">
+                        <img src="../../assets/icons/Staff Portal/Dashboard Page/Manage Documents (Quick Actions).png">
+                        <h4>Manage Documents</h4>
+                        <p>Add, edit, or delete documents</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="barangay-announcement-card">
+            <div class="announcement-card"></div>
+        </section>
+
+        <section class="view-announcement">
+            <img src="../../assets/icons/Staff Portal/Dashboard Page/Announcement (blue).png">
+            <div id="announcement-detail"></div>
+            <button id="view-announcement-btn">View Announcements</button>
+        </section>
     </main>
 
+    <script type="module" src="../../js/components/timestamp.js"></script>
     <script type="module" src="../../js/components/staff-sidebar.js"></script>
+    <script type="module" src="../../js/pages/staff/dashboard.js"></script>
 </body>
 </html>

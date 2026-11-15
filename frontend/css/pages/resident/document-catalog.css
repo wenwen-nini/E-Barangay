@@ -6,7 +6,7 @@ body {
     grid-template-areas:
         "aside  main";
     gap: 0.75rem;
-    font-family: 'Poppins', 'Inter';
+    font-family: var(--font-family-portals);
     background-color: #F5F7FA;
     align-items: stretch;
     overflow: hidden;
