@@ -1,7 +1,7 @@
 body {
     display: grid;
     min-height: 100vh;
-    grid-template-columns: minmax(140px, 0.28fr) minmax(0, 1fr);
+    grid-template-columns: 0.28fr 1fr 100px;
     margin: 0;
     background-color: #F5F7FA;
     color: #193B64;
@@ -16,12 +16,13 @@ app-navbar {
 main {
     display: grid;
     min-width: 0;
-    grid-template-columns: minmax(0, 1.5fr) minmax(155px, 0.5fr);
+    grid-template-columns: 1.50fr 0.50fr;
     grid-template-areas:
         "header header"
         "filter ."
         "feed sidebar";
     align-content: start;
+    margin-left: 3vw;
     gap: 12px 18px;
     padding: 22px 24px 28px 22px;
 }
@@ -32,6 +33,7 @@ main {
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 12px;
+    margin-top: 3rem;
     line-height: 1.6;
 }
 
@@ -53,13 +55,13 @@ main {
 
 .notification-filter {
     min-height: 28px;
-    padding: 0 12px;
+    padding: 8px 16px;
     border: 1px solid #DCE2EA;
     border-radius: 999px;
     background-color: #FFFFFF;
     color: #64748B;
     font-family: inherit;
-    font-size: 10px;
+    font-size: 12px;
     cursor: pointer;
 }
 
@@ -84,24 +86,24 @@ main {
 .notification-group h2 {
     margin: 0 0 6px 2px;
     color: #344054;
-    font-size: 11px;
+    font-size: 14px;
     font-weight: 500;
 }
 
 .notification-group-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 16px;
 }
 
 .notification-card {
     display: grid;
     grid-template-columns: 14px minmax(0, 1fr) 8px;
     align-items: start;
-    gap: 8px;
-    padding: 12px 10px;
+    gap: 16px;
+    padding: 16px 14px;
     border: 1px solid #DCE2EA;
-    border-radius: 8px;
+    border-radius: 12px;
     background-color: #FFFFFF;
 }
 
@@ -110,8 +112,8 @@ main {
 }
 
 .notification-status-icon {
-    width: 14px;
-    height: 14px;
+    width: 20px;
+    height: 20px;
     margin-top: 2px;
     object-fit: contain;
 }
@@ -122,22 +124,22 @@ main {
 
 .notification-message {
     color: #202B3C;
-    font-size: 11px;
-    line-height: 1.5;
+    font-size: 14px;
+    line-height: 1.6;
     overflow-wrap: anywhere;
 }
 
 .notification-date {
     margin-top: 2px;
     color: #98A2B3;
-    font-size: 9px;
+    font-size: 12px;
 }
 
 .notification-action {
     display: inline-block;
     margin-top: 4px;
     color: #175CD3;
-    font-size: 10px;
+    font-size: 12px;
     text-decoration: none;
 }
 
@@ -162,15 +164,15 @@ main {
     display: flex;
     align-self: start;
     flex-direction: column;
-    gap: 14px;
+    gap: 24px;
     min-width: 0;
 }
 
 .summary-card,
 .claiming-card {
-    padding: 12px;
+    padding: 16px;
     border: 1px solid #DCE2EA;
-    border-radius: 8px;
+    border-radius: 16px;
     background-color: #FFFFFF;
 }
 
@@ -178,24 +180,24 @@ main {
 .claiming-card h2 {
     display: flex;
     align-items: center;
-    gap: 7px;
+    gap: 8px;
     margin-bottom: 8px;
     color: #202B3C;
-    font-size: 11px;
+    font-size: 16px;
     font-weight: 600;
 }
 
 .summary-card h2 img,
 .claiming-card h2 img {
-    width: 14px;
-    height: 14px;
+    width: 20px;
+    height: 20px;
     object-fit: contain;
 }
 
 .summary-card > p {
     color: #344054;
-    font-size: 10px;
-    line-height: 1.5;
+    font-size: 14px;
+    line-height: 1.6;
 }
 
 .summary-card strong {
@@ -205,20 +207,20 @@ main {
 .summary-card .summary-note {
     margin-top: 5px;
     color: #98A2B3;
-    font-size: 9px;
+    font-size: 12px;
 }
 
 .claiming-card > p {
     color: #98A2B3;
-    font-size: 9px;
-    line-height: 1.5;
+    font-size: 14px;
+    line-height: 1.6;
 }
 
 .claiming-card a {
     display: inline-block;
     margin-top: 5px;
     color: #175CD3;
-    font-size: 9px;
+    font-size: 12px;
     text-decoration: none;
 }
 

@@ -1,4 +1,5 @@
-app-navbar > aside {
+app-navbar > aside,
+app-staff-sidebar > aside {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -43,11 +44,13 @@ app-navbar > aside {
 }
 
 .profile img {
-    padding: 15px 19px;
-    width: 3.5vw;
-    height: 7vh;
+    width: 56px;
+    height: 56px;
+    flex: 0 0 56px;
+    object-fit: cover;
     background-color: var(--secondary-color);
-    border-radius: 100%;
+    border-radius: 50%;
+    border: 1px solid var(--tertiary-color);
 }
 
 .profile h1 {
