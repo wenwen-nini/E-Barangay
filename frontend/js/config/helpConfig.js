@@ -41,3 +41,47 @@ export const helpConfig = {
         action: "Manage your account →"
     }
 }
+
+export const staffHelpConfig = {
+    "Request Management": {
+        icon: "Request Management Icon.png",
+        title: "Request Management",
+        description: "Review resident details and requirements before updating a request’s status.",
+        action: "Review a request "
+    },
+
+    "Document Management": {
+        icon: "Document Management Icon.png",
+        title: "Document Management",
+        description: "Add or edit document types and check the details residents need to submit.",
+        action: "Manage document types "
+    },
+
+    "Document Release": {
+        icon: "Document Release Icon.png",
+        title: "Document Release",
+        description: "Confirm approval and pickup details before recording a document release.",
+        action: "Prepare for release "
+    },
+
+    "Announcements": {
+        icon: "Megaphone Icon.png",
+        title: "Announcements",
+        description: "Check your message and audience, then save a draft or publish a barangay notice.",
+        action: "Prepare an announcement "
+    },
+
+    "Reports & Analytics": {
+        icon: "Chart icon.png",
+        title: "Reports & Analytics",
+        description: "Check the reporting period and filters when reviewing request totals and trends.",
+        action: "Understand your reports "
+    },
+
+    "Getting Started": {
+        icon: "Book open.png",
+        title: "Getting Started",
+        description: "Use the sidebar to open a module. Review the record before making any changes.",
+        action: "Learn the staff workflow "
+    }
+}

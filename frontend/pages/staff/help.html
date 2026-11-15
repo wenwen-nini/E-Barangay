@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resident Portal</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components/sidebar.css">
+    <link rel="stylesheet" href="../../css/pages/resident/help.css">
+</head>
+<body>
+    <app-staff-sidebar></app-staff-sidebar>
+
+    <main>
+        <header>
+            <div class="introduction">
+                <p>Brgy. Staff Portal / Help & Support</p>
+                <h1>Help & Support</h1>
+                <p>Find guidance for everyday batangas tasks and get help when you need it.</p>
+            </div>
+            <app-timestamp></app-timestamp>
+        </header>
+
+        <section class="search-feature">
+            <div class="search-card">
+                <div class="search-form">
+                    <label for="search">Search staff help</label>
+                    <input type="text" id="search" name="search" placeholder="Search topics e.g. request status or document release">
+                </div>
+                <div>
+                    <h3>Not sure where to start?</h3>
+                    <p>Browse a topic below for practical guidance</p>
+                </div>
+            </div>
+        </section>
+        <section class="help-guidance-container">
+            <h2>How can we help you?</h2>
+            <div id="help-card-container" class="help-card-container"></div>
+        </section>
+        <section class="frequently-asked-container">
+            <div class="fqa-title">
+                <h2>Frequently Asked Questions</h2>
+                <p>Quick answers for common staff tasks.</p>
+            </div>
+            <div class="questions">
+                <h3>What should I check before approving a request?</h3>
+                <p>Open Request Management and review the resident’s information, requested document and submitted requirements. If anything is missing or unclear, keep the request under review and confirm the details before approving it.</p>
+            </div>
+            <div class="questions">
+                <h3>When should I record a document as released?</h3>
+                <p>In Document Release, confirm the approved request and verify the recipient and pickup details according to barangay procedure. Record the release only after the document has been handed over.</p>
+            </div>
+        </section>
+        <section class="need-more-help">
+            <div class="need-help-title">
+                <img src="../../assets/icons/Staff Portal/Help & Support Page/Help icon (blue).png" alt="">
+                <h2>Need more help?</h2>
+            </div>
+            <p>For account access, permissions or a task you cannot complete, contact your:</p>
+            <div class="office-card">
+                <h3>Portal administrator</h3>
+                <p>Use your barangay’s designated internal contact channel.</p>
+            </div>
+            <h3>Reporting an issue</h3>
+            <p>Include the module, request ID if relevant, what happened and steps to repeat it. Share a screenshot with sensitive resident details hidden.</p>
+            <div class="important-reminder">
+                <img src="../../assets/icons/Staff Portal/Help & Support Page/Shield Check Icon.png" alt="">
+                <p>Never share your password or unnecessary resident information.</p>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="../../js/components/staff-sidebar.js"></script>
+    <script type="module" src="../../js/components/timestamp.js"></script>
+    <script type="module" src="../../js/pages/staff/help.js"></script>
+</body>
+</html>

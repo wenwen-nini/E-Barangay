@@ -100,6 +100,7 @@ header {
     background-color: #F8FAFC;
     border-radius: 12px;
     outline-color: var(--tertiary-color);
+    font-family: var(--font-family-portals);
 }
 
 .search-card h3 {
