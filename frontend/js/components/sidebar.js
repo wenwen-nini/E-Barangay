@@ -1,6 +1,7 @@
 
 import { getCurrentUser } from "../core/session.js";
 import { getResidentInfo } from "../services/getService.js";
+import { users } from "../mock-data/users.js";
 
 async function generateResidentName() {
     const currentUser = getCurrentUser();
@@ -27,6 +28,7 @@ async function generateResidentName() {
 class Sidebar extends HTMLElement {
     async connectedCallback() {
 
+        const currentUser = getCurrentUser();
         const residentInfo = await generateResidentName();
 
         console.log("Resident information:", residentInfo);
@@ -42,6 +44,12 @@ class Sidebar extends HTMLElement {
             ].filter(Boolean).join(" ")
             : "Resident";
 
+        const residentUser = users.find(
+            user => user.user_id === currentUser?.user_id
+        );
+        const profileImagePath = residentUser?.profile_image_path
+            || "../../assets/images/profile_images/default.png";
+
         this.innerHTML = `
             <aside>
                 <div class="logo">
@@ -53,7 +61,7 @@ class Sidebar extends HTMLElement {
                 </div>
 
                 <div class="profile">
-                    <img src="../../assets/images/profile_images/default.png">
+                    <img src="${profileImagePath}" alt="">
                     <div class="profile-info">
                         <h1>${residentName}</h1>
                         <p>Balagtas, Batangas</p>
