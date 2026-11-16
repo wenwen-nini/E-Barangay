@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Portal</title>
+    <link rel="stylesheet" href="../../css/components/sidebar.css">
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/pages/staff/request_management.css">
+</head>
+<body>
+    <app-staff-sidebar></app-staff-sidebar>
+
+    <main>
+        <header>
+            <div class="introduction">
+                <p>Brgy. Staff / Request Management</p>
+                <h1>Request Management</h1>
+                <p>Review requirements, respond to follow-ups and manage each request with care.</p>
+        </header>
+
+        <section class="tab-btn-container">
+            <div class="tabs-container" id="status-tabs">
+                <button class="tab-btn" data-status="All">All <span id="count-all">0</span></button>
+                <button class="tab-btn" data-status="Pending">Pending <span id="count-all">0</span></button>
+                <button class="tab-btn" data-status="Under Review">Under Review <span id="count-all">0</span></button>
+                <button class="tab-btn" data-status="Approved">Approved <span id="count-all">0</span></button>
+                <button class="tab-btn" data-status="Rejected">Rejected <span id="count-all">0</span></button>
+                <button class="tab-btn" data-status="Released">Released <span id="count-all">0</span></button>
+            </div>
+        </section>
+
+        <section class="main-content">
+            <div class="filter-group">
+                <div>
+                <label for="search">Search</label><br>
+                <input type="text" id="search-input" placeholder="Search by request ID or resident"><br>
+                </div>
+                <div class="filter-line">
+                    <div>
+                        <label for="document">Document</label><br>
+                        <select id="document">
+                            <option value="">All documents</option>
+                        </select><br>
+                    </div>
+                    <div>
+                        <label for="status">Status</label><br>
+                        <select id="status">
+                            <option value="">All statuses</option>
+                        </select><br>
+                    </div>
+                    <div>
+                        <label for="date-range">Date range</label><br>
+                        <select id="date-range">
+                            <option value=""><span id="date"></span></option>
+                        </select><br>
+                    </div>
+                    <button id="reset-filter">Reset</button>
+                </div>
+            </div>
+
+            <h3>All requests</h3>
+            <table class="request-table">
+                <thead>
+                    <th>ID</th>
+                    <th>Resident</th>
+                    <th>Document / remarks</th>
+                    <th>Submitted</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </section>
+
+        <div class="reminder">
+            <img src="../../assets/icons/General Icons/basta i na nasa bilog.png">
+            <p>Residents can cancel only submitted Pending requests. Rejected requests remain in the record, missing files return to staff for re-review, not automatic approval.</p>
+        </div>
+    </main>
+
+    <script type="module" src="../../js/components/staff-sidebar.js"></script>
+    <script type="module" src="../../js/pages/staff/request_management.js"></script>
+
+</body>
+</html>
