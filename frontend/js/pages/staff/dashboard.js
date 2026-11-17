@@ -113,6 +113,12 @@ function renderRecentRequests(requests, residents) {
         </table>
         <p class="request-table-footnote">Showing ${recentRequests.length} of ${requests.length} sample requests · Open Request Management to view all.</p>
     `;
+
+    container.querySelectorAll(".review-request-button").forEach(button => {
+        button.addEventListener("click", () => {
+            window.location.href = "request_management.html";
+        });
+    });
 }
 
 function renderNotification(requests) {
@@ -173,11 +179,12 @@ async function renderDashboard() {
     renderNotification(requests);
     renderAnnouncement(announcements);
 
+    document.querySelector("#open-request-managament-btn")?.addEventListener("click", () => {
+        window.location.href = "request_management.html";
+    });
+
     document.querySelector("#view-announcement-btn")?.addEventListener("click", () => {
-        document.querySelector(".barangay-announcement-card")?.scrollIntoView({
-            behavior: "smooth",
-            block: "center"
-        });
+        window.location.href = "announcement.html";
     });
 }
 
