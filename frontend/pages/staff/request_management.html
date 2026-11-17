@@ -17,44 +17,50 @@
                 <p>Brgy. Staff / Request Management</p>
                 <h1>Request Management</h1>
                 <p>Review requirements, respond to follow-ups and manage each request with care.</p>
+            </div>
+            <app-timestamp></app-timestamp>
         </header>
 
         <section class="tab-btn-container">
             <div class="tabs-container" id="status-tabs">
-                <button class="tab-btn" data-status="All">All <span id="count-all">0</span></button>
-                <button class="tab-btn" data-status="Pending">Pending <span id="count-all">0</span></button>
-                <button class="tab-btn" data-status="Under Review">Under Review <span id="count-all">0</span></button>
-                <button class="tab-btn" data-status="Approved">Approved <span id="count-all">0</span></button>
-                <button class="tab-btn" data-status="Rejected">Rejected <span id="count-all">0</span></button>
-                <button class="tab-btn" data-status="Released">Released <span id="count-all">0</span></button>
+                <button class="tab-btn active" data-status="All">All <span class="status-count">0</span></button>
+                <button class="tab-btn" data-status="Pending">Pending <span class="status-count">0</span></button>
+                <button class="tab-btn" data-status="Under Review">Under Review <span class="status-count">0</span></button>
+                <button class="tab-btn" data-status="Approved">Approved <span class="status-count">0</span></button>
+                <button class="tab-btn" data-status="Rejected">Rejected <span class="status-count">0</span></button>
+                <button class="tab-btn" data-status="Released">Released <span class="status-count">0</span></button>
             </div>
         </section>
 
         <section class="main-content">
             <div class="filter-group">
                 <div>
-                <label for="search">Search</label><br>
+                <label for="search-input">Search</label><br>
                 <input type="text" id="search-input" placeholder="Search by request ID or resident"><br>
                 </div>
                 <div class="filter-line">
-                    <div>
-                        <label for="document">Document</label><br>
-                        <select id="document">
-                            <option value="">All documents</option>
-                        </select><br>
-                    </div>
-                    <div>
-                        <label for="status">Status</label><br>
-                        <select id="status">
-                            <option value="">All statuses</option>
-                        </select><br>
-                    </div>
-                    <div>
-                        <label for="date-range">Date range</label><br>
-                        <select id="date-range">
-                            <option value=""><span id="date"></span></option>
-                        </select><br>
-                    </div>
+                        <div>
+                            <label for="document">Document</label><br>
+                            <select id="document" class="filters">
+                                <option value="">All documents</option>
+                            </select><br>
+                        </div>
+                        <div>
+                            <label for="status">Status</label><br>
+                            <select id="status" class="filters">
+                                <option value="">All statuses</option>
+                            </select><br>
+                        </div>
+                        <div>
+                            <label for="date-range">Date range</label><br>
+                            <select id="date-range" class="filters">
+                                <option value="">All dates</option>
+                                <option value="1">Today</option>
+                                <option value="7">Last 7 days</option>
+                                <option value="30">Last 30 days</option>
+                                <option value="this-month">This month</option>
+                            </select><br>
+                        </div>
                     <button id="reset-filter">Reset</button>
                 </div>
             </div>
@@ -70,6 +76,20 @@
                     <th>Action</th>
                 </thead>
                 <tbody id="table-body"></tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3">
+                            <span id="show-entries"></span>
+                        </td>
+                        <td colspan="3">
+                            <div class="pagination-controls">
+                                <button type="button" class="table-btn" id="previous-btn">Previous</button>
+                                <button type="button" class="table-btn" id="current-page" aria-current="page">1</button>
+                                <button type="button" class="table-btn" id="next-btn">Next</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
             </table>
         </section>
 
@@ -79,7 +99,74 @@
         </div>
     </main>
 
+    <dialog id="request-review-modal" class="request-review-modal" aria-labelledby="request-review-title">
+        <form id="request-review-form" class="request-review-panel">
+            <header class="request-review-header">
+                <div>
+                    <h2 id="request-review-title">Change request status</h2>
+                    <p>Update the request status, capture staff remarks, and keep the resident record intact.</p>
+                </div>
+                <button type="button" class="review-modal-close" id="close-request-review" aria-label="Close review">×</button>
+            </header>
+
+            <div class="request-review-content">
+                <section id="request-review-summary" class="request-review-summary" aria-live="polite"></section>
+
+                <div class="request-review-columns">
+                    <section class="review-requirements" aria-labelledby="review-requirements-title">
+                        <h3 id="review-requirements-title">Uploaded requirements</h3>
+                        <div id="review-requirements-list"></div>
+                        <p class="review-preview-note">Select View requirement to preview an uploaded file. JPG, PNG, and PDF files are supported.</p>
+                        <div id="review-resident-identity" class="review-resident-identity"></div>
+                    </section>
+
+                    <section class="review-status-form" aria-label="Request status and staff remarks">
+                        <label for="review-current-status">Current status</label>
+                        <input id="review-current-status" type="text" readonly>
+
+                        <label for="review-new-status">New status</label>
+                        <select id="review-new-status"></select>
+
+                        <label for="review-staff-remarks">Staff remarks <span aria-hidden="true">*</span></label>
+                        <textarea id="review-staff-remarks" rows="4" required></textarea>
+
+                        <label for="review-follow-up-note">Internal follow-up note · Optional</label>
+                        <input id="review-follow-up-note" type="text">
+
+                        <div class="review-approval-notice" role="status">
+                            <p>Save Update records the review stage and remarks without approval. Reject Request sends the reason to the resident.</p>
+                            <p id="review-approval-notice"></p>
+                        </div>
+                        <p class="review-status-footnote">Rejected requests remain on record. Resubmitted files return to staff for verification.</p>
+                    </section>
+                </div>
+            </div>
+
+            <footer class="request-review-footer">
+                <button type="button" id="cancel-request-review" class="review-button review-button-secondary">Cancel</button>
+                <button type="button" id="save-request-review" class="review-button review-button-secondary">Save Update</button>
+                <button type="button" id="approve-request" class="review-button review-button-approve">Approve</button>
+                <button type="button" id="reject-request" class="review-button review-button-reject">Reject Request</button>
+            </footer>
+        </form>
+    </dialog>
+
+    <dialog id="request-file-preview" class="request-file-preview-modal" aria-labelledby="request-file-preview-title">
+        <div class="request-file-preview-panel">
+            <header class="request-file-preview-header">
+                <h2 id="request-file-preview-title">Uploaded requirement preview</h2>
+                <button type="button" class="review-modal-close" id="close-file-preview" aria-label="Close preview">×</button>
+            </header>
+            <div id="request-file-preview-content" class="request-file-preview-content"></div>
+            <footer class="request-file-preview-footer">
+                <a id="open-original-file" href="#" target="_blank" rel="noopener" hidden>Open original file</a>
+                <button type="button" class="review-button review-button-secondary" id="close-file-preview-button">Close</button>
+            </footer>
+        </div>
+    </dialog>
+
     <script type="module" src="../../js/components/staff-sidebar.js"></script>
+    <script type="module" src="../../js/components/timestamp.js"></script>
     <script type="module" src="../../js/pages/staff/request_management.js"></script>
 
 </body>
