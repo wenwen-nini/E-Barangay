@@ -6,7 +6,7 @@ export const staff = [
         middle_name: "",
         last_name: "Jamiilano",
         name_extension: null,
-        position: "Barangay Secretary"
+        position: "Barangay Tambay"
     }
 ];
 
