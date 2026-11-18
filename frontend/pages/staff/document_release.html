@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Release | Staff Portal</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components/sidebar.css">
+    <link rel="stylesheet" href="../../css/pages/staff/document_release.css">
+</head>
+<body>
+    <app-staff-sidebar></app-staff-sidebar>
+
+    <main>
+        <header>
+            <div class="introduction">
+                <p>Brgy. Staff Portal / Document Release</p>
+                <h1>Document Release</h1>
+                <p>Verify identity and record collection of printed documents at the barangay hall.</p>
+            </div>
+        </header>
+
+        <section class="release-metrics" aria-label="Release summary">
+            <article class="release-metric-card">
+                <p>Ready for pickup</p>
+                <strong id="ready-count">0</strong>
+                <span>Approved · Not yet collected</span>
+            </article>
+            <article class="release-metric-card">
+                <p>Released</p>
+                <strong id="released-count">0</strong>
+                <span>Collected in selected date range</span>
+            </article>
+            <article class="release-metric-card">
+                <p>Collection method</p>
+                <strong class="metric-method">On-site</strong>
+                <span>No delivery or issued PDF</span>
+            </article>
+        </section>
+
+        <section class="release-workspace">
+            <div class="release-left-column">
+                <section class="release-panel ready-panel" aria-labelledby="ready-title">
+                    <div class="panel-heading">
+                        <div>
+                            <h2 id="ready-title">Ready for pickup</h2>
+                            <p>Select a request below to verify and release. Only approved, uncollected requests appear here.</p>
+                        </div>
+                    </div>
+
+                    <div class="queue-filters">
+                        <label class="queue-search">
+                            <span>Search queue</span>
+                            <span class="search-input-wrap">
+                                <input id="queue-search" type="search" placeholder="Search request ID or resident">
+                                <span aria-hidden="true">⌕</span>
+                            </span>
+                        </label>
+                        <label class="queue-filter">
+                            <span>Document</span>
+                            <select id="queue-document-filter">
+                                <option value="">All documents</option>
+                            </select>
+                        </label>
+                        <fieldset class="queue-filter date-range-filter">
+                            <legend>Approved date</legend>
+                            <div class="date-range-inputs">
+                                <label>
+                                    <span class="visually-hidden">Approved from date</span>
+                                    <input id="approved-from-date" type="date">
+                                </label>
+                                <span aria-hidden="true">–</span>
+                                <label>
+                                    <span class="visually-hidden">Approved to date</span>
+                                    <input id="approved-to-date" type="date">
+                                </label>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <div class="table-scroll">
+                        <table class="release-table queue-table">
+                            <thead>
+                                <tr>
+                                    <th>Request</th>
+                                    <th>Resident / document</th>
+                                    <th>Status</th>
+                                    <th>Select</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ready-queue-body"></tbody>
+                        </table>
+                    </div>
+                    <div class="queue-footer">
+                        <span id="queue-entry-count" aria-live="polite"></span>
+                        <div class="queue-pagination">
+                            <button type="button" id="queue-previous" class="pagination-button">Previous</button>
+                            <label class="visually-hidden" for="queue-page-size">Rows per page</label>
+                            <select id="queue-page-size" aria-label="Rows per page">
+                                <option value="10">10 rows</option>
+                                <option value="20">20 rows</option>
+                                <option value="50">50 rows</option>
+                            </select>
+                            <button type="button" id="queue-next" class="pagination-button">Next</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="release-panel recent-panel" aria-labelledby="recent-title">
+                    <div class="panel-heading">
+                        <h2 id="recent-title">Recent release log</h2>
+                    </div>
+                    <div class="table-scroll">
+                        <table class="release-table recent-table">
+                            <thead>
+                                <tr>
+                                    <th>Request</th>
+                                    <th>Collection record</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="release-log-body"></tbody>
+                        </table>
+                    </div>
+                    <p class="release-log-note">Identity verified and printed copy collected on-site.</p>
+                </section>
+            </div>
+
+            <aside class="release-panel verify-panel" aria-labelledby="verify-title">
+                <div class="panel-heading">
+                    <div>
+                        <h2 id="verify-title">Verify &amp; release</h2>
+                        <p id="selected-request-label">Select an approved request to begin verification.</p>
+                    </div>
+                </div>
+                <div id="selected-request-details" class="selected-request-details"></div>
+                <fieldset id="release-checklist" class="release-checklist" disabled>
+                    <legend>Identity verification checklist</legend>
+                    <label>
+                        <input type="checkbox" data-check="valid_id_presented">
+                        <span>Resident presents a valid ID</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" data-check="identity_matched">
+                        <span>Identity matches the request record</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" data-check="document_and_copies_verified">
+                        <span>Printed document and copy count checked</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" data-check="collection_confirmed">
+                        <span>Resident has collected the document</span>
+                    </label>
+                </fieldset>
+                <label class="remarks-field" for="release-remarks">
+                    Collection remarks · Optional
+                    <textarea id="release-remarks" rows="2" placeholder="Add an internal release note"></textarea>
+                </label>
+                <button type="button" id="mark-released" class="release-action" disabled>Mark as Released</button>
+                <p id="release-feedback" class="release-feedback" role="status" aria-live="polite"></p>
+                <p class="release-guidance">Complete every check before marking this request as released. Selecting another request requires a fresh identity and collection check.</p>
+            </aside>
+        </section>
+
+    </main>
+
+    <script type="module" src="../../js/components/staff-sidebar.js"></script>
+    <script type="module" src="../../js/pages/staff/document_release.js"></script>
+</body>
+</html>

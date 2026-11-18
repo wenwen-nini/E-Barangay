@@ -93,5 +93,24 @@ export const requests = [
         document_and_copies_verified: false,
         collection_confirmed: false,
         release_remarks: null
+    },
+    {
+        request_id: 6,
+        resident_id: 2,
+        document_id: 4,
+        staff_id: 1,
+        number_of_copies: 1,
+        purpose: "Financial assistance application",
+        request_date: "2026-11-05",
+        status: "Approved",
+        resident_remarks: null,
+        remarks: "Requirements verified. Request approved.",
+        approval_date: "2026-11-16",
+        release_date: null,
+        valid_id_presented: false,
+        identity_matched: false,
+        document_and_copies_verified: false,
+        collection_confirmed: false,
+        release_remarks: null
     }
 ];
