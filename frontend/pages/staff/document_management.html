@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Portal</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components/sidebar.css">
+    <link rel="stylesheet" href="../../css/pages/staff/document_management.css">
+</head>
+<body>
+    <app-staff-sidebar></app-staff-sidebar>
+
+    <main>
+        <header>
+            <div class="introduction">
+                <p>Brgy. Staff / Document Management</p>
+                <h1>Document Management</h1>
+                <p>Maintain the resident catalog, requirement lists and illustrative document previews.</p>
+            </div>
+            <button type="button" class="add-document-btn">+ Add Document</button>
+        </header>
+
+        <section class="metric-grid">
+            <div class="metric-card">
+                <p class="metric-label">Document types</p>
+                <h2 class="metric-num" id="total-docs">0</h2>
+                <p>Catalog entries</p>
+            </div>
+            <div class="metric-card">
+                <p class="metric-label">Available</p>
+                <h2 class="metric-num" id="total-available">0</h2>
+                <p>Open for new requests</p>
+            </div>
+            <div class="metric-card">
+                <p class="metric-label">Unavailable</p>
+                <h2 class="metric-num" id="total-unavailable">0</h2>
+                <p>Preview under maintenance</p>
+            </div>
+        </section>
+
+        <section class="main-content">
+            <div class="filter-group">
+                <div>
+                <label for="search-input">Search</label><br>
+                <input type="text" id="search-input" placeholder="Search document name"><br>
+                </div>
+                <div class="filter-line">
+                    <div class="filters-sec">
+                        <div>
+                            <label for="document">Document</label><br>
+                            <select id="document" class="filters">
+                                <option value="">All document types</option>
+                            </select><br>
+                        </div>
+                        <div>
+                            <label for="status-filter">Status</label><br>
+                            <select id="status-filter" class="filters">
+                                <option value="All">All availability</option>
+                                <option value="Available">Available</option>
+                                <option value="Unavailable">Unavailable</option>
+                            </select><br>
+                        </div>
+                    </div>
+                    <button type="button" id="reset-filter">Reset</button>
+                </div>
+            </div>
+
+            <table class="document-table">
+                <thead>
+                    <tr>
+                        <th>Preview</th>
+                        <th>Document</th>
+                        <th>Sample fee</th>
+                        <th>Requirements</th>
+                        <th>Availability</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3">
+                            <span id="show-entries"></span>
+                        </td>
+                        <td colspan="3">
+                            <div class="pagination-controls">
+                                <button type="button" class="table-btn" id="previous-btn">Previous</button>
+                                <button type="button" class="table-btn" id="current-page" aria-current="page">1</button>
+                                <button type="button" class="table-btn" id="next-btn">Next</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </section>
+
+        <div class="reminder">
+            <img src="../../assets/icons/General Icons/basta i na nasa bilog.png">
+            <p>Use Edit to update availability and the document preview. Sample fees and requirements must be confirmed by the barangay before publication. Historical requests retain their original document details.</p>
+        </div>
+    </main>
+
+    <dialog id="document-editor-modal" class="document-management-modal">
+        <form id="document-form" class="document-editor-form">
+            <div class="management-modal-header">
+                <div>
+                    <h2 id="document-form-title">Add document</h2>
+                    <p id="document-form-description">Create a catalog entry with separate requirements and a document image.</p>
+                </div>
+                <button type="button" class="modal-close" data-close-editor aria-label="Close dialog">&times;</button>
+            </div>
+
+            <div class="document-editor-body">
+                <div class="document-editor-fields">
+                    <label class="modal-field">
+                        <span>Document name <b>*</b></span>
+                        <input id="document-name-input" name="document_name" type="text" maxlength="120" placeholder="Enter document name" required>
+                    </label>
+
+                    <label class="modal-field">
+                        <span>Description <b>*</b></span>
+                        <textarea id="document-description-input" name="description" rows="3" maxlength="1000" placeholder="Describe the document and its intended use" required></textarea>
+                    </label>
+
+                    <div class="document-field-row">
+                        <label class="modal-field">
+                            <span>Sample fee (PHP) <b>*</b></span>
+                            <input id="document-fee-input" name="fee_per_copy" type="number" min="0" step="0.01" value="0.00" required>
+                        </label>
+                        <label class="modal-field">
+                            <span>Availability <b>*</b></span>
+                            <select id="document-availability-input" name="availability" required>
+                                <option value="Available">Available</option>
+                                <option value="Unavailable">Unavailable - Draft</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <section class="requirements-editor" aria-labelledby="requirements-editor-title">
+                        <h3 id="requirements-editor-title">Requirements <b>*</b> <span>One entry per requirement</span></h3>
+                        <div id="document-requirements-inputs"></div>
+                        <button type="button" class="add-requirement-btn" id="add-requirement-btn">+ Add requirement</button>
+                    </section>
+
+                    <p class="modal-footnote">Fees and requirements are illustrative and must be confirmed before publication.</p>
+                </div>
+
+                <aside class="document-preview-editor">
+                    <h3 id="preview-heading">Document preview <b>*</b></h3>
+                    <div class="preview-frame">
+                        <img id="document-preview-image" src="../../assets/images/default.png" alt="Document preview">
+                    </div>
+                    <label class="upload-preview-btn" for="document-preview-input">
+                        <span id="preview-upload-label">Upload preview image</span>
+                        <input id="document-preview-input" type="file" accept="image/png,image/jpeg">
+                    </label>
+                    <p>JPG or PNG · Up to 5 MB. Use a picture of the document layout, not an icon. Remove personal data and watermark SAMPLE / NOT VALID.</p>
+                    <p class="preview-error" id="preview-error" role="alert"></p>
+                </aside>
+            </div>
+
+            <div class="management-modal-footer">
+                <button type="button" class="modal-secondary-btn" data-close-editor>Cancel</button>
+                <button type="submit" class="modal-primary-btn" id="save-document-btn">Save Document</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="delete-document-modal" class="document-management-modal delete-document-modal">
+        <div class="delete-modal-content">
+            <div class="management-modal-header">
+                <div>
+                    <h2>Delete this document?</h2>
+                    <p>This permanently removes the catalog entry.</p>
+                </div>
+                <button type="button" class="modal-close" data-close-delete aria-label="Close dialog">&times;</button>
+            </div>
+            <div class="delete-modal-body">
+                <div class="delete-document-summary">
+                    <img id="delete-preview-image" src="../../assets/images/default.png" alt="">
+                    <div>
+                        <strong id="delete-document-name"></strong>
+                        <p id="delete-document-fee"></p>
+                        <span id="delete-document-availability" class="badge"></span>
+                    </div>
+                </div>
+                <p class="delete-warning">Deleting cannot be undone. Residents will no longer see or request this document from the available catalog.</p>
+                <p>Past and already-submitted requests are not deleted. Their document details, uploaded requirements and processing history are retained.</p>
+                <p>If you only need to pause new requests, keep this entry and set its availability to Unavailable instead.</p>
+                <p class="preview-error" id="delete-error" role="alert"></p>
+            </div>
+            <div class="management-modal-footer">
+                <button type="button" class="modal-secondary-btn" data-close-delete>Cancel</button>
+                <button type="button" class="modal-danger-btn" id="confirm-delete-document">Delete Document</button>
+            </div>
+        </div>
+    </dialog>
+
+    <script type="module" src="../../js/components/staff-sidebar.js"></script>
+    <script type="module" src="../../js/pages/staff/document_management.js"></script>
+</body>
+</html>
