@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Portal</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/components/sidebar.css">
+    <link rel="stylesheet" href="../../css/pages/staff/announcement.css">
+</head>
+<body>
+    
+    <app-staff-sidebar></app-staff-sidebar>
+
+    <main>
+        <header>
+            <div class="introduction">
+                <p>Brgy. Staff / Announcements</p>
+                <h1>Announcements</h1>
+                <p>Prepare clear service updates and manage what residents see in their portal.</p>
+            </div>
+            <button type="button" class="add-document-btn">+ Add Announcement</button>
+        </header>
+
+        <section class="announcement-body">
+            <div class="filter-group">
+                <div class="search">
+                    <label for="search-input">Search announcements</label><br>
+                    <input type="text" id="search-input" name="search-input" placeholder="Search title or content">
+                </div>
+                <div class="status">
+                    <label for="publication-status">Publication Status</label><br>
+                    <select id="status">
+                        <option value="">All statuses</option>
+                        <option value="Draft">Draft</option>
+                        <option value="Published">Published</option>
+                        <option value="Archived">Archived</option>
+                    </select>
+                </div>
+            </div>
+
+            <table class="announcement-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Audience</th>
+                        <th>Published date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="5">
+                            <span id="show-entries"></span>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </section>
+
+        <section class="preview-card">
+            <div class="preview-header">
+                <h2>Resident feed preview</h2>
+                <p class="meta">ANN-<span id="preview-id"></span> ● Selected Announcement</p>
+
+                <div class="status-line">
+                    <span id="preview-status"></span>
+                    <span id="preview-meta"></span>
+                </div>
+            </div>
+            <div class="preview-content">
+                <h2 id="preview-title"></h2>
+                <p id="preview-body"></p>
+            </div>
+        </section>
+
+        <section class="publication-guide">
+            <div class="publication-title">
+                <h2>Publication guide</h2>
+            </div>
+            <div class="statuses">
+                <span class="badge badge-draft">Draft</span>
+                <p>Visible only to staff while you prepare the message.</p>
+            </div>
+            <div class="statuses">
+                <span class="badge badge-published">Published</span>
+                <p>Visible in the selected audience's announcement feed.</p>
+            </div>
+            <div class="statuses">
+                <span class="badge badge-archived">Archived</span>
+                <p>Kept for reference and removed from the current feed.</p>
+            </div>
+        </section>
+    </main>
+
+    <dialog id="announcement-editor-modal" class="announcement-management-modal">
+        <form id="announcement-form" class="announcement-editor-form">
+            <div class="announcement-modal-header">
+                <div>
+                    <h2 id="announcement-form-title">Add announcement</h2>
+                    <p id="announcement-form-description">Create a service update for the resident portal.</p>
+                </div>
+                <button type="button" class="modal-close" data-close-editor aria-label="Close dialog">&times;</button>
+            </div>
+
+            <div class="announcement-editor-body">
+                <div class="announcement-editor-fields">
+                    <label class="modal-field">
+                        <span>Title <b>*</b></span>
+                        <input id="announcement-title-input" name="announcement-title" type="text" maxlength="120" placeholder="Enter announcement title" required>
+                    </label>
+
+                    <label class="modal-field">
+                        <span>Announcement body <b>*</b></span>
+                        <textarea id="announcement-description-input" name="description" rows="3" maxlength="1000" placeholder="Write a clear, helpful update for your audience. Include confirmed details only." required></textarea>
+                    </label>
+
+                    <div class="announcement-field-row">
+                        <label class="modal-field">
+                            <span>Audience <b>*</b></span>
+                            <select id="announcement-audience-input" name="audience" required>
+                                <option value="All residents">All residents</option>
+                            </select>
+                        </label>
+
+                        <label class="modal-field">
+                            <span>Publication status <b>*</b></span>
+                            <select id="announcement-status-input" name="status" required>
+                                <option value="Draft">Draft</option>
+                                <option value="Published">Published</option>
+                                <option value="Archived">Archived</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="modal-footnote">
+                        <img src="../../assets/icons/General Icons/basta i na nasa bilog.png">
+                        <p>Drafts are visible only to staff. Choose Publish when the content is ready for the selected audience. No scheduled publication is set.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="announcement-modal-footer">
+                <button type="button" class="modal-secondary-btn" data-close-editor>Cancel</button>
+                <button type="submit" class="modal-primary-btn" id="save-announcement-btn">Publish</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="delete-announcement-modal" class="announcement-management-modal delete-announcement-modal">
+        <div class="delete-modal-content">
+            <div class="announcement-modal-header">
+                <div>
+                    <h2>Delete this announcement?</h2>
+                    <p>Remove this message from the resident feed.</p>
+                </div>
+                <button type="button" class="modal-close" data-close-delete aria-label="Close dialog">&times;</button>
+            </div>
+            <div class="delete-modal-body">
+                <div class="delete-announcement-summary">
+                    <span id="delete-modal-status" class="badge badge-published">Published</span>
+                    <div>
+                        <h3 id="delete-modal-title"></h3>
+                        <p id="delete-modal-meta"></p>
+                    </div>
+                </div>
+                <div class="delete-warning">
+                    <img src="../../assets/icons/General Icons/i na nasa bilog ulit pero pula.png">
+                    <p>This action cannot be undone. The announcement will disappear from the public resident feed.</p>
+                </div>
+                <p>Deleting this message does not cancel document requests or remove release records. Keep the announcement if residents still need its pickup guidance.</p>
+                <small>To retain the message for staff reference without showing it in the current feed, change its status to Archived instead.</small>
+            </div>
+            <div class="announcement-modal-footer delete-modal-footer">
+                <button type="button" class="modal-secondary-btn" data-close-delete>Cancel</button>
+                <button type="button" class="modal-danger-btn" id="confirm-delete-announcement">Delete Announcement</button>
+            </div>
+        </div>
+    </dialog>
+
+    <script type="module" src="../../js/components/staff-sidebar.js"></script>
+    <script type="module" src="../../js/pages/staff/announcement.js"></script>
+</body>
+</html>

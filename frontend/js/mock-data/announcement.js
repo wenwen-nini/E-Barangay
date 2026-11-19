@@ -6,6 +6,7 @@ export const announcements = [
         content: "The barangay office will be open from Monday to Friday, 8:00 AM to 5:00 PM.",
         published_at: "2026-11-01",
         expires_at: "2026-11-30 17:00:00",
+        audience: "All residents",
         status: "Published"
     },
     {
@@ -15,6 +16,7 @@ export const announcements = [
         content: "Residents are encouraged to submit complete requirements to avoid delays in document processing.",
         published_at: "2026-11-04",
         expires_at: null,
+        audience: "All residents",
         status: "Published"
     },
     {
@@ -22,8 +24,9 @@ export const announcements = [
         staff_id: 1,
         title: "Upcoming Barangay Activity",
         content: "Details about the upcoming community activity will be announced soon.",
-        published_at: null,
+        published_at: "2026-11-18",
         expires_at: null,
+        audience: "All residents",
         status: "Draft"
     }
 ];
