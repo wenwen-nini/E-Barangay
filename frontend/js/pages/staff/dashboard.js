@@ -1,5 +1,5 @@
 import {
-    getAnnouncementOne,
+    getAnnouncement,
     getRequestsWithDocuments,
     getResidentInfo
 } from "../../services/getServiceForStaff.js";
@@ -170,7 +170,7 @@ function renderAnnouncement(announcements) {
 async function renderDashboard() {
     const [requests, announcements, residents] = await Promise.all([
         getRequestsWithDocuments(),
-        getAnnouncementOne(),
+        getAnnouncement(),
         getResidentInfo()
     ]);
 

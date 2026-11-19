@@ -18,7 +18,7 @@ export async function getRequestsWithDocuments() {
     });
 }
 
-export async function getAnnouncementOne() {
+export async function getAnnouncement() {
     return announcements;
 }
 
