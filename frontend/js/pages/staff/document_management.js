@@ -165,26 +165,51 @@ function renderRequirementInputs(requirements) {
         row.className = "requirement-input-row";
         row.dataset.requirementId = requirement.requirement_id ?? "";
 
-        const input = document.createElement("input");
-        input.type = "text";
-        input.maxLength = 160;
-        input.required = true;
-        input.value = requirement.requirement_name ?? "";
-        input.placeholder = index === 0 ? "Enter requirement name" : "Enter another requirement";
-        input.setAttribute("aria-label", `Requirement ${index + 1}`);
+        const titleLabel = document.createElement("label");
+        titleLabel.className = "requirement-field";
+        titleLabel.innerHTML = "<span>Title <b>*</b></span>";
+        const titleInput = document.createElement("input");
+        titleInput.type = "text";
+        titleInput.maxLength = 150;
+        titleInput.required = true;
+        titleInput.value = requirement.requirement_name ?? "";
+        titleInput.placeholder = "Enter requirement title";
+        titleInput.setAttribute("aria-label", `Requirement ${index + 1} title`);
+        titleLabel.append(titleInput);
+
+        const descriptionLabel = document.createElement("label");
+        descriptionLabel.className = "requirement-field";
+        descriptionLabel.innerHTML = "<span>Description</span>";
+        const descriptionInput = document.createElement("textarea");
+        descriptionInput.rows = 2;
+        descriptionInput.maxLength = 500;
+        descriptionInput.value = requirement.description ?? "";
+        descriptionInput.placeholder = "Explain what the resident must provide";
+        descriptionInput.setAttribute("aria-label", `Requirement ${index + 1} description`);
+        descriptionLabel.append(descriptionInput);
+
+        const typeLabel = document.createElement("label");
+        typeLabel.className = "requirement-field requirement-type-field";
+        typeLabel.innerHTML = "<span>Type <b>*</b></span>";
+        const typeSelect = document.createElement("select");
+        typeSelect.required = true;
+        typeSelect.setAttribute("aria-label", `Requirement ${index + 1} type`);
+        typeSelect.add(new Option("Mandatory", "mandatory"));
+        typeSelect.add(new Option("Optional", "optional"));
+        typeSelect.value = requirement.is_mandatory === false ? "optional" : "mandatory";
+        typeLabel.append(typeSelect);
 
         const removeButton = document.createElement("button");
         removeButton.type = "button";
         removeButton.className = "remove-requirement-btn";
         removeButton.textContent = "×";
         removeButton.setAttribute("aria-label", `Remove requirement ${index + 1}`);
-        removeButton.disabled = entries.length === 1;
         removeButton.addEventListener("click", () => {
             row.remove();
             updateRequirementRemoveButtons();
         });
 
-        row.append(input, removeButton);
+        row.append(titleLabel, descriptionLabel, typeLabel, removeButton);
         requirementsInputs.append(row);
     });
 }
@@ -193,9 +218,10 @@ function updateRequirementRemoveButtons() {
     const rows = [...requirementsInputs.querySelectorAll(".requirement-input-row")];
     rows.forEach((row, index) => {
         const removeButton = row.querySelector(".remove-requirement-btn");
-        removeButton.disabled = rows.length === 1;
         removeButton.setAttribute("aria-label", `Remove requirement ${index + 1}`);
-        row.querySelector("input").setAttribute("aria-label", `Requirement ${index + 1}`);
+        row.querySelector("input").setAttribute("aria-label", `Requirement ${index + 1} title`);
+        row.querySelector("textarea").setAttribute("aria-label", `Requirement ${index + 1} description`);
+        row.querySelector("select").setAttribute("aria-label", `Requirement ${index + 1} type`);
     });
 }
 
@@ -269,6 +295,8 @@ function buildRequirements(documentId, existingRequirements) {
     return [...requirementsInputs.querySelectorAll(".requirement-input-row")]
         .map(row => {
             const requirementName = row.querySelector("input").value.trim();
+            const requirementDescription = row.querySelector("textarea").value.trim();
+            const isMandatory = row.querySelector("select").value === "mandatory";
             const oldId = Number(row.dataset.requirementId);
             const existing = existingRequirements.find(requirement =>
                 requirement.requirement_id === oldId
@@ -277,13 +305,18 @@ function buildRequirements(documentId, existingRequirements) {
             if (!requirementName) return null;
 
             return existing
-                ? { ...existing, requirement_name: requirementName }
+                ? {
+                    ...existing,
+                    requirement_name: requirementName,
+                    description: requirementDescription,
+                    is_mandatory: isMandatory
+                }
                 : {
                     requirement_id: nextRequirementId++,
                     document_id: documentId,
                     requirement_name: requirementName,
-                    description: "",
-                    is_mandatory: true
+                    description: requirementDescription,
+                    is_mandatory: isMandatory
                 };
         })
         .filter(Boolean);
@@ -369,7 +402,9 @@ addRequirementButton.addEventListener("click", () => {
     const requirements = [...requirementsInputs.querySelectorAll(".requirement-input-row")]
         .map(row => ({
             requirement_name: row.querySelector("input").value,
-            requirement_id: row.dataset.requirementId
+            requirement_id: row.dataset.requirementId,
+            description: row.querySelector("textarea").value,
+            is_mandatory: row.querySelector("select").value === "mandatory"
         }));
     requirements.push({});
     renderRequirementInputs(requirements);
