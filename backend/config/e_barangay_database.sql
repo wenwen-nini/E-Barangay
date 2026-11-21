@@ -191,11 +191,6 @@ CREATE TABLE IF NOT EXISTS Notification (
     CONSTRAINT fk_notification_announcement
         FOREIGN KEY (announcement_id) REFERENCES Announcement(announcement_id)
         ON UPDATE CASCADE ON DELETE RESTRICT,
-    CONSTRAINT chk_notification_reference CHECK (
-        (request_id IS NOT NULL AND announcement_id IS NULL)
-        OR
-        (request_id IS NULL AND announcement_id IS NOT NULL)
-    ),
     INDEX idx_notification_user_read (user_id, is_read),
     INDEX idx_notification_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

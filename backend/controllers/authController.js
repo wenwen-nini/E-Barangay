@@ -133,6 +133,144 @@ async function registerResident(req, res, next) {
     }
 }
 
+async function loginUser(req, res) {
+    try {
+        const { email, password } = req.body;
+
+        if (!email?.trim() || !password?.trim()) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter your email and password."
+            });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+
+        const user = await userModel.findUserByEmail(
+            pool,
+            normalizedEmail
+        );
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid email or password"
+            });
+        }
+
+        if (user.account_status !== "Active") {
+            return res.status(400).json({
+                success: false,
+                message: "Your account is not active."
+            });
+        }
+
+        const passwordMatch = await bcrypt.compare(
+            password,
+            user.password_hash
+        );
+
+        if (!passwordMatch) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid email or password"
+            });
+        }
+
+        req.session.regenerate((err) => {
+            if (err) {
+                console.error("Session regeneration error:", err);
+
+                return res.status(500).json({
+                    success: false,
+                    message: "Unable to create session."
+                });
+            }
+
+            req.session.user = {
+                user_id: user.user_id,
+                role: user.role
+            };
+
+            req.session.save((err) => {
+                if (err) {
+                    console.error("Session save error:", err);
+
+                    return res.status(500).json({
+                        success: false,
+                        message: "Unable to save session."
+                    });
+                }
+
+                return res.status(200).json({
+                    success: true,
+                    message: "Login successful.",
+                    user: {
+                        user_id: user.user_id,
+                        email: user.email,
+                        role: user.role
+                    }
+                });
+            });
+        });
+
+    } catch (error) {
+        console.error("login error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "An unexpected error occured during login."
+        });
+    }
+}
+
+async function getCurrentUser(req, res) {
+    try {
+        if (!req.session.user) {
+            return res.status(401).json({
+                success: false,
+                message: "You are not logged in."
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Session is valid.",
+            user: req.session.user
+        });
+    } catch (error) {
+        console.error("Session verification error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to verify session."
+        });
+    }
+}
+
+function logout(req, res) {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error("Logout error:", err);
+
+            return res.status(500).json({
+            success: false,
+            message: "Unable to log out."
+            });
+        }
+
+        res.clearCookie("connect.sid");
+
+        return res.status(200).json({
+            success: true,
+            message: "Logout successful"
+        });
+    });
+}
+
 module.exports = {
-    registerResident
+    registerResident,
+    loginUser,
+    getCurrentUser,
+    logout
 };

@@ -24,7 +24,7 @@
         <div class="settings-columns">
             <div class="settings-column">
         <section class="personal-info-card">
-            <form>
+            <form id="resident-profile-form">
                 <fieldset>
                     <h2>Personal Information</h2>
                     <p>Required fields are marked *. Other details are optional</p>
@@ -43,6 +43,11 @@
                             <label for="last-name">Last Name <span>*</span></label>
                             <input type="text" id="last-name" name="last-name" required>
                         </div>
+
+                        <div class="form-group">
+                            <label for="name-extension">Name Extension · Optional</label>
+                            <input type="text" id="name-extension" name="name-extension" placeholder="Jr., Sr., III">
+                        </div>
                     </div>
                     <div class="address">
                         <label for="address">Residential address <span>*</span></label>
@@ -60,22 +65,24 @@
                         </div>
                     </div>
                     <div>
-                        <label for="email">Email Address • Optional</label>
-                        <input type="email" id="email" name="email" placeholder="Enter email address">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" readonly>
+                        <small>Email address cannot currently be changed.</small>
                     </div>
                     <div class="quick-reminder">
                         <img src="../../assets/icons/General Icons/basta i na nasa bilog.png">
                         <p>Profile changes apply to future requests. They do not change information on already-submitted requests.</p>
                     </div>
                     <div class="form-actions">
-                        <button type="reset">Cancel</button>
+                        <button type="button" id="cancel-profile">Cancel</button>
                         <button type="submit">Save profile</button>
                     </div>
                 </fieldset>
             </form>
         </section>
         <section class="password-security-card">
-            <form>
+            <form id="password-form">
+                <div id="password-message" class="form-message" role="status" aria-live="polite" hidden></div>
                 <fieldset>
                     <h2>Password & Security</h2>
                     <p>Use a strong, unique password for your portal account.</p>
@@ -102,7 +109,14 @@
             </div>
             <div class="settings-column">
         <section class="preferences-card">
-            <form>
+            <form id="notification-preferences-form">
+                <div id="notification-message"
+                    class="form-message"
+                    role="status"
+                    aria-live="polite"
+                    hidden>
+                </div>
+
                 <fieldset>
                     <h2>Notification preferences</h2>
                     <p>These preferences apply to in-portal notifications only.</p>
@@ -132,13 +146,13 @@
                             <p>Barangay service notices in your portal.</p>
                         </div>
                         <label class="toggle-switch">
-                            <input type="checkbox" name="request-updates" id="request-updates">
+                            <input type="checkbox" name="announcements" id="announcements">
                             <span class="toggle-slider"></span>
                         </label>
                     </div>
                     <p>SMS and email notifications are not supported.</p>
                     <div class="form-actions">
-                        <button type="reset">Cancel</button>
+                        <button type="button" id="cancel-notifications">Cancel</button>
                         <button type="submit">Save Preferences</button>
                     </div>
                 </fieldset>
@@ -196,6 +210,9 @@
         </div>
     </dialog>
 
+    <script src="../../js/config/apiConfig.js"></script>
+    <script src="../../js/services/authServices.js"></script>
+    <script src="../../js/core/authGuard.js"></script>
     <script type="module" src="../../js/components/sidebar.js"></script>
     <script type="module" src="../../js/pages/resident/settings.js"></script>
 </body>

@@ -1,6 +1,13 @@
 async function findUserByEmail(connection, email) {
     const [rows] = await connection.execute(
-        "SELECT user_id, email FROM User WHERE email = ?",
+        `SELECT
+            user_id,
+            email,
+            password_hash,
+            role,
+            account_status
+         FROM User
+         WHERE email = ?`,
         [email]
     );
 
@@ -17,7 +24,19 @@ async function createUser(connection, email, passwordHash) {
     return result.insertId;
 }
 
+async function updateUserPassword(connection, userId, passwordHash) {
+    const [result] = await connection.execute(
+        `UPDATE User
+         SET password_hash = ?
+         WHERE user_id = ?`,
+        [passwordHash, userId]
+    );
+
+    return result.affectedRows;
+}
+
 module.exports = {
     findUserByEmail,
-    createUser
+    createUser,
+    updateUserPassword
 };
