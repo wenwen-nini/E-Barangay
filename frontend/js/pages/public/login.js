@@ -2,8 +2,6 @@
 import { users } from "../../mock-data/users.js";
 import { setCurrentUser } from "../../core/session.js";
 
-const loginForm = document.getElementById("form");
-
 if (loginForm) {
 
     loginForm.addEventListener("submit", function(event) {
