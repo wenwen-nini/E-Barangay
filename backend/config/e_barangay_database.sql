@@ -51,7 +51,6 @@ CREATE TABLE IF NOT EXISTS Document (
     document_name VARCHAR(150) NOT NULL UNIQUE,
     description TEXT NULL,
     fee_per_copy DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    estimated_processing_days INT UNSIGNED NOT NULL,
     availability ENUM('Available', 'Unavailable')
         NOT NULL DEFAULT 'Available',
     document_preview_path VARCHAR(500) NULL,

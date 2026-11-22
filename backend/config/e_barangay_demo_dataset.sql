@@ -46,16 +46,16 @@ INSERT INTO Document
 VALUES
 (1, 'Barangay Clearance',
  'Certification of good standing in the barangay.',
- 50.00, 2, 'Available'),
+ 50.00, 'Available'),
 (2, 'Certificate of Residency',
  'Proof of residency within the barangay.',
- 30.00, 1, 'Available'),
+ 30.00, 'Available'),
 (3, 'Certificate of Indigency',
  'Certification of indigency.',
- 0.00, 3, 'Available'),
+ 0.00, 'Available'),
 (4, 'Certificate of Good Moral Character',
  'Certification of good moral character.',
- 50.00, 3, 'Unavailable');
+ 50.00, 'Unavailable');
 
 -- 5. REQUIREMENT
 INSERT INTO Requirement
