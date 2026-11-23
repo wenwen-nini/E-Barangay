@@ -1,17 +1,12 @@
+import { getCurrentUser } from "../services/authServices.js";
+
 async function protectStaffPage() {
     try {
-        const user = await window.authService.getCurrentUser();
-
-        console.log("User returned:", user);
-        console.log("User role:", user.role);
+        const user = await getCurrentUser();
 
         if (user.role !== "Staff") {
-            console.log("Role mismatch. Redirecting to login.");
-            window.location.replace("../public/login.html");
-            return;
+            return window.location.replace("../public/login.html");
         }
-
-        console.log("Staff authentication successful.");
 
     } catch (error) {
         console.error("Staff authentication failed:", error);

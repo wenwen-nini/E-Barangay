@@ -177,6 +177,25 @@ async function loginUser(req, res) {
             });
         }
 
+        let residentId = null;
+
+        if (user.role === "Resident") {
+            const [residentRows] = await pool.execute(
+                "SELECT resident_id FROM Resident WHERE user_id = ?",
+                [user.user_id]
+            );
+
+            if (residentRows.length === 0) {
+                return res.status(403).json({
+                    success: false,
+                    message: "Resident profile not found."
+                });
+            }
+
+            residentId = residentRows[0].resident_id;
+
+        }
+
         req.session.regenerate((err) => {
             if (err) {
                 console.error("Session regeneration error:", err);
@@ -189,7 +208,8 @@ async function loginUser(req, res) {
 
             req.session.user = {
                 user_id: user.user_id,
-                role: user.role
+                role: user.role,
+                ...(user.role === "Resident" && { resident_id: residentId })
             };
 
             req.session.save((err) => {
@@ -208,7 +228,10 @@ async function loginUser(req, res) {
                     user: {
                         user_id: user.user_id,
                         email: user.email,
-                        role: user.role
+                        role: user.role,
+                        ...(user.role === "Resident" && {
+                            resident_id: residentId
+                        })
                     }
                 });
             });

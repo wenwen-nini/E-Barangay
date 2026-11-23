@@ -1,32 +1,26 @@
-import { getRequestsWithDocuments, getRequestStatusHistory } from "../../services/getService.js";
-import { getCurrentUser } from "../../core/session.js";
+import { getRequestsWithDocuments, getRequestStatusHistory } from "../../services/requestServices.js";
 import { requestStatusConfig } from "../../config/requestStatusConfig.js";
 import { modalConfig } from "../../config/modalConfig.js";
 
-const currentUser = getCurrentUser();
 let residentRequest = [];
 let activeFilter = "all";
 let activeRequestId = null;
 
 async function generateRequestCards() {
-    const container = document.getElementById("request-cards-container");
-
     try {
-        if (!currentUser || !currentUser.resident_id) {
-            container.innerHTML = "<p>Unable to load resident information.</p>";
-            return;
-        }
-
         const requests = await getRequestsWithDocuments();
 
-        residentRequest = requests.filter(
-            request => request.resident_id === currentUser.resident_id
-        );
+        console.log("Retrieved requests:", requests);
+
+        residentRequest = Array.isArray(requests)
+            ? requests
+            : [];
 
         renderRequestCards();
+
     } catch (error) {
-        console.error("Error loading requests: ", error);
-        container.innerHTML = "<p>Unable to load requests.</p>"
+        console.error("Error loading requests:", error);
+        cardsContainer.innerHTML = "<p>Unable to load requests.</p>";
     }
 }
 

@@ -35,7 +35,7 @@ async function getAllDocuments(req, res) {
 
 async function getAvailableDocuments(req, res) {
     try {
-        const documents = await pool.query(
+        const [documents] = await pool.query(
             `SELECT
                 document_id,
                 document_name,

@@ -1,7 +1,6 @@
-
-import { getDocumentsWithRequirements } from "../../services/getService.js";
+import { getAvailableDocuments } from "../../services/requestServices.js";
 import { getCurrentUser } from "../../core/session.js";
-import { residents } from "../../mock-data/resident.js";
+import { getCurrentUserProfile } from "../../services/profileServices.js";
 
 const documentSelect = document.getElementById("document-type");
 const purposeInput = document.getElementById("purpose");
@@ -22,30 +21,26 @@ let currentResident = null;
 const urlParams = new URLSearchParams(window.location.search);
 const selectedDocumentId = urlParams.get("document_id");
 
-function getResidentInformation() {
-    if (!currentUser || !currentUser.resident_id) {
-        throw new Error("Resident session not found.");
+async function getResidentInformation() {
+    const profileData = await getCurrentUserProfile();
+
+    if (!profileData.success || !profileData.profile) {
+        throw new Error("Unable to retrieve resident information.");
     }
 
-    currentResident = residents.find(
-        resident =>
-            String(resident.resident_id) === String(currentUser.resident_id)
-    );
-
-    if (!currentResident) {
-        throw new Error("Resident information not found.");
-    }
+    currentResident = profileData.profile;
 
     const fullName = [
-        currentResident.first_name,
-        currentResident.middle_name
-            ? currentResident.middle_name.charAt(0) + "."
+        currentResident.resident_first_name,
+        currentResident.resident_middle_name
+            ? currentResident.resident_middle_name.charAt(0) + "."
             : "",
-        currentResident.last_name,
-        currentResident.name_extension
+        currentResident.resident_last_name,
+        currentResident.resident_name_extension
     ].filter(Boolean).join(" ");
 
     fullNameDisplay.textContent = fullName;
+
     addressDisplay.textContent =
         currentResident.complete_address || "No address available.";
 
@@ -114,9 +109,9 @@ async function initializeRequestPage() {
             throw new Error("Please log in using a resident account.");
         }
 
-        getResidentInformation();
+        await getResidentInformation();
 
-        const retrievedDocuments = await getDocumentsWithRequirements();
+        const retrievedDocuments = await getAvailableDocuments();
 
         documents = Array.isArray(retrievedDocuments)
             ? retrievedDocuments

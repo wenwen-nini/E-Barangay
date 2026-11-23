@@ -1,3 +1,5 @@
+const pool = require("../config/database");
+
 async function findUserByEmail(connection, email) {
     const [rows] = await connection.execute(
         `SELECT
@@ -35,8 +37,20 @@ async function updateUserPassword(connection, userId, passwordHash) {
     return result.affectedRows;
 }
 
+async function updateProfileImage(userId, imagePath) {
+    const [result] = await pool.execute(
+        `UPDATE User
+        SET profile_image_path = ?
+        WHERE user_id = ?`,
+        [imagePath, userId]
+    );
+
+    return result.affectedRows;
+}
+
 module.exports = {
     findUserByEmail,
     createUser,
-    updateUserPassword
+    updateUserPassword,
+    updateProfileImage
 };

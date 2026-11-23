@@ -6,6 +6,9 @@ const path = require("path");
 const authRoutes = require("./routes/authRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const documentRoutes = require("./routes/documentRoutes");
+const requestRoutes = require("./routes/requestRoutes");
+const announcementRoutes = require("./routes/announcementRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 const {
     requireAuth,
@@ -42,5 +45,8 @@ app.use(
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/documents", documentRoutes);
+app.use("/api/requests", requestRoutes);
+app.use("/api/announcements", announcementRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 module.exports = app;

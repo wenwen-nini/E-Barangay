@@ -2,6 +2,8 @@ const pool = require("../config/database.js");
 const profileModel = require("../models/profileModel.js");
 const userModel = require("../models/userModel.js");
 const bcrypt = require("bcrypt");
+const fs = require("fs");
+const path = require("path");
 
 async function getProfile(req, res) {
     try {
@@ -278,9 +280,64 @@ async function changePassword(req, res) {
     }
 }
 
+async function uploadProfileImage(req, res) {
+    const uploadedFile = req.file;
+    let imageSaved = false;
+
+    try {
+        const userId = req.session.user.user_id;
+
+        if (!uploadedFile) {
+            return res.status(400).json({
+                success: false,
+                message: "Please select a profile image."
+            });
+        }
+
+        const imagePath = `/uploads/profile-images/${uploadedFile.filename}`;
+
+        const affectedRows = await userModel.updateProfileImage(
+            userId,
+            imagePath
+        );
+
+        if (affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "User account not found."
+            });
+        }
+
+        imageSaved = true;
+
+        return res.status(200).json({
+            success: true,
+            message: "Profile image uploaded successfully.",
+            profile_image_path: imagePath
+        });
+
+    } catch (error) {
+        console.error("Upload profile image error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to upload profile image."
+        });
+
+    } finally {
+        if (!imageSaved && uploadedFile) {
+            await fs.promises.unlink(uploadedFile.path)
+                .catch(error => {
+                    console.error("Profile image cleanup error:", error);
+                });
+        }
+    }
+}
+
 module.exports = {
     getProfile,
     updateProfile,
     updateNotificationPreferences,
-    changePassword
+    changePassword,
+    uploadProfileImage
 };

@@ -1,5 +1,5 @@
-
-import { getDocumentsWithRequirements } from "../../services/getService.js";
+import { API_BASE_URL } from "../../config/apiConfig.js";
+import { getDocumentsWithRequirements } from "../../services/requestServices.js";
 
 const requirementIconPath = new URL(
     "../../../assets/icons/Resident Portal/Document catalog Page/Requirement Icon.png",
@@ -233,8 +233,16 @@ function openDocumentModal(documentId) {
             : `₱${fee.toFixed(2)}`
         : "Confirm with barangay";
 
-    modalDocumentImage.src = defaultDocumentPreviewPath;
+    modalDocumentImage.src = documentInfo.document_preview_path
+        ? new URL(documentInfo.document_preview_path, API_BASE_URL).href
+        : defaultDocumentPreviewPath;
+
     modalDocumentImage.alt = `${documentInfo.document_name} sample`;
+
+    modalDocumentImage.onerror = () => {
+        modalDocumentImage.onerror = null;
+        modalDocumentImage.src = defaultDocumentPreviewPath;
+    };
 
     // Display requirements
     const requirements = documentInfo.requirements ?? [];

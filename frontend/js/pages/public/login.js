@@ -1,8 +1,9 @@
+import { setCurrentUser } from "../../core/session.js";
+
 document.addEventListener("DOMContentLoaded", () => {
     const loginForm = document.getElementById("form");
 
-    loginForm.addEventListener("submit", async (event) => {
-
+    loginForm.addEventListener("submit", async event => {
         event.preventDefault();
 
         const email = document.getElementById("email")
@@ -11,12 +12,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const password = document.getElementById("password").value;
 
         const loginData = {
-            email: email,
-            password: password
+            email,
+            password
         };
 
         try {
             const result = await window.authService.loginUser(loginData);
+
+            setCurrentUser(result.user);
 
             if (result.user.role === "Staff") {
                 window.location.href = "../staff/dashboard.html";
@@ -29,5 +32,3 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
-    
-

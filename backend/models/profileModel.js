@@ -5,6 +5,7 @@ async function findProfileByUserId(connection, userId) {
             u.user_id,
             u.email,
             u.role,
+            u.profile_image_path,
             u.account_status,
             u.created_at,
             u.profile_image_path,

@@ -1,3 +1,5 @@
+import { registerResident } from "../../services/authServices.js";
+
 const registerForm = document.getElementById("registerForm");
 
 registerForm.addEventListener("submit", async function (event) {

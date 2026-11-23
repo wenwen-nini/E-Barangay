@@ -1,6 +1,6 @@
-async function registerResident(registrationData) {
-    console.log("Data being sent:", registrationData);
-    console.log("JSON being sent:", JSON.stringify(registrationData));
+import { API_BASE_URL } from "../config/apiConfig.js";
+
+export async function registerResident(registrationData) {
 
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: "POST",
@@ -19,7 +19,8 @@ async function registerResident(registrationData) {
     return data;
 }
 
-async function loginUser(loginData) {
+export async function loginUser(loginData) {
+
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
@@ -38,7 +39,7 @@ async function loginUser(loginData) {
     return data;
 }
 
-async function getCurrentUser() {
+export async function getCurrentUser() {
     const response = await fetch(`${API_BASE_URL}/auth/me`, {
         method: "GET",
         credentials: "include"
