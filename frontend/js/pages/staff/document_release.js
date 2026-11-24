@@ -1,21 +1,19 @@
 import {
-    getResidentInfo,
-    recentRequestInfo
-} from "../../services/getServiceForStaff.js";
-import { staff } from "../../mock-data/staff.js";
+    getDocumentReleaseRequests,
+    getDocumentReleaseDetails,
+    updateReleaseVerification,
+    releaseRequest,
+    getRecentReleaseLog
+} from "../../services/getServiceForDocumentRelease.js";
 
-const [requestRows, residentRows] = await Promise.all([
-    recentRequestInfo(),
-    getResidentInfo()
-]);
-const requestData = requestRows.map(request => {
-    const resident = residentRows.find(row => row.resident_id === request.resident_id);
-    return {
-        ...request,
-        complete_address: resident?.complete_address ?? "Address unavailable",
-        contact_number: resident?.contact_number ?? "Contact unavailable"
-    };
-});
+let requestData = [];
+let releaseLogData = [];
+
+let currentPage = 1;
+let totalPages = 0;
+let totalRecords = 0;
+let selectedRequestId = null;
+let selectedRequestDetailsData = null;
 const readyQueueBody = document.querySelector("#ready-queue-body");
 const releaseLogBody = document.querySelector("#release-log-body");
 const queueSearchInput = document.querySelector("#queue-search");
@@ -36,9 +34,6 @@ const releaseRemarks = document.querySelector("#release-remarks");
 const markReleasedButton = document.querySelector("#mark-released");
 const releaseFeedback = document.querySelector("#release-feedback");
 
-let selectedRequestId = null;
-let currentPage = 1;
-
 function escapeHtml(value) {
     return String(value ?? "").replace(/[&<>"']/g, character => ({
         "&": "&amp;",
@@ -49,18 +44,62 @@ function escapeHtml(value) {
     })[character]);
 }
 
-function toLocalDateString(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
+async function loadDocumentReleaseRequests(page = 1) {
+    try {
+        const result = await getDocumentReleaseRequests(page, {
+            search: queueSearchInput.value.trim(),
+            documentId: documentFilter.value,
+            dateFrom: approvedFromDate.value,
+            dateTo: approvedToDate.value
+        });
+
+        requestData = result.requests;
+
+        readyCount.textContent = result.summary.approvedCount;
+        releasedCount.textContent = result.summary.releasedCount;
+
+        populateDocumentFilter();
+
+        currentPage = result.pagination.currentPage;
+        totalPages = result.pagination.totalPages;
+        totalRecords = result.pagination.totalRecords;
+
+        renderPage();
+
+    } catch (error) {
+        console.error("Unable to load Document Release requests:", error);
+        releaseFeedback.textContent = error.message;
+    }
+}
+
+async function loadRecentReleaseLog() {
+    try {
+        const result = await getRecentReleaseLog();
+
+        releaseLogData = result.releases;
+
+        renderReleaseLog();
+
+    } catch (error) {
+        console.error("Unable to load Recent Release Log:", error);
+    }
 }
 
 function parseLocalDate(value) {
     if (typeof value !== "string" || !value) return null;
-    const [year, month, day] = value.split("-").map(Number);
+
+    const datePart = value.split("T")[0].split(" ")[0];
+    const [year, month, day] = datePart.split("-").map(Number);
+
+    if (!year || !month || !day) return null;
+
     const date = new Date(year, month - 1, day);
+
     return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatRequestId(requestId) {
+    return `REQ-${String(requestId).padStart(3, "0")}`;
 }
 
 function formatDate(value) {
@@ -71,84 +110,107 @@ function formatDate(value) {
 }
 
 function residentName(request) {
-    const middleInitial = request.middle_name ? ` ${request.middle_name.charAt(0)}.` : "";
-    return `${request.first_name}${middleInitial} ${request.last_name}${request.name_extension ? ` ${request.name_extension}` : ""}`;
+    return request.resident_name || "Resident name unavailable";
 }
 
 function getReadyRequests() {
     return requestData.filter(request =>
         request.status === "Approved"
-        && request.collection_confirmed !== true
-        && !request.release_date
     );
 }
 
 function isWithinSelectedDateRange(value) {
     if (!value) return false;
+
+    const requestDate = String(value).split("T")[0].split(" ")[0];
+
     const from = approvedFromDate.value;
     const to = approvedToDate.value;
-    return (!from || value >= from) && (!to || value <= to);
+
+    return (
+        (!from || requestDate >= from) &&
+        (!to || requestDate <= to)
+    );
 }
 
 function getFilteredQueue() {
-    const searchTerm = queueSearchInput.value.trim().toLowerCase();
-    const selectedDocument = documentFilter.value;
-
-    return getReadyRequests().filter(request => {
-        const searchableText = [
-            request.request_id,
-            residentName(request),
-            request.document_name
-        ].join(" ").toLowerCase();
-        const matchesSearch = !searchTerm || searchableText.includes(searchTerm);
-        const matchesDocument = !selectedDocument || request.document_name === selectedDocument;
-        const matchesApprovalDate = isWithinSelectedDateRange(request.approval_date);
-        return matchesSearch && matchesDocument && matchesApprovalDate;
-    });
+    return requestData;
 }
 
 function populateDocumentFilter() {
     const selectedValue = documentFilter.value;
-    const documentNames = [...new Set(
-        getReadyRequests().map(request => request.document_name).filter(Boolean)
-    )].sort((first, second) => first.localeCompare(second));
 
-    documentFilter.replaceChildren(new Option("All documents", ""));
-    documentNames.forEach(name => documentFilter.add(new Option(name, name)));
-    if (documentNames.includes(selectedValue)) {
-        documentFilter.value = selectedValue;
+    const documents = [
+        ...new Map(
+            requestData.map(request => [
+                String(request.document_id),
+                request.document_name
+            ])
+        )
+    ];
+
+    documentFilter.replaceChildren(
+        new Option("All documents", "")
+    );
+
+    documents.forEach(([documentId, documentName]) => {
+        documentFilter.add(
+            new Option(documentName, documentId)
+        );
+    });
+
+    if (
+        selectedValue &&
+        !documents.some(([documentId]) => documentId === selectedValue)
+    ) {
+        const previousOption = documentFilter.querySelector(
+            `option[value="${CSS.escape(selectedValue)}"]`
+        );
+
+        if (previousOption) {
+            documentFilter.add(previousOption);
+        }
     }
-}
 
-function updateSummaryCards() {
-    const releasedInRange = requestData.filter(request =>
-        request.status === "Released" && isWithinSelectedDateRange(request.release_date)
-    ).length;
-
-    readyCount.textContent = getReadyRequests().length;
-    releasedCount.textContent = releasedInRange;
+    documentFilter.value = selectedValue;
 }
 
 function renderQueue() {
     const filteredRequests = getFilteredQueue();
-    const pageSize = Number(pageSizeSelect.value);
-    const totalPages = Math.max(1, Math.ceil(filteredRequests.length / pageSize));
-    currentPage = Math.min(currentPage, totalPages);
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = Math.min(startIndex + pageSize, filteredRequests.length);
-    const pageRequests = filteredRequests.slice(startIndex, endIndex);
 
-    if (!pageRequests.some(request => request.request_id === selectedRequestId)) {
-        selectedRequestId = pageRequests[0]?.request_id ?? null;
+    // The backend already returns the records for the current page.
+    const pageRequests = filteredRequests;
+
+    if (!pageRequests.some(request =>
+        request.request_id === selectedRequestId
+    )) {
+        const firstApprovedRequest = pageRequests.find(
+            request => request.status === "Approved"
+        );
+
+        selectedRequestId = firstApprovedRequest?.request_id ?? null;
+        selectedRequestDetailsData = null;
     }
 
     readyQueueBody.innerHTML = pageRequests.map(request => `
         <tr class="${request.request_id === selectedRequestId ? "is-selected" : ""}">
-            <td>#${escapeHtml(request.request_id)}</td>
+            <td>${escapeHtml(formatRequestId(request.request_id))}</td>
             <td class="resident-document-cell">
                 <strong>${escapeHtml(residentName(request))}</strong>
-                <span>${escapeHtml(request.document_name)} · ${escapeHtml(request.number_of_copies)} ${Number(request.number_of_copies) === 1 ? "copy" : "copies"}</span>
-                <small>Approved ${escapeHtml(formatDate(request.approval_date))} · ${escapeHtml(request.purpose)}</small>
+                <span>
+                    ${escapeHtml(request.document_name)} ·
+                    ${escapeHtml(request.number_of_copies)}
+                    ${Number(request.number_of_copies) === 1 ? "copy" : "copies"}
+                </span>
+                <small>
+                    ${escapeHtml(request.status === "Approved" ? "Approved" : "Released")}
+                    ${escapeHtml(formatDate(
+                        request.status === "Approved"
+                            ? request.approval_date
+                            : request.release_date
+                    ))}
+                    · ${escapeHtml(request.purpose)}
+                </small>
             </td>
             <td><span class="status-pill">Approved</span></td>
             <td>
@@ -157,149 +219,265 @@ function renderQueue() {
                     class="queue-select-button ${request.request_id === selectedRequestId ? "is-current" : ""}"
                     data-select-request="${escapeHtml(request.request_id)}"
                     aria-pressed="${request.request_id === selectedRequestId}"
-                >${request.request_id === selectedRequestId ? "Selected" : "Select"}</button>
+                >
+                    ${request.request_id === selectedRequestId ? "Selected" : "Select"}
+                </button>
             </td>
         </tr>
-    `).join("") || `<tr><td class="empty-queue" colspan="4">No approved, uncollected requests match these filters.</td></tr>`;
+    `).join("") || `
+        <tr>
+            <td class="empty-queue" colspan="4">
+                No approved requests match these filters.
+            </td>
+        </tr>
+    `;
 
-    const rangeText = filteredRequests.length
-        ? `${startIndex + 1}${endIndex > startIndex + 1 ? `–${endIndex}` : ""} of ${filteredRequests.length}`
-        : "0 of 0";
-    entryCount.textContent = `${rangeText} ready-for-pickup ${filteredRequests.length === 1 ? "request" : "requests"}`;
-    previousButton.disabled = currentPage === 1;
+    const startIndex = totalRecords === 0
+        ? 0
+        : (currentPage - 1) * 10 + 1;
+
+    const endIndex = Math.min(currentPage * 10, totalRecords);
+
+    entryCount.textContent =
+        `${startIndex}–${endIndex} of ${totalRecords} requests`;
+
+    previousButton.disabled = currentPage <= 1;
     nextButton.disabled = currentPage >= totalPages;
+
     renderSelectedRequest();
 }
 
-function renderSelectedRequest() {
+async function refreshQueueFromFirstPage() {
+    currentPage = 1;
+    selectedRequestId = null;
+    selectedRequestDetailsData = null;
+
+    await loadDocumentReleaseRequests(1);
+}
+
+async function renderSelectedRequest() {
     const selectedRequest = getReadyRequests().find(request =>
         request.request_id === selectedRequestId
     );
 
     if (!selectedRequest) {
-        selectedRequestLabel.textContent = "Select an approved request to begin verification.";
-        selectedRequestDetails.innerHTML = `<p>No approved request selected.</p>`;
+        selectedRequestDetailsData = null;
+
+        selectedRequestLabel.textContent =
+            "Select an approved request to begin verification.";
+
+        selectedRequestDetails.innerHTML =
+            "<p>No request selected.</p>";
+
         releaseChecklist.disabled = true;
         checklistInputs.forEach(input => {
             input.checked = false;
         });
+
         releaseRemarks.value = "";
         releaseRemarks.disabled = true;
         markReleasedButton.disabled = true;
         return;
     }
 
-    selectedRequestLabel.textContent = `Selected request: #${selectedRequest.request_id} · ${residentName(selectedRequest)} · ${selectedRequest.document_name}`;
-    selectedRequestDetails.innerHTML = `
-        <span class="status-pill">Approved</span>
-        <p class="selected-document-name">${escapeHtml(selectedRequest.document_name)}</p>
-        <p>${escapeHtml(residentName(selectedRequest))}<br>${escapeHtml(selectedRequest.complete_address)}<br>${escapeHtml(selectedRequest.contact_number)}</p>
-        <p>Requested ${escapeHtml(formatDate(selectedRequest.request_date))} · ${escapeHtml(selectedRequest.number_of_copies)} ${Number(selectedRequest.number_of_copies) === 1 ? "copy" : "copies"}<br>Purpose: ${escapeHtml(selectedRequest.purpose)}</p>
-    `;
+    const requestId = selectedRequest.request_id;
 
-    releaseChecklist.disabled = false;
-    checklistInputs.forEach(input => {
-        input.checked = selectedRequest[input.dataset.check] === true;
-    });
-    releaseRemarks.disabled = false;
-    releaseRemarks.value = selectedRequest.release_remarks ?? "";
-    updateReleaseButton(selectedRequest);
+    selectedRequestLabel.textContent =
+        `Selected request: ${formatRequestId(requestId)} · ${residentName(selectedRequest)} · ${selectedRequest.document_name}`;
+
+    selectedRequestDetails.innerHTML =
+        "<p>Loading request details...</p>";
+
+    releaseChecklist.disabled = true;
+    releaseRemarks.disabled = true;
+    markReleasedButton.disabled = true;
+
+    try {
+        const result = await getDocumentReleaseDetails(requestId);
+
+        // Ignore an older response if another request was selected.
+        if (selectedRequestId !== requestId) return;
+
+        const details = result.request;
+        selectedRequestDetailsData = details;
+
+        selectedRequestDetails.innerHTML = `
+            <span class="status-pill">${escapeHtml(details.status)}</span>
+            <p class="selected-document-name">
+                ${escapeHtml(details.document_name)}
+            </p>
+            <p>
+                ${escapeHtml(details.resident_name)}<br>
+                ${escapeHtml(details.complete_address)}<br>
+                ${escapeHtml(details.contact_number)}
+            </p>
+            <p>
+                Requested ${escapeHtml(formatDate(details.request_date))}<br>
+                ${escapeHtml(details.number_of_copies)}
+                ${Number(details.number_of_copies) === 1 ? "copy" : "copies"}<br>
+                Purpose: ${escapeHtml(details.purpose)}
+            </p>
+            <p>
+                Approved: ${escapeHtml(formatDate(details.approval_date))}<br>
+                Released: ${escapeHtml(
+                    details.release_date
+                        ? formatDate(details.release_date)
+                        : "Not yet released"
+                )}
+            </p>
+        `;
+
+        checklistInputs.forEach(input => {
+            details[input.dataset.check] =
+                Number(details[input.dataset.check]) === 1;
+
+            input.checked = details[input.dataset.check];
+        });
+
+        const isApproved = details.status === "Approved";
+
+        releaseChecklist.disabled = !isApproved;
+        releaseRemarks.disabled = !isApproved;
+
+        updateReleaseButton(details);
+
+    } catch (error) {
+        console.error("Unable to load selected request:", error);
+
+        if (selectedRequestId === requestId) {
+            selectedRequestDetails.innerHTML =
+                `<p>Unable to load request details: ${escapeHtml(error.message)}</p>`;
+        }
+    }
 }
 
-function updateReleaseButton(selectedRequest = getReadyRequests().find(request =>
-    request.request_id === selectedRequestId
-)) {
-    markReleasedButton.disabled = !selectedRequest
-        || checklistInputs.some(input => !input.checked);
+function updateReleaseButton(selectedRequest = selectedRequestDetailsData) {
+    markReleasedButton.disabled =
+        !selectedRequest ||
+        selectedRequest.status !== "Approved" ||
+        checklistInputs.some(input => !input.checked);
 }
 
-function getStaffName(staffId) {
-    const staffMember = staff.find(member => member.staff_id === staffId);
-    if (!staffMember) return "Staff member unavailable";
-    return [staffMember.first_name, staffMember.middle_name, staffMember.last_name]
-        .filter(Boolean)
-        .join(" ");
+function getStaffName(request) {
+    return request.staff_name || "Staff member unavailable";
 }
 
 function renderReleaseLog() {
-    const releasedRequests = requestData
-        .filter(request => request.status === "Released" && request.release_date)
-        .sort((first, second) => second.release_date.localeCompare(first.release_date));
+    const releasedRequests = releaseLogData.filter(
+        request => request.release_date
+    );
 
     releaseLogBody.innerHTML = releasedRequests.map(request => `
         <tr>
-            <td>#${escapeHtml(request.request_id)}</td>
+            <td>${escapeHtml(formatRequestId(request.request_id))}</td>
             <td class="recent-record-cell">
-                <span>${escapeHtml(residentName(request))} · ${escapeHtml(request.document_name)}</span>
-                <small>${escapeHtml(request.number_of_copies)} ${Number(request.number_of_copies) === 1 ? "copy" : "copies"} · ${escapeHtml(request.purpose)}</small>
-                <small>${escapeHtml(formatDate(request.release_date))} · ${escapeHtml(getStaffName(request.staff_id))}</small>
+                <span>
+                    ${escapeHtml(residentName(request))} ·
+                    ${escapeHtml(request.document_name)}
+                </span>
+                <small>
+                    ${escapeHtml(request.number_of_copies)}
+                    ${Number(request.number_of_copies) === 1 ? "copy" : "copies"}
+                    · ${escapeHtml(request.purpose)}
+                </small>
+                <small>
+                    ${escapeHtml(formatDate(request.release_date))}
+                    · ${escapeHtml(getStaffName(request))}
+                </small>
             </td>
             <td><span class="status-pill">Released</span></td>
         </tr>
-    `).join("") || `<tr><td class="empty-queue" colspan="3">No released documents in the record yet.</td></tr>`;
+    `).join("") || `
+        <tr>
+            <td class="empty-queue" colspan="3">
+                No released documents in the last 7 days.
+            </td>
+        </tr>
+    `;
 }
 
+
 function renderPage() {
-    updateSummaryCards();
     renderQueue();
     renderReleaseLog();
 }
 
 function selectRequest(requestId) {
     selectedRequestId = requestId;
+    selectedRequestDetailsData = null;
     releaseFeedback.textContent = "";
+
     renderQueue();
 }
 
-function markSelectedAsReleased() {
-    const selectedRequest = getReadyRequests().find(request =>
-        request.request_id === selectedRequestId
-    );
-    if (!selectedRequest || checklistInputs.some(input => !input.checked)) return;
 
-    checklistInputs.forEach(input => {
-        selectedRequest[input.dataset.check] = input.checked;
-    });
-    selectedRequest.status = "Released";
-    selectedRequest.collection_confirmed = true;
-    selectedRequest.release_date = toLocalDateString(new Date());
-    selectedRequest.release_remarks = releaseRemarks.value.trim() || null;
+async function markSelectedAsReleased() {
+    const details = selectedRequestDetailsData;
 
-    releaseFeedback.textContent = `Request #${selectedRequest.request_id} marked as released.`;
-    selectedRequestId = null;
-    currentPage = 1;
-    populateDocumentFilter();
-    renderPage();
+    if (
+        !details ||
+        details.status !== "Approved" ||
+        checklistInputs.some(input => !input.checked)
+    ) {
+        return;
+    }
+
+    const requestId = selectedRequestId;
+
+    markReleasedButton.disabled = true;
+    releaseFeedback.textContent = "Processing document release...";
+
+    try {
+        await releaseRequest(requestId);
+
+        releaseFeedback.textContent =
+            `Request #${requestId} successfully marked as Released.`;
+
+        selectedRequestId = null;
+        selectedRequestDetailsData = null;
+
+        // Refresh the request table and Recent Release Log.
+        await Promise.all([
+            loadDocumentReleaseRequests(currentPage),
+            loadRecentReleaseLog()
+        ]);
+
+    } catch (error) {
+        console.error("Unable to release document:", error);
+
+        releaseFeedback.textContent =
+            `Unable to release document: ${error.message}`;
+
+        updateReleaseButton(details);
+    }
 }
 
-const today = new Date();
-const thirtyDaysAgo = new Date(today);
-thirtyDaysAgo.setDate(today.getDate() - 30);
-approvedFromDate.value = toLocalDateString(thirtyDaysAgo);
-approvedToDate.value = toLocalDateString(today);
+approvedFromDate.value = "";
+approvedToDate.value = "";
 
-populateDocumentFilter();
-selectedRequestId = getReadyRequests()[0]?.request_id ?? null;
-renderPage();
+async function initializeDocumentReleasePage() {
+    await Promise.all([
+        loadDocumentReleaseRequests(1),
+        loadRecentReleaseLog()
+    ]);
+}
+
+initializeDocumentReleasePage();
 
 queueSearchInput.addEventListener("input", () => {
-    currentPage = 1;
-    renderPage();
+    refreshQueueFromFirstPage();
 });
 
 documentFilter.addEventListener("change", () => {
-    currentPage = 1;
-    renderPage();
+    refreshQueueFromFirstPage();
 });
 
 approvedFromDate.addEventListener("change", () => {
-    currentPage = 1;
-    renderPage();
+    refreshQueueFromFirstPage();
 });
 
 approvedToDate.addEventListener("change", () => {
-    currentPage = 1;
-    renderPage();
+    refreshQueueFromFirstPage();
 });
 
 pageSizeSelect.addEventListener("change", () => {
@@ -307,16 +485,16 @@ pageSizeSelect.addEventListener("change", () => {
     renderQueue();
 });
 
-previousButton.addEventListener("click", () => {
+previousButton.addEventListener("click", async () => {
     if (currentPage > 1) {
-        currentPage--;
-        renderQueue();
+        await loadDocumentReleaseRequests(currentPage - 1);
     }
 });
 
-nextButton.addEventListener("click", () => {
-    currentPage++;
-    renderQueue();
+nextButton.addEventListener("click", async () => {
+    if (currentPage < totalPages) {
+        await loadDocumentReleaseRequests(currentPage + 1);
+    }
 });
 
 readyQueueBody.addEventListener("click", event => {
@@ -324,16 +502,67 @@ readyQueueBody.addEventListener("click", event => {
     if (button) selectRequest(Number(button.dataset.selectRequest));
 });
 
+
 checklistInputs.forEach(input => {
-    input.addEventListener("change", () => {
-        const selectedRequest = getReadyRequests().find(request =>
-            request.request_id === selectedRequestId
-        );
-        if (selectedRequest) {
-            selectedRequest[input.dataset.check] = input.checked;
+    input.addEventListener("change", async () => {
+        const details = selectedRequestDetailsData;
+
+        if (!details || details.status !== "Approved") {
+            input.checked = false;
+            return;
         }
-        updateReleaseButton(selectedRequest);
+
+        const requestId = selectedRequestId;
+        const field = input.dataset.check;
+        const newValue = input.checked;
+
+        // Prevent additional changes while saving.
+        checklistInputs.forEach(item => {
+            item.disabled = true;
+        });
+
+        markReleasedButton.disabled = true;
+        releaseFeedback.textContent = "Saving verification...";
+
+        try {
+            await updateReleaseVerification(
+                requestId,
+                field,
+                newValue
+            );
+
+            // Update local data after successful saving.
+            details[field] = newValue;
+
+            const listRequest = requestData.find(request =>
+                request.request_id === requestId
+            );
+
+            if (listRequest) {
+                listRequest[field] = newValue;
+            }
+
+            releaseFeedback.textContent =
+                "Verification successfully saved.";
+
+        } catch (error) {
+            console.error("Unable to save verification:", error);
+
+            // Restore the previous checkbox value.
+            input.checked = Boolean(details[field]);
+
+            releaseFeedback.textContent =
+                `Unable to save verification: ${error.message}`;
+
+        } finally {
+            checklistInputs.forEach(item => {
+                item.disabled = details.status !== "Approved";
+            });
+
+            updateReleaseButton(details);
+        }
     });
 });
+
 
 markReleasedButton.addEventListener("click", markSelectedAsReleased);

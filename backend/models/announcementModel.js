@@ -22,6 +22,25 @@ async function getPublishedAnnouncements() {
     return announcements;
 }
 
+async function getAllAnnouncementsForStaff() {
+    const [announcements] = await pool.execute(
+        `SELECT
+            announcement_id,
+            staff_id
+            title,
+            content,
+            created_at,
+            published_at,
+            expires_at,
+            status
+        FROM Announcement
+        ORDER BY created_at DESC`
+    );
+
+    return announcements;
+}
+
 module.exports = {
-    getPublishedAnnouncements
+    getPublishedAnnouncements,
+    getAllAnnouncementsForStaff
 };

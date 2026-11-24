@@ -12,4 +12,12 @@ router.get(
     announcementController.getPublishedAnnouncements
 );
 
+// Get all announcements for staff route
+router.get(
+    "/staff/all",
+    requireAuth,
+    requireRole("Staff"),
+    announcementController.getAllAnnouncementsForStaff
+);
+
 module.exports = router;

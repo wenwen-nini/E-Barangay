@@ -15,6 +15,10 @@ let activeFilter = "all";
 let activeRequestId = null;
 let activeModalAction = null;
 
+function formatRequestId(requestId) {
+    return `REQ-${String(requestId).padStart(3, "0")}`;
+}
+
 async function generateRequestCards() {
     try {
         const requests = await getRequestsWithDocuments();
@@ -67,7 +71,7 @@ function renderRequestCards() {
                     </span>
                 </div>
 
-                <p id="id-date-copy-line">#${request.request_id} ${request.request_date} - ${label(request.number_of_copies)}</p>
+                <p id="id-date-copy-line">${formatRequestId(request.request_id)} ● ${request.request_date} - ${label(request.number_of_copies)}</p>
                 <p>Purpose: ${request.purpose}</p>
 
                 <div class="request-actions">
@@ -129,7 +133,7 @@ async function generateRequestTimeline(requestId) {
         }
 
         document.querySelector("#timeline-request-number").textContent =
-            `Request #${request.request_id}`;
+            `${formatRequestId(request.request_id)}`;
 
         document.querySelector("#timeline-document-name").textContent =
             request.document_name;
@@ -261,6 +265,7 @@ const modalForm = document.getElementById("modal-form");
 const modalNotice = document.getElementById("modal-notice");
 const modalContent = document.getElementById("modal-content");
 
+
 async function loadMissingRequirements(requestId) {
     const container = document.getElementById(
         "missing-requirements-container"
@@ -273,8 +278,11 @@ async function loadMissingRequirements(requestId) {
 
         const uploadedRequirements = request.uploaded_requirements || [];
 
-        const uploadedIds = uploadedRequirements.map(item =>
-            Number(item.requirement_id)
+        const uploadedMap = new Map(
+            uploadedRequirements.map(item => [
+                Number(item.requirement_id),
+                item
+            ])
         );
 
         const documentRequirements = await getDocumentRequirements(
@@ -284,9 +292,18 @@ async function loadMissingRequirements(requestId) {
         container.innerHTML = "";
 
         documentRequirements.forEach(requirement => {
-            const isUploaded = uploadedIds.includes(
+            const uploaded = uploadedMap.get(
                 Number(requirement.requirement_id)
             );
+
+            const isMissing = !uploaded;
+            const verificationStatus =
+                uploaded?.verification_status || null;
+
+            const needsCorrection =
+                verificationStatus === "Needs Correction";
+
+            const canUpload = isMissing || needsCorrection;
 
             const requirementGroup = document.createElement("div");
             requirementGroup.classList.add("missing-requirement-group");
@@ -294,25 +311,52 @@ async function loadMissingRequirements(requestId) {
             const label = document.createElement("label");
             label.classList.add("modal-label");
 
-            label.textContent =
-                `${requirement.requirement_name} ${isUploaded ? "(Previously uploaded)" : "(Missing)"}`;
+            label.textContent = requirement.requirement_name;
 
-            const input = document.createElement("input");
-            input.type = "file";
-            input.name = "requirements";
-            input.accept = ".jpg,.jpeg,.png,.pdf";
-            input.dataset.requirementId = requirement.requirement_id;
+            const status = document.createElement("p");
 
-            if (Number(requirement.is_mandatory) === 1) {
-                input.required = !isUploaded;
+            if (isMissing) {
+                status.textContent = "Missing requirement";
+            } else if (needsCorrection) {
+                status.textContent = "Needs Correction";
+            } else if (verificationStatus === "Accepted") {
+                status.textContent = "Accepted";
+            } else {
+                status.textContent = "Awaiting staff verification";
             }
 
-            requirementGroup.append(label, input);
+            requirementGroup.append(label, status);
+
+            if (needsCorrection && uploaded.staff_remarks) {
+                const remarks = document.createElement("p");
+                remarks.classList.add("requirement-correction-remarks");
+                remarks.textContent =
+                    `Staff remarks: ${uploaded.staff_remarks}`;
+
+                requirementGroup.appendChild(remarks);
+            }
+
+            if (canUpload) {
+                const input = document.createElement("input");
+
+                input.type = "file";
+                input.name = "requirements";
+                input.accept = ".jpg,.jpeg,.png,.pdf";
+                input.dataset.requirementId = requirement.requirement_id;
+
+                if (Number(requirement.is_mandatory) === 1) {
+                    input.required = true;
+                }
+
+                requirementGroup.appendChild(input);
+            }
+
             container.appendChild(requirementGroup);
         });
 
     } catch (error) {
         console.error("Load missing requirements error:", error);
+
         container.innerHTML =
             "<p>Unable to load document requirements.</p>";
     }

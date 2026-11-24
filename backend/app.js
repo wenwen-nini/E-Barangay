@@ -37,8 +37,8 @@ app.use(session({
 }));
 
 app.use(
-    "/uploads",
-    express.static(path.join(__dirname, "uploads"))
+    "/uploads/document-previews",
+    express.static(path.join(__dirname, "uploads/document-previews"))
 );
 
 // 5. Routes

@@ -202,7 +202,7 @@ export async function getResidentRequestDetails(requestId) {
             );
         }
 
-        data.request;
+        return data.request;
     } catch (error) {
         console.error("Get resident request details error:", error);
         throw error;

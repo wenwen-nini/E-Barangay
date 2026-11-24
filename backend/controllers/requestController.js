@@ -1,5 +1,6 @@
 const requestModel = require("../models/requestModel");
 const fs = require("fs");
+const path = require("path");
 
 // Get resident request summary
 async function getRequestSummary(req, res) {
@@ -157,15 +158,30 @@ async function submitDocumentRequest(req, res) {
     const uploadedFiles = req.files || [];
     let filesSaved = false;
 
-    const cleanupFiles = async () => {
-        await Promise.all(
-            uploadedFiles.map(file =>
-                fs.promises.unlink(file.path).catch(error => {
-                    console.error("File cleanup error:", error);
-                })
-            )
-        );
-    };
+    const uploadDirectory = path.resolve(
+        __dirname,
+        "..",
+        "uploads",
+        "request-requirements"
+    );
+
+    await Promise.all(
+        oldFilePaths.map(async filePath => {
+            const resolvedPath = path.resolve(__dirname, "..", filePath);
+
+            // Ensure the file is inside the request-requirements folder
+            if (!resolvedPath.startsWith(uploadDirectory + path.sep)) {
+                console.error("Invalid old file path:", filePath);
+                return;
+            }
+
+            try {
+                await fs.promises.unlink(resolvedPath);
+            } catch (error) {
+                console.error("Old file cleanup error:", error);
+            }
+        })
+    );
 
     try {
         const residentId = req.session.user.resident_id;
@@ -415,6 +431,7 @@ async function reuploadRequestRequirements(req, res) {
             INVALID_REQUEST_STATUS: 409,
             INVALID_REQUIREMENT: 400,
             DUPLICATE_REQUIREMENT: 400,
+            REQUIREMENT_NOT_CORRECTABLE: 400,
             MISSING_REQUIREMENTS: 400,
             NO_FILES: 400
         };
@@ -438,6 +455,89 @@ async function reuploadRequestRequirements(req, res) {
         }
     }
 }
+
+// Retrieve the uploaded requirement file for preview controller
+async function previewUploadedRequirement(req, res) {
+    try {
+        const requestId = Number(req.params.requestId);
+        const uploadedRequirementId = Number(
+            req.params.uploadedRequirementId
+        );
+
+        if (
+            !Number.isInteger(requestId) ||
+            requestId <= 0 ||
+            !Number.isInteger(uploadedRequirementId) ||
+            uploadedRequirementId <= 0
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid request or uploaded requirement ID."
+            });
+        }
+
+        const uploadedFile =
+            await requestModel.getUploadedRequirementFile(
+                requestId,
+                uploadedRequirementId
+            );
+
+        if (!uploadedFile) {
+            return res.status(404).json({
+                success: false,
+                message: "Uploaded requirement not found."
+            });
+        }
+
+        const uploadDirectory = path.resolve(
+            __dirname,
+            "..",
+            "uploads",
+            "request-requirements"
+        );
+
+        const filePath = path.resolve(
+            __dirname,
+            "..",
+            uploadedFile.storage_path
+        );
+
+        if (!filePath.startsWith(uploadDirectory + path.sep)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid file path."
+            });
+        }
+
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({
+                success: false,
+                message: "Uploaded file does not exist."
+            });
+        }
+
+        res.setHeader(
+            "Content-Type",
+            uploadedFile.mime_type || "application/octet-stream"
+        );
+
+        res.setHeader(
+            "Content-Disposition",
+            `inline; filename="${path.basename(uploadedFile.original_filename)}"`
+        );
+
+        return res.sendFile(filePath);
+
+    } catch (error) {
+        console.error("Preview uploaded requirement error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to preview uploaded requirement."
+        });
+    }
+}
+
 
 
 // Get Document Requirement
@@ -640,6 +740,590 @@ async function cancelResidentRequest(req, res) {
     }
 }
 
+// Retrieves all requests for Staff Dashboard
+async function getAllRequestsForStaff(req, res) {
+    try {
+        const requests = await requestModel.getAllRequestsForStaff();
+
+        return res.status(200).json({
+            success: true,
+            requests
+        });
+    } catch (error) {
+        console.error("Get all staff requests error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to retrieve requests."
+        });
+    }
+}
+
+// Retrieve request summary for Staff Dashboard
+async function getStaffRequestSummary(req, res) {
+    try {
+        const summary = await requestModel.getStaffRequestSummary();
+
+        return res.status(200).json({
+            success: true,
+            summary
+        });
+    } catch (error) {
+        console.error("Get staff request summary error:", error);
+        
+        return res.status(500).json({
+            success: false,
+            message: "Unable to retrieve request summary"
+        });
+    }
+}
+
+async function getStaffRequestDetails(req, res) {
+    try {
+        const requestId = Number(req.params.id);
+
+        if (!Number.isInteger(requestId) || requestId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid request ID."
+            });
+        }
+
+        const request = await requestModel.getStaffRequestDetails(requestId);
+
+        if (!request) {
+            return res.status(404).json({
+                success: false,
+                message: "Request not found."
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            request
+        });
+
+    } catch (error) {
+        console.error("Get staff request details error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to retrieve request details."
+        });
+    }
+}
+
+// Assign request to the logged-in staff member
+async function assignRequestToStaff(req, res) {
+    try {
+        const requestId = Number(req.params.id);
+        const userId = req.session.user.user_id;
+
+        if (!Number.isInteger(requestId) || requestId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid request ID."
+            });
+        }
+
+        const assigned = await requestModel.assignRequestToStaff(
+            requestId,
+            userId
+        );
+
+        if (!assigned) {
+            return res.status(404).json({
+                success: false,
+                message: "Request not found or assignment was unsuccessful."
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Request assigned successfully."
+        });
+
+    } catch (error) {
+        console.error("Assign request error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to assign request."
+        });
+    }
+}
+
+// Request Task Methods Controller
+
+// Mark a request as Under Review
+async function markRequestUnderReview(req, res) {
+    try {
+        const requestId = Number(req.params.id);
+        const userId = req.session.user.user_id;
+        const { remarks } = req.body;
+
+        if (!Number.isInteger(requestId) || requestId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid request ID."
+            });
+        }
+
+        await requestModel.markRequestUnderReview(
+            requestId,
+            userId,
+            remarks?.trim() || null
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Request is now under review."
+        });
+
+    } catch (error) {
+        console.error("Mark request under review error:", error);
+
+        if (error.code === "REQUEST_NOT_FOUND") {
+            return res.status(404).json({
+                success: false,
+                message: error.message
+            });
+        }
+
+        if (error.code === "INVALID_REQUEST_STATUS") {
+            return res.status(409).json({
+                success: false,
+                message: error.message
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to update request status."
+        });
+    }
+}
+
+// Approve a request
+async function approveRequest(req, res) {
+    try {
+        const requestId = Number(req.params.id);
+        const userId = req.session.user.user_id;
+        const { remarks } = req.body;
+
+        if (!Number.isInteger(requestId) || requestId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid request ID."
+            });
+        }
+
+        await requestModel.approveRequest(
+            requestId,
+            userId,
+            remarks?.trim() || null
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Request approved successfully."
+        });
+
+    } catch (error) {
+        console.error("Approve request error:", error);
+
+        if (error.code === "REQUEST_NOT_FOUND") {
+            return res.status(404).json({
+                success: false,
+                message: error.message
+            });
+        }
+
+        if (error.code === "INVALID_REQUEST_STATUS") {
+            return res.status(409).json({
+                success: false,
+                message: error.message
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to approve request."
+        });
+    }
+}
+
+// Reject a request
+async function rejectRequest(req, res) {
+    try {
+        const requestId = Number(req.params.id);
+        const userId = req.session.user.user_id;
+        const { remarks } = req.body;
+
+        if (!Number.isInteger(requestId) || requestId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid request ID."
+            });
+        }
+
+        if (!remarks || !remarks.trim()) {
+            return res.status(400).json({
+                success: false,
+                message: "Rejection remarks are required."
+            });
+        }
+
+        await requestModel.rejectRequest(
+            requestId,
+            userId,
+            remarks.trim()
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Request rejected successfully."
+        });
+
+    } catch (error) {
+        console.error("Reject request error:", error);
+
+        if (error.code === "REQUEST_NOT_FOUND") {
+            return res.status(404).json({
+                success: false,
+                message: error.message
+            });
+        }
+
+        if (error.code === "INVALID_REQUEST_STATUS") {
+            return res.status(409).json({
+                success: false,
+                message: error.message
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to reject request."
+        });
+    }
+}
+
+// Return a request for correction
+async function returnRequest(req, res) {
+    try {
+        const requestId = Number(req.params.id);
+        const userId = req.session.user.user_id;
+        const { remarks } = req.body;
+
+        if (!Number.isInteger(requestId) || requestId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid request ID."
+            });
+        }
+
+        if (!remarks || !remarks.trim()) {
+            return res.status(400).json({
+                success: false,
+                message: "Return remarks are required."
+            });
+        }
+
+        await requestModel.returnRequest(
+            requestId,
+            userId,
+            remarks.trim()
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Request returned successfully."
+        });
+
+    } catch (error) {
+        console.error("Return request error:", error);
+
+        if (error.code === "REQUEST_NOT_FOUND") {
+            return res.status(404).json({
+                success: false,
+                message: error.message
+            });
+        }
+
+        if (error.code === "INVALID_REQUEST_STATUS") {
+            return res.status(409).json({
+                success: false,
+                message: error.message
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to return request."
+        });
+    }
+}
+
+
+async function verifyRequirement(req, res) {
+    try {
+        const { requestId, uploadedRequirementId } = req.params;
+        const { verification_status, remarks } = req.body;
+
+        if (!verification_status) {
+            return res.status(400).json({
+                success: false,
+                message: "Verification status is required."
+            });
+        }
+
+        const result = await requestModel.verifyUploadedRequirement(
+            uploadedRequirementId,
+            requestId,
+            req.session.user.user_id,
+            verification_status,
+            remarks
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Requirement verification updated successfully.",
+            data: result
+        });
+
+    } catch (error) {
+        console.error("Verify requirement error:", error);
+
+        const errorResponses = {
+            INVALID_VERIFICATION_STATUS: 400,
+            REQUIREMENT_REMARKS_REQUIRED: 400,
+            STAFF_NOT_FOUND: 403,
+            UPLOADED_REQUIREMENT_NOT_FOUND: 404
+        };
+
+        return res.status(errorResponses[error.code] || 500).json({
+            success: false,
+            message: error.message || "Unable to verify requirement."
+        });
+    }
+}
+
+async function getDocumentReleaseRequests(req, res) {
+    try {
+        const page = Number(req.query.page) || 1;
+        const search = (req.query.search || "").trim();
+        const documentId = req.query.document_id || "";
+        const dateFrom = req.query.date_from || "";
+        const dateTo = req.query.date_to || "";
+
+        if (!Number.isInteger(page) || page < 1) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid page number."
+            });
+        }
+
+        const result = await requestModel.getDocumentReleaseRequests(
+            page,
+            {
+                search,
+                documentId,
+                dateFrom,
+                dateTo
+            }
+        );
+
+        return res.status(200).json({
+            success: true,
+            ...result
+        });
+
+    } catch (error) {
+        console.error("Get document release requests error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to retrieve document release requests."
+        });
+    }
+}
+
+async function getDocumentReleaseDetails(req, res) {
+    try {
+        const requestId = Number(req.params.id);
+
+        if (!Number.isInteger(requestId) || requestId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid request ID."
+            });
+        }
+
+        const request = await requestModel.getDocumentReleaseDetails(
+            requestId
+        );
+
+        if (!request) {
+            return res.status(404).json({
+                success: false,
+                message: "Approved or released request not found."
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            request
+        });
+
+    } catch (error) {
+        console.error("Get document release details error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to retrieve document release details."
+        });
+    }
+}
+
+async function updateReleaseVerification(req, res) {
+    try {
+        const requestId = Number(req.params.id);
+        const { field, value } = req.body;
+
+        if (!Number.isInteger(requestId) || requestId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid request ID."
+            });
+        }
+
+        const allowedFields = [
+            "valid_id_presented",
+            "identity_matched",
+            "document_and_copies_verified",
+            "collection_confirmed"
+        ];
+
+        if (!allowedFields.includes(field)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid verification field."
+            });
+        }
+
+        if (value !== 0 && value !== 1) {
+            return res.status(400).json({
+                success: false,
+                message: "Verification value must be 0 or 1."
+            });
+        }
+
+        const updated = await requestModel.updateReleaseVerification(
+            requestId,
+            field,
+            value
+        );
+
+        if (!updated) {
+            return res.status(404).json({
+                success: false,
+                message: "Approved request not found."
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Verification checklist updated successfully."
+        });
+
+    } catch (error) {
+        console.error("Update release verification error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to update verification checklist."
+        });
+    }
+}
+
+async function releaseRequest(req, res) {
+    try {
+        const requestId = Number(req.params.id);
+        const userId = req.session.user.user_id;
+
+        if (!Number.isInteger(requestId) || requestId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid request ID."
+            });
+        }
+
+        await requestModel.releaseRequest(requestId, userId);
+
+        return res.status(200).json({
+            success: true,
+            message: "Document successfully released."
+        });
+
+    } catch (error) {
+        console.error("Release request error:", error);
+
+        if (error.message === "REQUEST_NOT_FOUND") {
+            return res.status(404).json({
+                success: false,
+                message: "Request not found."
+            });
+        }
+
+        if (error.message === "INVALID_REQUEST_STATUS") {
+            return res.status(409).json({
+                success: false,
+                message: "Only approved requests can be released."
+            });
+        }
+
+        if (error.message === "VERIFICATION_INCOMPLETE") {
+            return res.status(409).json({
+                success: false,
+                message: "Complete all verification checklist items before releasing the document."
+            });
+        }
+
+        if (error.message === "STAFF_NOT_FOUND") {
+            return res.status(404).json({
+                success: false,
+                message: "Staff account not found."
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to release document."
+        });
+    }
+}
+
+async function getRecentReleaseLog(req, res) {
+    try {
+        const releases = await requestModel.getRecentReleaseLog();
+
+        return res.status(200).json({
+            success: true,
+            releases
+        });
+
+    } catch (error) {
+        console.error("Get recent release log error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to retrieve recent release log."
+        });
+    }
+}
+
+
 module.exports = {
     getRequestSummary,
     getRecentRequests,
@@ -650,5 +1334,20 @@ module.exports = {
     reuploadRequestRequirements,
     getRequestStatusHistory,
     submitRequestFollowUp,
-    cancelResidentRequest
+    cancelResidentRequest,
+    getAllRequestsForStaff,
+    getStaffRequestSummary,
+    getStaffRequestDetails,
+    assignRequestToStaff,
+    markRequestUnderReview,
+    approveRequest,
+    rejectRequest,
+    returnRequest,
+    verifyRequirement,
+    previewUploadedRequirement,
+    getDocumentReleaseRequests,
+    getDocumentReleaseDetails,
+    updateReleaseVerification,
+    releaseRequest,
+    getRecentReleaseLog
 };
