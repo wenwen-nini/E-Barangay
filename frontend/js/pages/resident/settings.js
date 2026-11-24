@@ -1,4 +1,10 @@
+import { setupProfileImageUpload } from "../../utils/profileImageSettings.js";
+
 const logoutModal = document.getElementById("logout-modal");
+const profileImageSettings = setupProfileImageUpload(
+    new URL("../../../assets/images/profile_images/default.png", import.meta.url).href,
+    "app-navbar .profile img"
+);
 
 async function loadResidentProfile() {
     const profileForm = document.getElementById("resident-profile-form");
@@ -46,6 +52,8 @@ async function loadResidentProfile() {
 
         document.getElementById("email").value =
             profile.email || "";
+
+        profileImageSettings.setProfileImage(profile.profile_image_path);
 
     } catch (error) {
         console.error("Unable to load Resident profile:", error);
@@ -254,9 +262,11 @@ cancelLogout.addEventListener("click", () => {
 
 confirmLogout.addEventListener("click", handleLogout);
 
-document.addEventListener("DOMContentLoaded", () => {
-    loadResidentProfile();
-    loadNotificationPreferences();
+document.addEventListener("DOMContentLoaded", async () => {
+    const initialLoads = Promise.all([
+        loadResidentProfile(),
+        loadNotificationPreferences()
+    ]);
 
     document.getElementById("resident-profile-form")
         .addEventListener("submit", handleProfileUpdate);
@@ -275,5 +285,8 @@ document.addEventListener("DOMContentLoaded", () => {
     
     document.addEventListener("DOMContentLoaded", () => {
         loadStaffProfile();
-});
+    });
+
+    await initialLoads;
+    window.finishPageSkeleton?.();
 });

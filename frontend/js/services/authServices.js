@@ -115,6 +115,30 @@ async function updateUserProfile(profileData) {
     }
 }
 
+async function uploadProfileImage(file) {
+    try {
+        const formData = new FormData();
+        formData.append("profile_image", file);
+
+        const response = await fetch(`${API_BASE_URL}/profile/image`, {
+            method: "PUT",
+            credentials: "include",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || "Unable to upload profile image.");
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Upload profile image error:", error);
+        throw error;
+    }
+}
+
 async function updateNotificationPreferences(preferences) {
     try {
         const response = await fetch(
@@ -177,6 +201,7 @@ window.authService = {
     logoutResident,
     getUserProfile,
     updateUserProfile,
+    uploadProfileImage,
     updateNotificationPreferences,
     changeUserPassword
 };

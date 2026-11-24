@@ -3,6 +3,9 @@ import { getCurrentUserProfile } from "../services/profileServices.js";
 
 class StaffSidebar extends HTMLElement {
     async connectedCallback() {
+        const sidebarLoaded =
+            sessionStorage.getItem("staffSidebarLoaded") === "true";
+
         this.innerHTML = `
             <aside>
                 <div class="logo">
@@ -20,8 +23,8 @@ class StaffSidebar extends HTMLElement {
                         alt="Staff profile"
                     >
                     <div class="profile-info">
-                        <h1 class="staff-name">Loading...</h1>
-                        <p class="staff-position">Loading...</p>
+                        <h1 class="staff-name">Staff</h1>
+                        <p class="staff-position">Barangay Staff</p>
                     </div>
                 </div>
 
@@ -76,7 +79,14 @@ class StaffSidebar extends HTMLElement {
             link.classList.toggle("active", linkPath === currentPath);
         });
 
+        const profile = this.querySelector(".profile");
+        profile.classList.toggle("sidebar-profile-loading", !sidebarLoaded);
+        if (!sidebarLoaded) {
+            sessionStorage.setItem("staffSidebarLoaded", "true");
+        }
+
         await this.loadStaffProfile();
+        profile.classList.remove("sidebar-profile-loading");
     }
 
     

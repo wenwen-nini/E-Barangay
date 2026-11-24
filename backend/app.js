@@ -42,6 +42,11 @@ app.use(
     express.static(path.join(__dirname, "uploads/document-previews"))
 );
 
+app.use(
+    "/uploads/profile-images",
+    express.static(path.join(__dirname, "uploads/profile-images"))
+);
+
 // 5. Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);

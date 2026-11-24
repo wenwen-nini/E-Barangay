@@ -27,7 +27,7 @@ async function generateRequestCards() {
             ? requests
             : [];
 
-        renderRequestCards();
+        await renderRequestCards();
 
     } catch (error) {
         console.error("Error loading requests:", error);
@@ -79,6 +79,7 @@ function renderRequestCards() {
         `;
     }).join("");
 
+    let timelineLoad = Promise.resolve();
     const selectedRequest = residentRequest.find(
         request => String(request.request_id) === activeRequestId
     );
@@ -90,7 +91,7 @@ function renderRequestCards() {
                 : latest
         );
         activeRequestId = String(latestRequest.request_id);
-        generateRequestTimeline(activeRequestId);
+        timelineLoad = generateRequestTimeline(activeRequestId);
     }
 
     cardsContainer.querySelectorAll(".request-card").forEach(card => {
@@ -101,6 +102,7 @@ function renderRequestCards() {
     });
 
     applyRequestFilter();
+    return timelineLoad;
 }
 
 function applyRequestFilter() {
@@ -227,6 +229,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         button.classList.toggle("active", isActive);
         button.setAttribute("aria-pressed", String(isActive));
     });
+
+    window.finishPageSkeleton?.();
 });
 
 function generateModalRequestInfo(request) {
@@ -312,15 +316,20 @@ async function loadMissingRequirements(requestId) {
             label.textContent = requirement.requirement_name;
 
             const status = document.createElement("p");
+            status.classList.add("requirement-upload-status");
 
             if (isMissing) {
                 status.textContent = "Missing requirement";
+                status.classList.add("missing");
             } else if (needsCorrection) {
                 status.textContent = "Needs Correction";
+                status.classList.add("needs-correction");
             } else if (verificationStatus === "Accepted") {
                 status.textContent = "Accepted";
+                status.classList.add("accepted");
             } else {
                 status.textContent = "Awaiting staff verification";
+                status.classList.add("pending");
             }
 
             requirementGroup.append(label, status);

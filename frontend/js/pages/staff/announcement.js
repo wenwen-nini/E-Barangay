@@ -10,7 +10,15 @@ import { formatId } from "../../utils/idFormatter.js";
 
 let searchQuery = "";
 let statusFilter = "";
-let announcements = await getAllAnnouncements() ?? [];
+let announcements;
+
+try {
+    announcements = await getAllAnnouncements() ?? [];
+} catch (error) {
+    window.finishPageSkeleton?.();
+    throw error;
+}
+
 let editingAnnouncementId = null;
 let deletingAnnouncementId = null;
 
@@ -366,3 +374,5 @@ renderTable();
 if (announcements.length > 0) {
     renderPreview(announcements[0]);
 }
+
+window.finishPageSkeleton?.();

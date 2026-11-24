@@ -163,4 +163,4 @@ loadOlderButton.addEventListener("click", () => {
     renderAnnouncements();
 });
 
-initializeAnnouncements();
+initializeAnnouncements().finally(() => window.finishPageSkeleton?.());

@@ -1,5 +1,6 @@
 import { getNotifications, markNotificationAsRead } from "../../services/notificationServices.js";
 import { getRequestsWithDocuments } from "../../services/requestServices.js";
+import { shortFormatDateTime } from "../../utils/dateFormatter.js";
 
 const listContainer = document.getElementById("notification-list-container");
 const filterButtons = document.querySelectorAll(".notification-filter");
@@ -103,7 +104,7 @@ function createNotificationCard(notification, index) {
         createTextElement(
             "p",
             "notification-date",
-            formatNotificationDate(notification.created_at)
+            formatNotificationDate(shortFormatDateTime(notification.created_at))
         )
     );
 
@@ -275,4 +276,4 @@ filterButtons.forEach(button => {
     });
 });
 
-initializeNotifications();
+initializeNotifications().finally(() => window.finishPageSkeleton?.());

@@ -342,4 +342,4 @@ requestButton.addEventListener("click", () => {
 });
 
 // Initialize
-generateDocumentCard();
+generateDocumentCard().finally(() => window.finishPageSkeleton?.());

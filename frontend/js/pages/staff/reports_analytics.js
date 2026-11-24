@@ -10,6 +10,17 @@ const resetFilterBtn = document.getElementById("reset-filter-btn");
 const summaryContainer = document.querySelector(".report-summary-cards");
 
 let reportData = null;
+const chartColors = {
+    navy: "#17365D",
+    blue: "#4F78A6",
+    gold: "#D4AF37",
+    green: "#2F8C68",
+    red: "#C9545D",
+    slate: "#8A98A9",
+    light: "#D6DEE8",
+    grid: "#E5EBF2",
+    text: "#52657A"
+};
 
 // Load report data
 async function loadReports(dateFrom = "", dateTo = "") {
@@ -18,7 +29,7 @@ async function loadReports(dateFrom = "", dateTo = "") {
 
         reportData = await getReports(dateFrom, dateTo);
 
-        renderSummaryCards(reportData.summary);
+        renderSummaryCards(reportData.summary, reportData.statusBreakdown);
         renderMonthlyTrend(reportData.monthlyTrend);
         renderStatusBreakdown(reportData.statusBreakdown);
         renderDocumentDemand(reportData.documentDemand);
@@ -35,23 +46,34 @@ async function loadReports(dateFrom = "", dateTo = "") {
 }
 
 // Render KPI cards
-function renderSummaryCards(summary) {
+function renderSummaryCards(summary, statusBreakdown) {
+    const rejected = Number(summary.rejected ?? 0);
+    const processed = Number(summary.processed_requests ?? 0);
+    const statusCount = status => Number(
+        statusBreakdown.find(item => item.status === status)?.total_requests ?? 0
+    );
     const cards = [
         {
             title: "Total Requests",
-            value: summary.total_requests
+            value: summary.total_requests,
+            detail: "Submitted in selected period"
         },
         {
             title: "In Progress",
-            value: summary.in_progress
+            value: summary.in_progress,
+            detail: `${statusCount("Pending")} pending · ${statusCount("Under Review")} under review`
         },
         {
             title: "Ready for Pickup",
-            value: summary.ready_for_pickup
+            value: summary.ready_for_pickup,
+            detail: "Approved, not yet collected"
         },
         {
             title: "Reject Rate",
-            value: `${Number(summary.reject_rate || 0).toFixed(1)}%`
+            value: `${Number(summary.reject_rate || 0).toFixed(1)}%`,
+            detail: processed > 0
+                ? `${rejected} rejected of ${processed} processed`
+                : "No processed requests in this period"
         }
     ];
 
@@ -59,6 +81,7 @@ function renderSummaryCards(summary) {
         <div class="report-summary-card">
             <p>${card.title}</p>
             <h3>${card.value ?? 0}</h3>
+            <small class="report-summary-detail">${card.detail}</small>
         </div>
     `).join("");
 }
@@ -83,7 +106,10 @@ function renderMonthlyTrend(data) {
                 borderWidth: 2,
                 tension: 0.3,
                 fill: false,
-                pointRadius: 4
+                pointRadius: 4,
+                borderColor: chartColors.navy,
+                pointBackgroundColor: chartColors.gold,
+                pointBorderColor: chartColors.navy
             }]
         },
         options: {
@@ -98,8 +124,20 @@ function renderMonthlyTrend(data) {
             scales: {
                 y: {
                     beginAtZero: true,
+                    grid: {
+                        color: chartColors.grid
+                    },
                     ticks: {
+                        color: chartColors.text,
                         precision: 0
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: chartColors.text
                     }
                 }
             }
@@ -143,16 +181,48 @@ function renderStatusBreakdown(data) {
             datasets: [{
                 label: "Requests",
                 data: statusCounts,
-                borderWidth: 2
+                borderWidth: 2,
+                backgroundColor: [
+                    chartColors.gold,
+                    chartColors.blue,
+                    chartColors.green,
+                    chartColors.red,
+                    chartColors.navy,
+                    chartColors.slate,
+                    chartColors.light
+                ],
+                borderColor: "#FFFFFF"
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+
+            hoverOffset: 18,
+
+            animation: {
+                duration: 700,
+                easing: "easeOutQuart"
+            },
+
+            transitions: {
+                active: {
+                    animation: {
+                        duration: 300
+                    }
+                }
+            },
+
             plugins: {
                 legend: {
-                    position: "bottom"
+                    position: "bottom",
+                    labels: {
+                        color: chartColors.text,
+                        boxWidth: 10,
+                        padding: 12
+                    }
                 },
+
                 tooltip: {
                     callbacks: {
                         label: function(context) {
@@ -182,7 +252,11 @@ function renderDocumentDemand(data) {
             datasets: [{
                 label: "Total Requests",
                 data: data.map(item => Number(item.total_requests)),
-                borderWidth: 1
+                borderWidth: 1,
+                backgroundColor: chartColors.navy,
+                borderColor: chartColors.navy,
+                borderRadius: 4,
+                hoverBackgroundColor: "rgba(15, 60, 133, 0.96)"
             }]
         },
         options: {
@@ -204,8 +278,20 @@ function renderDocumentDemand(data) {
             scales: {
                 x: {
                     beginAtZero: true,
+                    grid: {
+                        color: chartColors.grid
+                    },
                     ticks: {
+                        color: chartColors.text,
                         precision: 0
+                    }
+                },
+                y: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: chartColors.text
                     }
                 }
             }
@@ -229,7 +315,11 @@ function renderRejectRate(data) {
             datasets: [{
                 label: "Reject Rate (%)",
                 data: data.map(item => Number(item.reject_rate)),
-                borderWidth: 1
+                borderWidth: 1,
+                backgroundColor: chartColors.gold,
+                borderColor: chartColors.gold,
+                borderRadius: 4,
+                hoverBackgroundColor: "rgba(231, 203, 76, 0.96)"
             }]
         },
         options: {
@@ -251,8 +341,20 @@ function renderRejectRate(data) {
                 y: {
                     beginAtZero: true,
                     max: 100,
+                    grid: {
+                        color: chartColors.grid
+                    },
                     ticks: {
+                        color: chartColors.text,
                         callback: value => `${value}%`
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: chartColors.text
                     }
                 }
             }
@@ -294,7 +396,11 @@ function renderWeekdayRequests(data) {
             datasets: [{
                 label: "Total Requests",
                 data: weekdayCounts,
-                borderWidth: 1
+                borderWidth: 1,
+                backgroundColor: chartColors.navy,
+                borderColor: chartColors.navy,
+                borderRadius: 4,
+                hoverBackgroundColor: "rgba(15, 60, 133, 0.96)"
             }]
         },
         options: {
@@ -313,8 +419,20 @@ function renderWeekdayRequests(data) {
             scales: {
                 y: {
                     beginAtZero: true,
+                    grid: {
+                        color: chartColors.grid
+                    },
                     ticks: {
+                        color: chartColors.text,
                         precision: 0
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: chartColors.text
                     }
                 }
             }
@@ -608,7 +726,7 @@ resetFilterBtn.addEventListener("click", () => {
 });
 
 // Initial loading
-loadReports();
+loadReports().finally(() => window.finishPageSkeleton?.());
 
 const exportCSVBtn = document.getElementById("export-csv-btn");
 const exportPDFBtn = document.getElementById("export-pdf-btn");

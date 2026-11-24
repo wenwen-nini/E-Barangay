@@ -191,4 +191,4 @@ if (cancelButton) {
     cancelButton.addEventListener("click", cancelRequest);
 }
 
-initializeRequestPage();
+initializeRequestPage().finally(() => window.finishPageSkeleton?.());

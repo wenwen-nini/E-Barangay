@@ -1,4 +1,10 @@
+import { setupProfileImageUpload } from "../../utils/profileImageSettings.js";
+
 const logoutModal = document.getElementById("logout-modal");
+const profileImageSettings = setupProfileImageUpload(
+    new URL("../../../assets/images/profile_images/staff.png", import.meta.url).href,
+    "app-staff-sidebar .staff-profile-image"
+);
 
 const logoutButtons = document.querySelectorAll(
     "#logout-btn, #support-logout-btn"
@@ -32,6 +38,8 @@ async function loadStaffProfile() {
 
         document.getElementById("email-address").value =
             profile.email || "";
+
+        profileImageSettings.setProfileImage(profile.profile_image_path);
 
     } catch (error) {
         console.error("Unable to load staff profile:", error);
@@ -225,7 +233,10 @@ cancelProfileButton.addEventListener("click", async () => {
     }
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-    loadStaffProfile();
-    loadStaffNotificationPreferences();
+document.addEventListener("DOMContentLoaded", async () => {
+    await Promise.all([
+        loadStaffProfile(),
+        loadStaffNotificationPreferences()
+    ]);
+    window.finishPageSkeleton?.();
 });

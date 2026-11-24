@@ -65,7 +65,7 @@ async function loadDocumentReleaseRequests(page = 1) {
         totalPages = result.pagination.totalPages;
         totalRecords = result.pagination.totalRecords;
 
-        renderPage();
+        await renderPage();
 
     } catch (error) {
         console.error("Unable to load Document Release requests:", error);
@@ -241,7 +241,7 @@ function renderQueue() {
     previousButton.disabled = currentPage <= 1;
     nextButton.disabled = currentPage >= totalPages;
 
-    renderSelectedRequest();
+    return renderSelectedRequest();
 }
 
 async function refreshQueueFromFirstPage() {
@@ -395,8 +395,9 @@ function renderReleaseLog() {
 
 
 function renderPage() {
-    renderQueue();
+    const selectedRequestLoad = renderQueue();
     renderReleaseLog();
+    return selectedRequestLoad;
 }
 
 function selectRequest(requestId) {
@@ -459,7 +460,7 @@ async function initializeDocumentReleasePage() {
     ]);
 }
 
-initializeDocumentReleasePage();
+initializeDocumentReleasePage().finally(() => window.finishPageSkeleton?.());
 
 queueSearchInput.addEventListener("input", () => {
     refreshQueueFromFirstPage();

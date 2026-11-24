@@ -312,8 +312,16 @@
 .review-submit-button {
     background-color: #193B64;
     color: #FFFFFF;
+    cursor: pointer;
+}
+
+.review-submit-button:disabled {
     cursor: not-allowed;
     opacity: 0.65;
+}
+
+.review-submit-button:not(:disabled):hover {
+    background-color: #245487;
 }
 
 .progress-step-complete {

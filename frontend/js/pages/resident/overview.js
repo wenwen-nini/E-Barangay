@@ -264,12 +264,16 @@ quickBtn.addEventListener("click", () => {
     window.location.href = "../resident/document_catalog.html";
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-    generateNotification();
-    generateStatusCards();
-    generateRecentRequests();
-    generateAnnouncement();
-    generateResidentName();
+document.addEventListener("DOMContentLoaded", async () => {
+    await Promise.all([
+        generateNotification(),
+        generateStatusCards(),
+        generateRecentRequests(),
+        generateAnnouncement(),
+        generateResidentName()
+    ]);
+
+    window.finishPageSkeleton?.();
 });
 
 

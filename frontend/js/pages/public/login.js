@@ -20,6 +20,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const result = await window.authService.loginUser(loginData);
 
             setCurrentUser(result.user);
+            sessionStorage.removeItem("residentSidebarLoaded");
+            sessionStorage.removeItem("staffSidebarLoaded");
 
             if (result.user.role === "Staff") {
                 window.location.href = "../staff/dashboard.html";

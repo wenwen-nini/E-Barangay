@@ -239,4 +239,4 @@ async function renderDashboard() {
     });
 }
 
-renderDashboard();
+renderDashboard().finally(() => window.finishPageSkeleton?.());

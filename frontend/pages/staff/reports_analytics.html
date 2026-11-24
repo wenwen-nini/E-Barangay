@@ -110,11 +110,10 @@
         <!-- Export Reminder -->
         <section class="report-reminder-container">
             <div class="report-reminder card">
-                <h3>Report Reminder</h3>
+                <span class="report-reminder-icon" aria-hidden="true">i</span>
                 <p>
-                    Exports contain aggregate reports only and do not include
-                    issued document soft copies. All figures shown are sample
-                    data for this concept proposal.
+                    Exports contain aggregate reports, not issued document soft copies.
+                    All figures shown are sample data for this concept proposal.
                 </p>
             </div>
         </section>
@@ -129,6 +128,7 @@
 
     <!-- jsPDF AutoTable -->
     <script src="https://unpkg.com/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
+    <script src="../../js/utils/pageSkeleton.js"></script>
     <script type="module" src="../../js/pages/staff/reports_analytics.js"></script>
 </body>
 </html>

@@ -13,10 +13,18 @@ import { formatId } from "../../utils/idFormatter.js";
 
 let currentStatus = "All";
 let searchQuery = "";
-const [requestData, residentData] = await Promise.all([
-    getRequestsWithDocuments(),
-    getResidentInfo()
-]);
+let requestData;
+let residentData;
+
+try {
+    [requestData, residentData] = await Promise.all([
+        getRequestsWithDocuments(),
+        getResidentInfo()
+    ]);
+} catch (error) {
+    window.finishPageSkeleton?.();
+    throw error;
+}
 
 const tableBody = document.getElementById("table-body");
 const searchInput = document.querySelector("#search-input");
@@ -853,4 +861,5 @@ newStatusSelect.addEventListener("change", checkReviewChanges);
 staffRemarksInput.addEventListener("input", checkReviewChanges);
 
 renderTable();
+window.finishPageSkeleton?.();
 

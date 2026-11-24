@@ -28,6 +28,29 @@
                 <fieldset>
                     <h2>Personal Information</h2>
                     <p>Required fields are marked *. Other details are optional</p>
+                    <div class="profile-image-section">
+                        <img
+                            id="profile-image-preview"
+                            class="profile-image-preview"
+                            src="../../assets/images/profile_images/default.png"
+                            alt="Profile photo preview"
+                        >
+                        <div class="profile-image-content">
+                            <h3>Profile photo</h3>
+                            <p class="profile-image-help">Choose a JPG or PNG image up to 5 MB.</p>
+                            <input
+                                type="file"
+                                id="profile-image-input"
+                                accept="image/jpeg,image/png"
+                                hidden
+                            >
+                            <div class="profile-image-actions">
+                                <label for="profile-image-input" class="profile-image-select-button">Choose photo</label>
+                                <button type="button" id="upload-profile-image-btn" disabled>Upload photo</button>
+                            </div>
+                            <p id="profile-image-message" class="form-message profile-image-message" role="status" aria-live="polite" hidden></p>
+                        </div>
+                    </div>
                     <div class="form-row name-field-line">
                         <div class="form-group">
                             <label for="first-name">First Name <span>*</span></label>
@@ -213,6 +236,7 @@
     <script type="module" src="../../js/services/authServices.js"></script>
     <script type="module" src="../../js/core/authGuard.js"></script>
     <script type="module" src="../../js/components/sidebar.js"></script>
+    <script src="../../js/utils/pageSkeleton.js"></script>
     <script type="module" src="../../js/pages/resident/settings.js"></script>
 </body>
 </html>

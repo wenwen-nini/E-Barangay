@@ -108,6 +108,7 @@ header {
     flex-direction: column;
     margin-top: 8px;
     gap: 16px;
+    
 }
 
 .quick-action-card {
@@ -121,6 +122,12 @@ header {
     padding: 12px;
     border: 1px solid #DCE2EA;
     border-radius: 12px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.quick-action-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.15);
 }
 
 .quick-action-card img {
@@ -300,6 +307,24 @@ header {
     border: 1px solid #76CB82;
 }
 
+.request-status.rejected {
+    color: #A12B36;
+    background-color: #FDEBED;
+    border: 1px solid #F3D0D3;
+}
+
+.request-status.cancelled {
+    color: #5D6E84;
+    background-color: #EEF2F6;
+    border: 1px solid #DCE2EA;
+}
+
+.request-status.returned {
+    color: #1D61F3;
+    background-color: rgba(40, 136, 246, 0.2);
+    border: 1px solid #1D61F3;
+}
+
 .review-request-button {
     color: var(--primary-color);
     background-color: #FFFFFF;
@@ -309,6 +334,11 @@ header {
     font: inherit;
     font-weight: 700;
     cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.review-request-button:hover {
+    transform: translateY(-2px);
 }
 
 .request-table-footnote {
@@ -362,6 +392,10 @@ header {
     font-size: 12px;
     font-weight: 700;
     cursor: pointer;
+}
+
+#open-request-managament-btn:hover {
+    background-color: #214A78;
 }
 
 .notif-card .notification-footnote {
@@ -444,4 +478,8 @@ header {
     font-size: 11px;
     font-weight: 700;
     cursor: pointer;
+}
+
+#view-announcement-btn:hover {
+    background: #214A78;
 }

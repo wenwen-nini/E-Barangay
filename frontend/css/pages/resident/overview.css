@@ -272,6 +272,13 @@ header {
     font-weight: bold;
     margin-top: 8px;
     cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.quick-action-item button:hover {
+    background-color: #1d5191;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 

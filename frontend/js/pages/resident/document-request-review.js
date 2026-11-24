@@ -15,6 +15,7 @@ const submissionNotice = document.getElementById("submission-notice");
 const allowedExtensions = [".jpg", ".jpeg", ".png", ".pdf"];
 const maxFileSize = 5 * 1024 * 1024;
 let requirements = [];
+let requirementsLoaded = false;
 
 async function getResident() {
     const currentUser = getCurrentUser();
@@ -41,6 +42,10 @@ function createTextElement(tagName, className, text) {
     element.className = className;
     element.textContent = text;
     return element;
+}
+
+function isRequirementMandatory(requirement) {
+    return Number(requirement.is_mandatory) === 1;
 }
 
 function getRequestDraft() {
@@ -111,7 +116,7 @@ function renderRequirement(requirement, index) {
         createTextElement(
             "span",
             "requirement-status",
-            requirement.is_mandatory ? "Required" : "Optional"
+            isRequirementMandatory(requirement) ? "Required" : "Optional"
         )
     );
 
@@ -122,7 +127,7 @@ function renderRequirement(requirement, index) {
     input.type = "file";
     input.dataset.requirementId = requirement.requirement_id;
     input.accept = ".jpg,.jpeg,.png,.pdf";
-    input.required = requirement.is_mandatory === true;
+    input.required = isRequirementMandatory(requirement);
     input.setAttribute("aria-label", `Upload ${requirement.requirement_name}`);
     input.addEventListener("change", () => validateSelectedFile(input));
 
@@ -167,11 +172,26 @@ function showFileError(message) {
 }
 
 function updateAttachmentCount() {
-    const attachedCount = [...requirementsList.querySelectorAll(
+    const fileInputs = [...requirementsList.querySelectorAll(
         'input[type="file"]'
-    )].filter(input => input.files && input.files.length > 0).length;
+    )];
+    const attachedCount = fileInputs.filter(
+        input => input.files && input.files.length > 0
+    ).length;
     attachmentCount.textContent =
         `${attachedCount} of ${requirements.length} attached`;
+
+    submitRequestButton.disabled = !requirementsLoaded || !requirements.every(
+        requirement => {
+            if (!isRequirementMandatory(requirement)) return true;
+
+            const input = requirementsList.querySelector(
+                `input[data-requirement-id="${requirement.requirement_id}"]`
+            );
+
+            return Boolean(input && input.files && input.files.length > 0);
+        }
+    );
 }
 
 function createRequestFormData(draft) {
@@ -209,6 +229,8 @@ function createRequestFormData(draft) {
 
 function showPageError(error) {
     console.error("Error initializing request review:", error);
+    requirementsLoaded = false;
+    submitRequestButton.disabled = true;
     requirementsIntro.textContent =
         error.message || "Unable to load request details.";
     requirementsList.replaceChildren();
@@ -242,6 +264,7 @@ async function initializeReviewPage() {
         requirements = await getDocumentRequirements(
             draft.document_id
         );
+        requirementsLoaded = true;
 
         requirementsIntro.textContent =
             `These requirements correspond to ${selectedDocument.document_name}, the document you selected on page 1.`;
@@ -266,8 +289,6 @@ async function initializeReviewPage() {
 
         updateAttachmentCount();
 
-        submitRequestButton.disabled = false;
-
         submissionNotice.textContent =
             "Check your request details and attach all required files before submitting.";
 
@@ -286,7 +307,7 @@ async function submitRequest() {
             );
 
             if (
-                Number(requirement.is_mandatory) === 1 &&
+                isRequirementMandatory(requirement) &&
                 (!input || !input.files.length)
             ) {
                 throw new Error(
@@ -311,6 +332,7 @@ async function submitRequest() {
             "Your document request was submitted successfully.";
 
         submitRequestButton.textContent = "Submitted";
+        submitRequestButton.disabled = true;
 
     } catch (error) {
         console.error("Submit document request error:", error);
@@ -318,7 +340,7 @@ async function submitRequest() {
         submissionNotice.textContent =
             error.message || "Unable to submit your document request.";
 
-        submitRequestButton.disabled = false;
+        updateAttachmentCount();
         submitRequestButton.textContent = "Submit Request";
     }
 }
@@ -345,4 +367,4 @@ document.getElementById("back-button").addEventListener(
     returnToRequestDetails
 );
 
-initializeReviewPage();
+initializeReviewPage().finally(() => window.finishPageSkeleton?.());

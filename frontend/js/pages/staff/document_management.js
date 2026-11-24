@@ -634,3 +634,4 @@ resetButton.addEventListener("click", () => {
 
 populateDocumentFilter();
 renderTable();
+window.finishPageSkeleton?.();

@@ -24,27 +24,9 @@ async function generateResidentName() {
 
 class Sidebar extends HTMLElement {
     async connectedCallback() {
-
+        const sidebarLoaded =
+            sessionStorage.getItem("residentSidebarLoaded") === "true";
         const currentUser = getCurrentUser();
-        const residentInfo = await generateResidentName();
-
-        console.log("Resident information:", residentInfo);
-
-        const residentName = residentInfo
-            ? [
-                residentInfo.resident_first_name,
-                residentInfo.resident_middle_name
-                    ? residentInfo.resident_middle_name.charAt(0) + "."
-                    : "",
-                residentInfo.resident_last_name,
-                residentInfo.resident_name_extension
-            ].filter(Boolean).join(" ")
-            : "Resident";
-
-        const profileImagePath = residentInfo?.profile_image_path
-            ? `http://127.0.0.1:3000${residentInfo.profile_image_path}`
-            : "../../assets/images/profile_images/default.png";
-
         this.innerHTML = `
             <aside>
                 <div class="logo">
@@ -56,9 +38,9 @@ class Sidebar extends HTMLElement {
                 </div>
 
                 <div class="profile">
-                    <img src="${profileImagePath}" alt="">
+                    <img src="../../assets/images/profile_images/default.png" alt="">
                     <div class="profile-info">
-                        <h1>${residentName}</h1>
+                        <h1>Resident</h1>
                         <p>Balagtas, Batangas</p>
                     </div>
                 </div>
@@ -106,6 +88,36 @@ class Sidebar extends HTMLElement {
                 </nav>
             </aside>
         `;
+
+        const profile = this.querySelector(".profile");
+        profile.classList.toggle("sidebar-profile-loading", !sidebarLoaded);
+        if (!sidebarLoaded) {
+            sessionStorage.setItem("residentSidebarLoaded", "true");
+        }
+
+        const residentInfo = await generateResidentName();
+
+        console.log("Resident information:", residentInfo);
+
+        const residentName = residentInfo
+            ? [
+                residentInfo.resident_first_name,
+                residentInfo.resident_middle_name
+                    ? residentInfo.resident_middle_name.charAt(0) + "."
+                    : "",
+                residentInfo.resident_last_name,
+                residentInfo.resident_name_extension
+            ].filter(Boolean).join(" ")
+            : "Resident";
+
+        this.querySelector(".profile-info h1").textContent = residentName;
+
+        if (residentInfo?.profile_image_path) {
+            this.querySelector(".profile img").src =
+                `http://127.0.0.1:3000${residentInfo.profile_image_path}`;
+        }
+
+        profile.classList.remove("sidebar-profile-loading");
 
         const currentPath = window.location.pathname.split("/").pop();
 
