@@ -9,6 +9,7 @@ const documentRoutes = require("./routes/documentRoutes");
 const requestRoutes = require("./routes/requestRoutes");
 const announcementRoutes = require("./routes/announcementRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
+const reportRoutes = require("./routes/reportRoutes");
 
 const {
     requireAuth,
@@ -48,5 +49,7 @@ app.use("/api/documents", documentRoutes);
 app.use("/api/requests", requestRoutes);
 app.use("/api/announcements", announcementRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/reports", reportRoutes);
+
 
 module.exports = app;

@@ -9,15 +9,13 @@ import {
 } from "../../services/requestServices.js";
 import { requestStatusConfig } from "../../config/requestStatusConfig.js";
 import { modalConfig } from "../../config/modalConfig.js";
+import { shortFormatDateTime } from "../../utils/dateFormatter.js";
+import { formatId } from "../../utils/idFormatter.js";
 
 let residentRequest = [];
 let activeFilter = "all";
 let activeRequestId = null;
 let activeModalAction = null;
-
-function formatRequestId(requestId) {
-    return `REQ-${String(requestId).padStart(3, "0")}`;
-}
 
 async function generateRequestCards() {
     try {
@@ -71,7 +69,7 @@ function renderRequestCards() {
                     </span>
                 </div>
 
-                <p id="id-date-copy-line">${formatRequestId(request.request_id)} ● ${request.request_date} - ${label(request.number_of_copies)}</p>
+                <p id="id-date-copy-line">${formatId(request.request_id, "REQ", 3)} ● ${shortFormatDateTime(request.request_date)} - ${label(request.number_of_copies)}</p>
                 <p>Purpose: ${request.purpose}</p>
 
                 <div class="request-actions">
@@ -133,7 +131,7 @@ async function generateRequestTimeline(requestId) {
         }
 
         document.querySelector("#timeline-request-number").textContent =
-            `${formatRequestId(request.request_id)}`;
+            `${formatId(request.request_id, "REQ", 3)}`;
 
         document.querySelector("#timeline-document-name").textContent =
             request.document_name;
@@ -240,7 +238,7 @@ function generateModalRequestInfo(request) {
 
             <div class="modal-request-heading">
                 <strong>
-                    #${request.request_id} - ${request.document_name}
+                    #${formatId(request.request_id, "REQ", 3)} - ${request.document_name}
                 </strong>
 
                 <span class="status-badge status-${config?.cssClass ?? ""}">

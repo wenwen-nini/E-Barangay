@@ -5,6 +5,7 @@ import {
 import { getAnnouncements } from "../../services/announcementServices.js";
 import { getNotifications } from "../../services/notificationServices.js";
 import { getCurrentUserProfile } from "../../services/profileServices.js";
+import { formatId } from "../../utils/idFormatter.js";
 
 const statusCard = [
     {
@@ -108,7 +109,7 @@ async function generateRecentRequests() {
                     </div>
 
                     <div class="id-date-line">
-                        <p>DOC-${String(request.document_id).padStart(3, "0")}</p>
+                        <p>${formatId(request.document_id, "DOC", 3)}</p>
                         <span> • </span>
                         <p>${activityDate}</p>
                     </div>

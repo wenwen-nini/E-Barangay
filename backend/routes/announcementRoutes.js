@@ -20,4 +20,44 @@ router.get(
     announcementController.getAllAnnouncementsForStaff
 );
 
+// Create an announcement route
+router.post(
+    "/staff",
+    requireAuth,
+    requireRole("Staff"),
+    announcementController.createAnnouncement
+);
+
+// Automatically archives expired announcements route
+router.patch(
+    "/staff/archive-expired",
+    requireAuth,
+    requireRole("Staff"),
+    announcementController.archiveExpiredAnnouncements
+);
+
+// Update an announcement route
+router.put(
+    "/staff/:id",
+    requireAuth,
+    requireRole("Staff"),
+    announcementController.updateAnnouncement
+);
+
+// Update an announcement status route
+router.patch(
+    "/staff/:id/status",
+    requireAuth,
+    requireRole("Staff"),
+    announcementController.updateAnnouncementStatus
+);
+
+// Delete an announcement route
+router.delete(
+    "/staff/:id",
+    requireAuth,
+    requireRole("Staff"),
+    announcementController.deleteAnnouncement
+);
+
 module.exports = router;

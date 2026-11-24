@@ -158,31 +158,6 @@ async function submitDocumentRequest(req, res) {
     const uploadedFiles = req.files || [];
     let filesSaved = false;
 
-    const uploadDirectory = path.resolve(
-        __dirname,
-        "..",
-        "uploads",
-        "request-requirements"
-    );
-
-    await Promise.all(
-        oldFilePaths.map(async filePath => {
-            const resolvedPath = path.resolve(__dirname, "..", filePath);
-
-            // Ensure the file is inside the request-requirements folder
-            if (!resolvedPath.startsWith(uploadDirectory + path.sep)) {
-                console.error("Invalid old file path:", filePath);
-                return;
-            }
-
-            try {
-                await fs.promises.unlink(resolvedPath);
-            } catch (error) {
-                console.error("Old file cleanup error:", error);
-            }
-        })
-    );
-
     try {
         const residentId = req.session.user.resident_id;
         const userId = req.session.user.user_id;
@@ -333,16 +308,6 @@ async function submitDocumentRequest(req, res) {
 async function reuploadRequestRequirements(req, res) {
     const uploadedFiles = req.files || [];
     let filesSaved = false;
-
-    const cleanupFiles = async () => {
-        await Promise.all(
-            uploadedFiles.map(file =>
-                fs.promises.unlink(file.path).catch(error => {
-                    console.error("File cleanup error:", error);
-                })
-            )
-        );
-    };
 
     try {
         const residentId = req.session.user.resident_id;

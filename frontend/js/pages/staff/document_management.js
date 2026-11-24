@@ -8,6 +8,7 @@ import {
     deleteRequirement,
     deleteDocument
 } from "../../services/documentServices.js";
+import { formatId } from "../../utils/idFormatter.js";
 
 const defaultDocumentPreviewPath = new URL(
     "../../../assets/images/default.png",
@@ -286,7 +287,7 @@ function openDeleteConfirmation(doc) {
     deletingDocumentId = doc.document_id;
     deleteError.textContent = "";
     deleteDocumentName.textContent = doc.document_name;
-    deleteDocumentFee.textContent = `DOC-${String(doc.document_id).padStart(2, "0")} · Sample fee ₱${Number(doc.fee_per_copy ?? 0).toFixed(2)}`;
+    deleteDocumentFee.textContent = `${formatId(doc.document_id, "DOC")} · Sample fee ₱${Number(doc.fee_per_copy ?? 0).toFixed(2)}`;
     deleteDocumentAvailability.textContent = doc.availability;
     deleteDocumentAvailability.className = `badge badge-${doc.availability.toLowerCase()}`;
     setPreviewImage(deletePreviewImage, doc.document_preview_path);

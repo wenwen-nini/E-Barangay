@@ -1,4 +1,5 @@
 const pool = require("../config/database.js");
+const notificationModel = require("./notificationModel");
 
 // Retrieve summary of a specific resident
 async function getRequestSummary(residentId) {
@@ -955,9 +956,14 @@ async function markRequestUnderReview(requestId, userId, remarks = null) {
         await connection.beginTransaction();
 
         const [requests] = await connection.execute(
-            `SELECT request_id, status
-            FROM \`Request\`
-            WHERE request_id = ?
+            `SELECT
+                r.request_id,
+                r.status,
+                res.user_id
+            FROM \`Request\` r
+            INNER JOIN Resident res
+                ON res.resident_id = r.resident_id
+            WHERE r.request_id = ?
             FOR UPDATE`,
             [requestId]
         );
@@ -988,18 +994,25 @@ async function markRequestUnderReview(requestId, userId, remarks = null) {
             [userId, requestId]
         );
 
+        const historyRemarks =
+            remarks || "Staff started reviewing the request.";
+
         await connection.execute(
             `INSERT INTO Request_Status_History
                 (request_id, changed_by_user_id, status, remarks)
             VALUES (?, ?, 'Under Review', ?)`,
-            [
-                requestId,
-                userId,
-                remarks || "Staff started reviewing the request."
-            ]
+            [requestId, userId, historyRemarks]
+        );
+
+        await notificationModel.createRequestStatusNotification(
+            connection,
+            requests[0].user_id,
+            requestId,
+            "Under Review"
         );
 
         await connection.commit();
+
         return true;
 
     } catch (error) {
@@ -1012,6 +1025,7 @@ async function markRequestUnderReview(requestId, userId, remarks = null) {
 }
 
 // Approve a request
+
 async function approveRequest(requestId, userId, remarks = null) {
     const connection = await pool.getConnection();
 
@@ -1019,9 +1033,14 @@ async function approveRequest(requestId, userId, remarks = null) {
         await connection.beginTransaction();
 
         const [requests] = await connection.execute(
-            `SELECT request_id, status
-            FROM \`Request\`
-            WHERE request_id = ?
+            `SELECT
+                r.request_id,
+                r.status,
+                res.user_id
+            FROM \`Request\` r
+            INNER JOIN Resident res
+                ON res.resident_id = r.resident_id
+            WHERE r.request_id = ?
             FOR UPDATE`,
             [requestId]
         );
@@ -1055,6 +1074,21 @@ async function approveRequest(requestId, userId, remarks = null) {
             [requestId, userId, remarks]
         );
 
+        // Automatically notify the resident
+        await notificationModel.createRequestStatusNotification(
+            connection,
+            requests[0].user_id,
+            requestId,
+            "Approved",
+            remarks
+        );
+
+        await notificationModel.createPickupReminderNotification(
+            connection,
+            requests[0].user_id,
+            requestId
+        );
+
         await connection.commit();
         return true;
 
@@ -1075,9 +1109,14 @@ async function rejectRequest(requestId, userId, remarks) {
         await connection.beginTransaction();
 
         const [requests] = await connection.execute(
-            `SELECT request_id, status
-            FROM \`Request\`
-            WHERE request_id = ?
+            `SELECT
+                r.request_id,
+                r.status,
+                res.user_id
+            FROM \`Request\` r
+            INNER JOIN Resident res
+                ON res.resident_id = r.resident_id
+            WHERE r.request_id = ?
             FOR UPDATE`,
             [requestId]
         );
@@ -1110,6 +1149,14 @@ async function rejectRequest(requestId, userId, remarks) {
             [requestId, userId, remarks]
         );
 
+        await notificationModel.createRequestStatusNotification(
+            connection,
+            requests[0].user_id,
+            requestId,
+            "Rejected",
+            remarks
+        );
+
         await connection.commit();
         return true;
 
@@ -1129,10 +1176,16 @@ async function returnRequest(requestId, userId, remarks) {
     try {
         await connection.beginTransaction();
 
+        // Get request details and the resident's user ID
         const [requests] = await connection.execute(
-            `SELECT request_id, status
-            FROM \`Request\`
-            WHERE request_id = ?
+            `SELECT
+                r.request_id,
+                r.status,
+                res.user_id
+            FROM \`Request\` r
+            INNER JOIN Resident res
+                ON res.resident_id = r.resident_id
+            WHERE r.request_id = ?
             FOR UPDATE`,
             [requestId]
         );
@@ -1151,6 +1204,7 @@ async function returnRequest(requestId, userId, remarks) {
             throw error;
         }
 
+        // Update request status
         await connection.execute(
             `UPDATE \`Request\`
             SET status = 'Returned'
@@ -1158,11 +1212,21 @@ async function returnRequest(requestId, userId, remarks) {
             [requestId]
         );
 
+        // Record status history
         await connection.execute(
             `INSERT INTO Request_Status_History
                 (request_id, changed_by_user_id, status, remarks)
             VALUES (?, ?, 'Returned', ?)`,
             [requestId, userId, remarks]
+        );
+
+        // Automatically notify the resident
+        await notificationModel.createRequestStatusNotification(
+            connection,
+            requests[0].user_id,
+            requestId,
+            "Returned",
+            remarks
         );
 
         await connection.commit();
@@ -1436,14 +1500,17 @@ async function releaseRequest(requestId, userId) {
 
         const [rows] = await connection.execute(
             `SELECT
-                request_id,
-                status,
-                valid_id_presented,
-                identity_matched,
-                document_and_copies_verified,
-                collection_confirmed
-            FROM \`Request\`
-            WHERE request_id = ?
+                r.request_id,
+                r.status,
+                r.valid_id_presented,
+                r.identity_matched,
+                r.document_and_copies_verified,
+                r.collection_confirmed,
+                res.user_id
+            FROM \`Request\` r
+            INNER JOIN Resident res
+                ON res.resident_id = r.resident_id
+            WHERE r.request_id = ?
             FOR UPDATE`,
             [requestId]
         );
@@ -1497,6 +1564,13 @@ async function releaseRequest(requestId, userId) {
                 userId,
                 "Document successfully released to resident."
             ]
+        );
+
+        await notificationModel.createRequestStatusNotification(
+            connection,
+            request.user_id,
+            requestId,
+            "Released"
         );
 
         await connection.commit();

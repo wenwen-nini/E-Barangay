@@ -9,6 +9,7 @@ import {
     verifyUploadedRequirement
 } from "../../services/getServiceForStaff.js";
 import { requestStatusConfig } from "../../config/requestStatusConfig.js";
+import { formatId } from "../../utils/idFormatter.js";
 
 let currentStatus = "All";
 let searchQuery = "";
@@ -81,10 +82,6 @@ function getLocalDate(date) {
     if (typeof date !== "string") return new Date(Number.NaN);
     const [year, month, day] = date.split("-").map(Number);
     return new Date(year, month - 1, day);
-}
-
-function formatRequestId(requestId) {
-    return `REQ-${String(requestId).padStart(3, "0")}`;
 }
 
 function matchesDateRange(requestDate) {
@@ -400,7 +397,7 @@ async function openReviewModal(requestId) {
 
         reviewSummary.innerHTML = `
             <div>
-                <strong>${formatRequestId(selectedRequest.request_id)} · ${selectedRequest.document_name}</strong>
+                <strong>${formatId(selectedRequest.request_id, "REQ", 3)} · ${selectedRequest.document_name}</strong>
                 <span class="review-current-status-badge">${selectedRequest.status}</span>
             </div>
             <p>${residentName} · ${formatRequestDate(selectedRequest.request_date)} · ${selectedRequest.number_of_copies} ${selectedRequest.number_of_copies === 1 ? "copy" : "copies"}</p>
@@ -503,7 +500,7 @@ function renderTable() {
         const statusClass = item.status.toLowerCase().replace(/ /g, "-");
         return `
         <tr>
-            <td>${formatRequestId(item.request_id)}</td>
+            <td>${formatId(item.request_id, "REQ", 3)}</td>
             <td><strong>${item.first_name} ${item.middle_name ? `${item.middle_name.charAt(0)}.` : ""} ${item.last_name} ${item.name_extension || ""}</strong></td>
             <td>
                 <div>${item.document_name}</div>

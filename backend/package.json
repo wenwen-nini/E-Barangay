@@ -19,6 +19,7 @@
     "express-mysql-session": "^3.0.3",
     "express-session": "^1.19.0",
     "multer": "^2.5.0",
-    "mysql2": "^3.24.6"
+    "mysql2": "^3.24.6",
+    "node-cron": "^4.6.0"
   }
 }

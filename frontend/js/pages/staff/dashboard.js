@@ -3,6 +3,7 @@ import {
     getRequestsWithDocuments,
     getStaffRequestSummary
 } from "../../services/getServiceForStaff.js";
+import { formatId } from "../../utils/idFormatter.js";
 
 const iconDirectory = "../../assets/icons/Staff Portal/Dashboard Page/";
 
@@ -21,10 +22,6 @@ function formatDate(value) {
         year: "numeric",
         timeZone: "UTC"
     });
-}
-
-function formatRequestId(requestId) {
-    return `REQ-${String(requestId).padStart(3, "0")}`;
 }
 
 function getResidentName(request) {
@@ -117,7 +114,7 @@ function renderRecentRequests(requests) {
             <tbody>
                 ${recentRequests.map(request => `
                     <tr>
-                        <td class="request-id">${formatRequestId(request.request_id)}</td>
+                        <td class="request-id">${formatId(request.request_id, "REQ", 3)}</td>
                         <td>${request.document_name}</td>
                         <td>${getResidentName(request)}</td>
                         <td>${formatDate(request.request_date)}</td>

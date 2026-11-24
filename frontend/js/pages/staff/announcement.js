@@ -1,8 +1,16 @@
-import { getAnnouncement } from "../../services/getServiceForStaff.js";
+import {
+    getAllAnnouncements,
+    createAnnouncement,
+    updateAnnouncement,
+    updateAnnouncementStatus,
+    deleteAnnouncement
+} from "../../services/announcementServices.js";
+import { shortFormatDateTime, formatDateTime } from "../../utils/dateFormatter.js";
+import { formatId } from "../../utils/idFormatter.js";
 
 let searchQuery = "";
 let statusFilter = "";
-let announcements = await getAnnouncement() ?? [];
+let announcements = await getAllAnnouncements() ?? [];
 let editingAnnouncementId = null;
 let deletingAnnouncementId = null;
 
@@ -22,6 +30,7 @@ const titleInput = document.querySelector("#announcement-title-input");
 const descriptionInput = document.querySelector("#announcement-description-input");
 const audienceInput = document.querySelector("#announcement-audience-input");
 const statusInput = document.querySelector("#announcement-status-input");
+const expirationInput = document.querySelector("#announcement-expiration-input");
 const saveAnnouncementButton = document.querySelector("#save-announcement-btn");
 
 const deleteModal = document.querySelector("#delete-announcement-modal");
@@ -49,16 +58,21 @@ function renderTable() {
 
     const htmlRows = filteredAnnouncements.map(ann => {
         const safeId = escapeHtml(ann.announcement_id);
+        const formattedId = escapeHtml(formatId(ann.announcement_id, "ANN"));
         const isSelected = String(ann.announcement_id) === String(selectedId) ? "selected" : "";
 
         return `
             <tr class="announcement-row ${isSelected}" data-id="${safeId}">
                 <td class="cell-title">
                     ${escapeHtml(ann.title)}
-                    <small>ANN-${safeId}</small>
+                    <small>${formattedId}</small>
                 </td>
                 <td>${escapeHtml(ann.audience)}</td>
-                <td>${escapeHtml(ann.published_at)}</td>
+                <td>${escapeHtml(
+                    ann.published_at
+                        ? formatDateTime(ann.published_at)
+                        : "Not published"
+                )}</td>
                 <td>
                     <span class="badge badge-${escapeHtml(ann.status.toLowerCase())}">${escapeHtml(ann.status)}</span>
                 </td>
@@ -79,9 +93,9 @@ function renderTable() {
 function renderPreview(item) {
     if (!item) return;
 
-    const previewMeta = `${item.published_at} ● ${item.audience}`;
+    const previewMeta = `${shortFormatDateTime(item.published_at)}`;
 
-    document.getElementById("preview-id").textContent = String(item.announcement_id).padStart(2, "0");
+    document.getElementById("preview-id").textContent = formatId(item.announcement_id);
     document.getElementById("preview-meta").textContent = previewMeta;
     document.getElementById("preview-title").textContent = item.title;
     document.getElementById("preview-body").textContent = item.content;
@@ -100,7 +114,7 @@ function openDeleteConfirmation(ann) {
     deleteAnnouncementStatus.textContent = ann.status;
     deleteAnnouncementStatus.className = `badge badge-${ann.status.toLowerCase()}`;
     deleteAnnouncementTitle.textContent = ann.title;
-    deleteAnnouncementMeta.textContent = `ANN-${String(ann.announcement_id).padStart(2, "0")} ● ${ann.audience} ● Published ${ann.published_at}`;
+    deleteAnnouncementMeta.textContent = `${formatId(ann.announcement_id, "ANN")} ● ${ann.audience} ● Published ${ann.published_at}`;
     deleteModal.showModal();
 }
 
@@ -110,48 +124,103 @@ function openEditor(ann = null) {
 
     const isEditing = Boolean(ann);
     formTitle.textContent = isEditing ? "Edit announcement" : "Add announcement";
-    formDescription.textContent = isEditing ? `ANN-${ann.announcement_id} ● ${ann.title}` : "Create a service update for the resident portal." ;
+    formDescription.textContent = isEditing ? `${formatId(ann.announcement_id, "ANN")} ● ${ann.title}` : "Create a service update for the resident portal." ;
     titleInput.value = ann?.title ?? "";
     descriptionInput.value = ann?.content ?? "";
     audienceInput.value = "All residents";
     statusInput.value = ann?.status ?? "Draft";
+    expirationInput.value = ann?.expires_at
+        ? String(ann.expires_at).slice(0, 10)
+        : "";
     saveAnnouncementButton.textContent = isEditing ? "Save Changes" : "Publish";
     editorModal.showModal();
 }
 
-function saveAnnouncement(event) {
+async function saveAnnouncement(event) {
     event.preventDefault();
 
     const title = titleInput.value.trim();
     const content = descriptionInput.value.trim();
-    if (!title || !content) return;
+    const status = statusInput.value;
 
-    const existingAnnouncement = announcements.find(
-        ann => ann.announcement_id === editingAnnouncementId
-    );
-    const announcementId = existingAnnouncement?.announcement_id
-        ?? Math.max(0, ...announcements.map(ann => Number(ann.announcement_id)).filter(Number.isFinite)) + 1;
-    const today = new Date().toISOString().slice(0, 10);
-    const updatedAnnouncement = {
-        ...existingAnnouncement,
-        announcement_id: announcementId,
-        staff_id: existingAnnouncement?.staff_id ?? 1,
+    if (!title || !content) {
+        alert("Please complete the announcement title and content.");
+        return;
+    }
+
+    const announcementData = {
         title,
         content,
-        published_at: existingAnnouncement?.published_at ?? today,
-        expires_at: existingAnnouncement?.expires_at ?? null,
-        audience: audienceInput.value,
-        status: statusInput.value
+        expires_at: expirationInput.value
+            ? `${expirationInput.value} 23:59:59`
+            : null
     };
 
-    announcements = existingAnnouncement
-        ? announcements.map(ann => ann.announcement_id === announcementId ? updatedAnnouncement : ann)
-        : [...announcements, updatedAnnouncement];
+    const isEditing = editingAnnouncementId !== null;
 
-    selectedId = announcementId;
-    closeEditor();
-    renderTable();
-    renderPreview(updatedAnnouncement);
+    saveAnnouncementButton.disabled = true;
+    saveAnnouncementButton.textContent = "Saving...";
+
+    try {
+        if (isEditing) {
+            // Update announcement content and expiration
+            await updateAnnouncement(
+                editingAnnouncementId,
+                announcementData
+            );
+
+            // Update status separately if it changed
+            const existingAnnouncement = announcements.find(
+                ann => String(ann.announcement_id) === String(editingAnnouncementId)
+            );
+
+            if (existingAnnouncement.status !== status) {
+                await updateAnnouncementStatus(
+                    editingAnnouncementId,
+                    status
+                );
+            }
+
+        } else {
+            // Create a new announcement
+            await createAnnouncement({
+                ...announcementData,
+                status
+            });
+        }
+
+        // Retrieve updated records from the database
+        announcements = await getAllAnnouncements();
+
+        selectedId = isEditing
+            ? editingAnnouncementId
+            : announcements[0]?.announcement_id ?? null;
+
+        closeEditor();
+        renderTable();
+
+        const selectedAnnouncement = announcements.find(
+            ann => String(ann.announcement_id) === String(selectedId)
+        );
+
+        if (selectedAnnouncement) {
+            renderPreview(selectedAnnouncement);
+        }
+
+        alert(
+            isEditing
+                ? "Announcement updated successfully."
+                : "Announcement created successfully."
+        );
+
+    } catch (error) {
+        console.error("Save announcement error:", error);
+        alert(error.message || "Unable to save announcement.");
+
+    } finally {
+        saveAnnouncementButton.disabled = false;
+        saveAnnouncementButton.textContent = "Save Changes";
+    }
 }
 
 addAnnouncementButton.addEventListener("click", () => openEditor());
@@ -225,27 +294,72 @@ tableBody.addEventListener("click", event => {
 announcementForm.addEventListener("submit", saveAnnouncement);
 
 confirmDeleteButton.addEventListener("click", () => {
-    const exists = announcements.some(ann => ann.announcement_id === deletingAnnouncementId);
-    if (!exists) {
-        return;
+    async function confirmDeleteAnnouncement() {
+        if (deletingAnnouncementId === null) {
+            return;
+        }
+
+        const announcementId = deletingAnnouncementId;
+
+        const exists = announcements.some(
+            ann => String(ann.announcement_id) === String(announcementId)
+        );
+
+        if (!exists) {
+            return;
+        }
+
+        confirmDeleteButton.disabled = true;
+        confirmDeleteButton.textContent = "Deleting...";
+
+        try {
+            // Delete announcement from the database
+            await deleteAnnouncement(announcementId);
+
+            // Retrieve updated announcements
+            announcements = await getAllAnnouncements() ?? [];
+
+            // Update selected announcement
+            if (String(selectedId) === String(announcementId)) {
+                selectedId = announcements[0]?.announcement_id ?? null;
+            }
+
+            deleteModal.close();
+
+            renderTable();
+
+            // Update announcement preview
+            const selectedAnnouncement = announcements.find(
+                ann => String(ann.announcement_id) === String(selectedId)
+            );
+
+            if (selectedAnnouncement) {
+                renderPreview(selectedAnnouncement);
+            } else {
+                document.getElementById("preview-id").textContent = "";
+                document.getElementById("preview-meta").textContent = "";
+                document.getElementById("preview-title").textContent = "No announcement selected";
+                document.getElementById("preview-body").textContent = "";
+                document.getElementById("preview-status").textContent = "";
+                document.getElementById("preview-status").className = "";
+            }
+
+            alert("Announcement deleted successfully.");
+
+        } catch (error) {
+            console.error("Delete announcement error:", error);
+            alert(error.message || "Unable to delete announcement.");
+
+        } finally {
+            confirmDeleteButton.disabled = false;
+            confirmDeleteButton.textContent = "Delete Announcement";
+        }
     }
 
-    announcements = announcements.filter(ann => ann.announcement_id !== deletingAnnouncementId);
-    if (String(selectedId) === String(deletingAnnouncementId)) {
-        selectedId = announcements[0]?.announcement_id ?? null;
-    }
-    deleteModal.close();
-    renderTable();
-    if (selectedId !== null) {
-        renderPreview(announcements.find(ann => ann.announcement_id === selectedId));
-    } else {
-        document.getElementById("preview-id").textContent = "";
-        document.getElementById("preview-meta").textContent = "";
-        document.getElementById("preview-title").textContent = "No announcement selected";
-        document.getElementById("preview-body").textContent = "";
-        document.getElementById("preview-status").textContent = "";
-        document.getElementById("preview-status").className = "";
-    }
+    confirmDeleteButton.addEventListener(
+        "click",
+        confirmDeleteAnnouncement
+    );
 })
 
 renderTable();

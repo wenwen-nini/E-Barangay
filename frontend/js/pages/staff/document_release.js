@@ -5,6 +5,7 @@ import {
     releaseRequest,
     getRecentReleaseLog
 } from "../../services/getServiceForDocumentRelease.js";
+import { formatId } from "../../utils/idFormatter.js";
 
 let requestData = [];
 let releaseLogData = [];
@@ -96,10 +97,6 @@ function parseLocalDate(value) {
     const date = new Date(year, month - 1, day);
 
     return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function formatRequestId(requestId) {
-    return `REQ-${String(requestId).padStart(3, "0")}`;
 }
 
 function formatDate(value) {
@@ -194,7 +191,7 @@ function renderQueue() {
 
     readyQueueBody.innerHTML = pageRequests.map(request => `
         <tr class="${request.request_id === selectedRequestId ? "is-selected" : ""}">
-            <td>${escapeHtml(formatRequestId(request.request_id))}</td>
+            <td>${escapeHtml(formatId(request.request_id, "REQ", 3))}</td>
             <td class="resident-document-cell">
                 <strong>${escapeHtml(residentName(request))}</strong>
                 <span>
@@ -283,7 +280,7 @@ async function renderSelectedRequest() {
     const requestId = selectedRequest.request_id;
 
     selectedRequestLabel.textContent =
-        `Selected request: ${formatRequestId(requestId)} · ${residentName(selectedRequest)} · ${selectedRequest.document_name}`;
+        `Selected request: ${formatId(requestId, "REQ", 3)} · ${residentName(selectedRequest)} · ${selectedRequest.document_name}`;
 
     selectedRequestDetails.innerHTML =
         "<p>Loading request details...</p>";
@@ -369,7 +366,7 @@ function renderReleaseLog() {
 
     releaseLogBody.innerHTML = releasedRequests.map(request => `
         <tr>
-            <td>${escapeHtml(formatRequestId(request.request_id))}</td>
+            <td>${escapeHtml(formatId(request.request_id, "REQ", 3))}</td>
             <td class="recent-record-cell">
                 <span>
                     ${escapeHtml(residentName(request))} ·
