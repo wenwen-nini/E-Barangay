@@ -1,13 +1,9 @@
-
-import { users } from "../../mock-data/users.js";
 import { setCurrentUser } from "../../core/session.js";
 
-const loginForm = document.getElementById("form");
+document.addEventListener("DOMContentLoaded", () => {
+    const loginForm = document.getElementById("form");
 
-if (loginForm) {
-
-    loginForm.addEventListener("submit", function(event) {
-
+    loginForm.addEventListener("submit", async event => {
         event.preventDefault();
 
         const email = document.getElementById("email")
@@ -15,41 +11,26 @@ if (loginForm) {
 
         const password = document.getElementById("password").value;
 
-        const matchedUser = users.find(
-            user => user.email.toLowerCase() === email
-        );
-
-        if (!matchedUser) {
-            window.alert("Account not found. Please check your credentials.");
-            return;
-        }
-
-        if (matchedUser.password !== password) {
-            window.alert("Incorrect password.");
-            return;
-        }
+        const loginData = {
+            email,
+            password
+        };
 
         try {
+            const result = await window.authService.loginUser(loginData);
 
-            const currentUser = setCurrentUser(matchedUser);
+            setCurrentUser(result.user);
+            sessionStorage.removeItem("residentSidebarLoaded");
+            sessionStorage.removeItem("staffSidebarLoaded");
 
-            if (currentUser.role === "Resident") {
-
-                window.location.href = "../resident/overview.html";
-
-            } else if (currentUser.role === "Staff") {
-
+            if (result.user.role === "Staff") {
                 window.location.href = "../staff/dashboard.html";
-
+            } else {
+                window.location.href = "../resident/overview.html";
             }
 
         } catch (error) {
-
-            console.error("Login error:", error);
-            window.alert(error.message);
-
+            alert(error.message);
         }
-
     });
-
-}
+});

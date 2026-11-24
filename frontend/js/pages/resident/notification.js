@@ -1,8 +1,6 @@
-import {
-    getNotificationOne,
-    getRequestsWithDocuments
-} from "../../services/getService.js";
-import { getCurrentUser } from "../../core/session.js";
+import { getNotifications, markNotificationAsRead } from "../../services/notificationServices.js";
+import { getRequestsWithDocuments } from "../../services/requestServices.js";
+import { shortFormatDateTime } from "../../utils/dateFormatter.js";
 
 const listContainer = document.getElementById("notification-list-container");
 const filterButtons = document.querySelectorAll(".notification-filter");
@@ -85,7 +83,7 @@ function getStatusIcon(notification) {
 
 function createNotificationCard(notification, index) {
     const card = document.createElement("article");
-    const isRead = Boolean(notification.is_read);
+    const isRead = Number(notification.is_read) === 1;
     card.className = `notification-card ${isRead ? "read" : "unread"}${index === 0 ? " latest" : ""}`;
 
     const icon = document.createElement("img");
@@ -106,7 +104,7 @@ function createNotificationCard(notification, index) {
         createTextElement(
             "p",
             "notification-date",
-            formatNotificationDate(notification.created_at)
+            formatNotificationDate(shortFormatDateTime(notification.created_at))
         )
     );
 
@@ -130,12 +128,44 @@ function createNotificationCard(notification, index) {
     unreadIndicator.setAttribute("aria-label", isRead ? "Read" : "Unread");
 
     card.append(icon, content, unreadIndicator);
+
+    card.addEventListener("click", async (event) => {
+        if (Number(notification.is_read) === 1) {
+            return;
+        }
+
+        const clickedLink = event.target.closest("a");
+        const destination = clickedLink ? clickedLink.href : null;
+
+        if (destination) {
+            event.preventDefault();
+        }
+
+        try {
+            await markNotificationAsRead(notification.notification_id);
+
+            notification.is_read = 1;
+
+            updateCounts();
+
+            if (destination) {
+                window.location.href = destination;
+                return;
+            }
+
+            renderNotifications();
+
+        } catch (error) {
+            console.error("Unable to mark notification as read:", error);
+        }
+    });
+
     return card;
 }
 
 function updateCounts() {
     const unreadTotal = residentNotifications.filter(
-        notification => !notification.is_read
+        notification => Number(notification.is_read) === 0
     ).length;
 
     allCount.textContent = String(residentNotifications.length);
@@ -146,7 +176,7 @@ function updateCounts() {
 
 function renderNotifications() {
     const filteredNotifications = residentNotifications.filter(
-        notification => activeFilter === "all" || !notification.is_read
+        notification => activeFilter === "all" || Number(notification.is_read) === 0
     );
 
     if (filteredNotifications.length === 0) {
@@ -209,31 +239,27 @@ function setActiveFilter(filter) {
 
 async function initializeNotifications() {
     try {
-        const currentUser = getCurrentUser();
-        if (!currentUser || currentUser.role !== "Resident" || !currentUser.user_id) {
-            throw new Error("Please log in using a resident account to view notifications.");
-        }
-
         const [notifications, requests] = await Promise.all([
-            getNotificationOne(),
+            getNotifications(),
             getRequestsWithDocuments()
         ]);
 
-        residentRequests = requests.filter(
-            request => request.resident_id === currentUser.resident_id
-        );
-        residentNotifications = notifications
-            .filter(notification => notification.user_id === currentUser.user_id)
-            .sort((first, second) => {
-                const firstDate = parseNotificationDate(first.created_at);
-                const secondDate = parseNotificationDate(second.created_at);
-                return (secondDate?.getTime() ?? 0) - (firstDate?.getTime() ?? 0);
-            });
+        residentRequests = requests;
+
+        residentNotifications = notifications.sort((first, second) => {
+            const firstDate = parseNotificationDate(first.created_at);
+            const secondDate = parseNotificationDate(second.created_at);
+
+            return (secondDate?.getTime() ?? 0) -
+                (firstDate?.getTime() ?? 0);
+        });
 
         updateCounts();
         renderNotifications();
+
     } catch (error) {
         console.error("Error loading notifications:", error);
+
         listContainer.replaceChildren(
             createTextElement(
                 "p",
@@ -250,4 +276,4 @@ filterButtons.forEach(button => {
     });
 });
 
-initializeNotifications();
+initializeNotifications().finally(() => window.finishPageSkeleton?.());

@@ -96,10 +96,12 @@ header {
     padding-top: 0.8rem;
     text-align: center;
     cursor: pointer;
+    transition: transform 0.2s ease;
 }
 
 .tab-btn:hover {
     background-color: #ecececFF;
+    transform: translateY(-2px);
 }
 
 .active {
@@ -306,6 +308,7 @@ header {
     inset: 0;
     margin: auto;
     width: min(840px, calc(100vw - 32px));
+    height: min(840px, calc(100vh - 32px));
     max-width: none;
     max-height: calc(100vh - 32px);
     padding: 0;
@@ -323,6 +326,8 @@ header {
 
 .request-review-panel {
     display: flex;
+    height: 100%;
+    min-height: 0;
     flex-direction: column;
     max-height: calc(100vh - 32px);
     margin: 0;
@@ -358,11 +363,16 @@ header {
 }
 
 .request-review-content {
-    overflow-y: auto;
+    display: flex;
+    min-height: 0;
+    flex: 1 1 0;
+    flex-direction: column;
+    overflow: hidden;
     padding: 18px 24px;
 }
 
 .request-review-summary {
+    flex: 0 0 auto;
     margin-bottom: 16px;
     padding: 14px;
     border-radius: 8px;
@@ -403,7 +413,26 @@ header {
     color: #24744E;
 }
 
+.review-requirement-status.accepted {
+    border: 1px solid #76CB82;
+    background: #E5F8EA;
+    color: #24744E;
+}
+
+.review-requirement-status.pending {
+    border: 1px solid #EFC46D;
+    background: #FFF2D8;
+    color: #8A5A10;
+}
+
 .review-requirement-status.missing {
+    border: 1px solid #F3D0D3;
+    background: #FDEBED;
+    color: #A12B36;
+}
+
+.review-requirement-status.needs-correction {
+    border: 1px solid #F3D0D3;
     background: #FDEBED;
     color: #A12B36;
 }
@@ -420,11 +449,28 @@ header {
 
 .request-review-columns {
     display: grid;
+    min-height: 400px;
+    flex: 1 1 0;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
     gap: 18px;
 }
 
+.review-requirements {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+#review-requirements-list {
+    min-height: 260px;
+    flex: 1 1 0;
+    overflow-y: auto;
+}
+
 .review-requirements h3 {
+    flex: 0 0 auto;
     margin: 0 0 10px;
     font-size: 0.95rem;
 }
@@ -475,6 +521,81 @@ header {
     cursor: pointer;
 }
 
+.review-verification-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #E5EAF0;
+}
+
+.review-verification-controls label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: #344054;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.requirement-staff-remarks {
+    width: 100%;
+    min-height: 72px;
+    padding: 9px 10px;
+    border: 1px solid #DCE2EA;
+    border-radius: 7px;
+    background: #FFFFFF;
+    color: #17365D;
+    font: inherit;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    resize: vertical;
+}
+
+.requirement-staff-remarks:focus {
+    border-color: #376FAE;
+    outline: 2px solid rgba(55, 111, 174, 0.15);
+}
+
+.review-verification-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.verify-requirement-button {
+    min-height: 34px;
+    padding: 0 11px;
+    border: 1px solid #267A61;
+    border-radius: 7px;
+    background: #FFFFFF;
+    color: #267A61;
+    font: inherit;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.verify-requirement-button[data-verification-status="Accepted"] {
+    background: #267A61;
+    color: #FFFFFF;
+}
+
+.verify-requirement-button[data-verification-status="Needs Correction"] {
+    border-color: #C9363E;
+    color: #C9363E;
+}
+
+.verify-requirement-button[data-verification-status="Needs Correction"]:hover {
+    background: #FEF2F2;
+}
+
+.verify-requirement-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .review-file-type {
     display: grid;
     width: 42px;
@@ -505,6 +626,7 @@ header {
 
 .review-preview-note,
 .review-status-footnote {
+    flex: 0 0 auto;
     color: #718198;
     font-size: 0.7rem;
     line-height: 1.45;
@@ -512,6 +634,7 @@ header {
 
 .review-resident-identity {
     display: flex;
+    flex: 0 0 auto;
     flex-direction: column;
     gap: 4px;
     margin-top: 16px;
@@ -526,6 +649,7 @@ header {
 
 .review-status-form {
     display: flex;
+    min-height: 0;
     flex-direction: column;
     gap: 7px;
 }
@@ -712,6 +836,7 @@ header {
 
 @media (max-width: 640px) {
     .request-review-modal {
+        height: calc(100vh - 16px);
         max-height: calc(100vh - 16px);
     }
 
@@ -726,7 +851,13 @@ header {
     }
 
     .request-review-columns {
+        min-height: 0;
         grid-template-columns: 1fr;
+        grid-template-rows: minmax(0, 1.4fr) minmax(0, 1fr);
+    }
+
+    #review-requirements-list {
+        min-height: 0;
     }
 
     .request-review-footer {

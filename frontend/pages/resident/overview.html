@@ -14,7 +14,11 @@
 
     <main>
         <header>
-            <div class="introduction"></div>
+            <div class="introduction">
+                <p>Resident Portal / Overview</p>
+                <h1 id="resident-greeting">Welcome, Resident!</h1>
+                <p>Welcome back, Here’s an overview of your document requests.</p>
+            </div>
             <app-timestamp></app-timestamp>
         </header>
         <section class="request-summary">
@@ -53,9 +57,12 @@
 
     <!-- Component Script -->
     <script type="module" src="../../js/components/sidebar.js"></script>
-    <script type="module" src="../../js/components/timestamp.js"></script>
+    <script src="../../js/components/timestamp.js"></script>
 
-    <!-- Page Logic Script -->
+    <script type="module" src="../../js/services/authServices.js"></script>
+    <script type="module" src="../../js/core/authGuard.js"></script>
+    <script src="../../js/utils/pageSkeleton.js"></script>
     <script type="module" src="../../js/pages/resident/overview.js"></script>
+    
 </body>
 </html>

@@ -1,17 +1,33 @@
-import { getDocumentsWithRequirements } from "../../services/getService.js";
+import {
+    getDocuments,
+    addDocument,
+    getDocumentDetails,
+    updateDocument,
+    addRequirement,
+    updateRequirement,
+    deleteRequirement,
+    deleteDocument
+} from "../../services/documentServices.js";
+import { formatId } from "../../utils/idFormatter.js";
 
 const defaultDocumentPreviewPath = new URL(
     "../../../assets/images/default.png",
     import.meta.url
 ).href;
 
-let searchQuery = "";
-let statusFilter = "All";
-let documents = await getDocumentsWithRequirements();
+let documents = [];
+
+try {
+    documents = await getDocuments();
+} catch (error) {
+    console.error("Error loading documents:", error);
+}
 let editingDocumentId = null;
 let deletingDocumentId = null;
 let selectedPreviewData = null;
 let currentPage = 1;
+let searchQuery = "";
+let statusFilter = "All";
 
 const tableBody = document.querySelector("#table-body");
 const searchInput = document.querySelector("#search-input");
@@ -69,14 +85,19 @@ function getPreviewUrl(path) {
 }
 
 function setPreviewImage(image, path) {
-    const previewUrl = getPreviewUrl(path);
+    if (!path) {
+        image.src = defaultDocumentPreviewPath;
+        return;
+    }
+
     image.onerror = () => {
         image.onerror = null;
-        if (previewUrl !== defaultDocumentPreviewPath) {
-            image.src = defaultDocumentPreviewPath;
-        }
+        image.src = defaultDocumentPreviewPath;
     };
-    image.src = previewUrl;
+
+    image.src = path.startsWith("/uploads")
+        ? `http://127.0.0.1:3000${path}`
+        : getPreviewUrl(path);
 }
 
 function updateMetrics() {
@@ -101,6 +122,7 @@ function populateDocumentFilter() {
 }
 
 function renderTable() {
+
     const filteredDocs = documents.filter(doc => {
         const matchesSearch = doc.document_name.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesDocument = !documentSelect.value || doc.document_name === documentSelect.value;
@@ -126,7 +148,17 @@ function renderTable() {
 
         return `
             <tr>
-                <td><img src="${escapeHtml(getPreviewUrl(doc.document_preview_path))}" alt="Document sample"></td>
+                <td>
+                    <img
+                        src="${escapeHtml(
+                            doc.document_preview_path
+                                ? `http://127.0.0.1:3000${doc.document_preview_path}`
+                                : defaultDocumentPreviewPath
+                        )}"
+                        alt="Document sample"
+                        onerror="this.onerror=null; this.src='${defaultDocumentPreviewPath}'"
+                    >
+                </td>
                 <td style="font-weight: bold; color: var(--primary-color);">${escapeHtml(doc.document_name)}</td>
                 <td>${fee}</td>
                 <td>${escapeHtml(requirements)}</td>
@@ -144,9 +176,6 @@ function renderTable() {
     }).join("");
 
     tableBody.innerHTML = htmlRows || `<tr><td colspan="6" style="text-align: center; color: var(--primary-color);">No documents match your filter.</td></tr>`;
-    tableBody.querySelectorAll("img").forEach(image => {
-        setPreviewImage(image, image.getAttribute("src"));
-    });
     showEntries.textContent = `Showing ${totalEntries ? startIndex + 1 : 0}-${endIndex} of ${totalEntries} entries`;
     previousButton.disabled = currentPage === 1;
     currentPageButton.textContent = currentPage;
@@ -258,7 +287,7 @@ function openDeleteConfirmation(doc) {
     deletingDocumentId = doc.document_id;
     deleteError.textContent = "";
     deleteDocumentName.textContent = doc.document_name;
-    deleteDocumentFee.textContent = `DOC-${String(doc.document_id).padStart(2, "0")} · Sample fee ₱${Number(doc.fee_per_copy ?? 0).toFixed(2)}`;
+    deleteDocumentFee.textContent = `${formatId(doc.document_id, "DOC")} · Sample fee ₱${Number(doc.fee_per_copy ?? 0).toFixed(2)}`;
     deleteDocumentAvailability.textContent = doc.availability;
     deleteDocumentAvailability.className = `badge badge-${doc.availability.toLowerCase()}`;
     setPreviewImage(deletePreviewImage, doc.document_preview_path);
@@ -290,90 +319,193 @@ function getNextRequirementId() {
 }
 
 function buildRequirements(documentId, existingRequirements) {
-    let nextRequirementId = getNextRequirementId();
-
     return [...requirementsInputs.querySelectorAll(".requirement-input-row")]
         .map(row => {
             const requirementName = row.querySelector("input").value.trim();
             const requirementDescription = row.querySelector("textarea").value.trim();
             const isMandatory = row.querySelector("select").value === "mandatory";
+
             const oldId = Number(row.dataset.requirementId);
+
             const existing = existingRequirements.find(requirement =>
-                requirement.requirement_id === oldId
+                Number(requirement.requirement_id) === oldId
             );
 
             if (!requirementName) return null;
 
-            return existing
-                ? {
-                    ...existing,
-                    requirement_name: requirementName,
-                    description: requirementDescription,
-                    is_mandatory: isMandatory
-                }
-                : {
-                    requirement_id: nextRequirementId++,
-                    document_id: documentId,
-                    requirement_name: requirementName,
-                    description: requirementDescription,
-                    is_mandatory: isMandatory
-                };
+            return {
+                ...(existing ? { requirement_id: existing.requirement_id } : {}),
+                document_id: documentId,
+                requirement_name: requirementName,
+                description: requirementDescription,
+                is_mandatory: isMandatory
+            };
         })
         .filter(Boolean);
 }
 
-function saveDocument(event) {
+async function saveDocument(event) {
     event.preventDefault();
     previewError.textContent = "";
 
     const previewFile = previewInput.files[0];
+
     if (previewFile && !selectedPreviewData) {
         previewError.textContent = "Wait for the selected image preview to finish loading.";
         return;
     }
 
-    if (!editingDocumentId && !selectedPreviewData) {
+    if (!editingDocumentId && !previewFile) {
         previewError.textContent = "Upload a JPG or PNG preview image to add this document.";
         return;
     }
 
-    const existingDocument = documents.find(doc => doc.document_id === editingDocumentId);
+    const existingDocument = documents.find(
+        doc => doc.document_id === editingDocumentId
+    );
+
     const documentId = existingDocument?.document_id
         ?? Math.max(0, ...documents.map(doc => Number(doc.document_id)).filter(Number.isFinite)) + 1;
-    const documentRequirements = buildRequirements(documentId, existingDocument?.requirements ?? []);
-    const updatedDocument = {
-        ...existingDocument,
-        document_id: documentId,
+
+    const documentRequirements = buildRequirements(
+        documentId,
+        existingDocument?.requirements ?? []
+    );
+
+    const documentData = {
         document_name: nameInput.value.trim(),
         description: descriptionInput.value.trim(),
         fee_per_copy: Number(feeInput.value),
         availability: availabilityInput.value,
-        document_preview_path: selectedPreviewData ?? existingDocument?.document_preview_path ?? null,
-        requirements: documentRequirements
+        requirements: documentRequirements.map(requirement => ({
+            requirement_name: requirement.requirement_name,
+            description: requirement.description,
+            is_mandatory: requirement.is_mandatory
+        }))
     };
 
-    documents = existingDocument
-        ? documents.map(doc => doc.document_id === documentId ? updatedDocument : doc)
-        : [...documents, updatedDocument];
+    if (existingDocument) {
+        try {
+            await updateDocument(documentId, {
+                ...documentData,
+                document_preview: previewFile || null
+            });
 
-    closeEditor();
-    populateDocumentFilter();
-    renderTable();
+            const existingRequirements = existingDocument.requirements ?? [];
+
+            for (const requirement of documentRequirements) {
+                const requirementData = {
+                    requirement_name: requirement.requirement_name,
+                    description: requirement.description,
+                    is_mandatory: requirement.is_mandatory
+                };
+
+                if (requirement.requirement_id) {
+                    await updateRequirement(
+                        documentId,
+                        requirement.requirement_id,
+                        requirementData
+                    );
+                } else {
+                    await addRequirement(documentId, requirementData);
+                }
+            }
+
+            const currentRequirementIds = documentRequirements.filter(requirement => requirement.requirement_id).map(requirement => Number(requirement.requirement_id));
+
+            for (const requirement of existingRequirements) {
+                if (!currentRequirementIds.includes(Number(requirement.requirement_id))) {
+                    await deleteRequirement(
+                        documentId,
+                        requirement.requirement_id
+                    );
+                }
+            }
+
+            const updatedDocument = await getDocumentDetails(documentId);
+
+            documents = documents.map(doc =>
+                doc.document_id === documentId
+                    ? updatedDocument
+                    : doc
+            );
+
+            closeEditor();
+            populateDocumentFilter();
+            renderTable();
+
+        } catch (error) {
+            console.error("Error updating document:", error);
+            previewError.textContent = error.message;
+        }
+
+        return;
+    }
+
+    try {
+        const result = await addDocument({
+            ...documentData,
+            document_preview: previewFile
+        });
+
+        const savedDocument = await getDocumentDetails(
+            result.document_id
+        );
+
+        documents = [...documents, savedDocument];
+
+        closeEditor();
+        populateDocumentFilter();
+        renderTable();
+
+    } catch (error) {
+        console.error("Error saving document:", error);
+        previewError.textContent = error.message;
+    }
+}
+
+async function handleDeleteDocument(documentId) {
+    try {
+        await deleteDocument(documentId);
+
+        documents = documents.filter(
+            doc => Number(doc.documentId) !== Number(documentId)
+        );
+
+        deleteModal.close();
+        populateDocumentFilter();
+        renderTable();
+
+        deletingDocumentId = null;
+        
+    } catch (error) {
+        console.error("Error deleting document:", error);
+        alert(error.message || "Unable to delete document.");
+    }
 }
 
 addDocumentButton.addEventListener("click", () => openEditor());
 
-tableBody.addEventListener("click", event => {
+tableBody.addEventListener("click", async event => {
     const button = event.target.closest("button[data-action]");
     if (!button) return;
 
-    const doc = documents.find(item => String(item.document_id) === button.dataset.documentId);
-    if (!doc) return;
+    const documentId = Number(button.dataset.documentId);
+    const action = button.dataset.action;
 
-    if (button.dataset.action === "edit") {
-        openEditor(doc);
-    } else if (button.dataset.action === "delete") {
-        openDeleteConfirmation(doc);
+    if (action === "edit") {
+        const document = await getDocumentDetails(documentId);
+        openEditor(document);
+    }
+    
+    if (action === "delete") {
+        const document = documents.find(
+            doc => Number(doc.document_id) === documentId
+        );
+
+        if (document) {
+            openDeleteConfirmation(document);
+        }
     }
 });
 
@@ -441,17 +573,24 @@ previewInput.addEventListener("change", async () => {
 
 documentForm.addEventListener("submit", saveDocument);
 
-confirmDeleteButton.addEventListener("click", () => {
-    const exists = documents.some(doc => doc.document_id === deletingDocumentId);
+confirmDeleteButton.addEventListener("click", async () => {
+    const exists = documents.some(
+        doc => Number(doc.document_id) === Number(deletingDocumentId)
+    );
+
     if (!exists) {
-        deleteError.textContent = "This document is no longer in the catalog. Close this dialog and refresh the list.";
+        deleteError.textContent =
+            "This document is no longer in the catalog. Close this dialog and refresh the list."
         return;
     }
 
-    documents = documents.filter(doc => doc.document_id !== deletingDocumentId);
-    deleteModal.close();
-    populateDocumentFilter();
-    renderTable();
+    confirmDeleteButton.disabled = true;
+
+    try {
+        await handleDeleteDocument(deletingDocumentId);
+    } finally {
+        confirmDeleteButton.disabled = false;
+    }
 });
 
 searchInput.addEventListener("input", event => {
@@ -495,3 +634,4 @@ resetButton.addEventListener("click", () => {
 
 populateDocumentFilter();
 renderTable();
+window.finishPageSkeleton?.();

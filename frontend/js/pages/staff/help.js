@@ -39,5 +39,8 @@ function generateHelpCards() {
     }).join("");
 }
 
-document.addEventListener("DOMContentLoaded", generateHelpCards);
+document.addEventListener("DOMContentLoaded", () => {
+    generateHelpCards();
+    window.finishPageSkeleton?.();
+});
 

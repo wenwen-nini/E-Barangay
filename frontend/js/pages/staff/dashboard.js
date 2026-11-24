@@ -1,65 +1,78 @@
 import {
     getAnnouncement,
     getRequestsWithDocuments,
-    getResidentInfo
+    getStaffRequestSummary
 } from "../../services/getServiceForStaff.js";
+import { formatId } from "../../utils/idFormatter.js";
 
 const iconDirectory = "../../assets/icons/Staff Portal/Dashboard Page/";
 
 function formatDate(value) {
     if (!value) return "Date unavailable";
 
-    const [year, month, day] = value.split("-").map(Number);
-    return new Date(year, month - 1, day).toLocaleDateString("en-US", {
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return "Date unavailable";
+    }
+
+    return date.toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
-        year: "numeric"
+        year: "numeric",
+        timeZone: "UTC"
     });
 }
 
-function getResidentName(request, residents) {
-    const resident = residents.find(item => item.resident_id === request.resident_id);
-    if (!resident) return "Unknown resident";
+function getResidentName(request) {
+    if (!request.first_name || !request.last_name) {
+        return "Unknown resident";
+    }
 
-    const middleInitial = resident.middle_name
-        ? ` ${resident.middle_name.charAt(0)}.`
+    const middleInitial = request.middle_name
+        ? ` ${request.middle_name.charAt(0)}.`
         : "";
-    return `${resident.first_name}${middleInitial} ${resident.last_name}`;
+
+    const nameExtension = request.name_extension
+        ? ` ${request.name_extension}`
+        : "";
+
+    return `${request.first_name}${middleInitial} ${request.last_name}${nameExtension}`;
 }
 
 function getStatusClass(status) {
     return status.toLowerCase().replace(/\s+/g, "-");
 }
 
-function renderStatusCards(requests) {
+function renderStatusCards(summary) {
     const container = document.querySelector(".status-cards");
     if (!container) return;
 
     const cards = [
         {
             label: "Total Requests",
-            count: requests.length,
+            count: summary.total_requests,
             detail: "All submitted requests",
             icon: "Total Requests Icon (Status Cards).png",
             className: "total"
         },
         {
             label: "Pending",
-            count: requests.filter(request => request.status === "Pending").length,
+            count: summary.pending,
             detail: "Awaiting staff review",
             icon: "Pending Icon (Status Cards).png",
             className: "pending"
         },
         {
             label: "Under Review",
-            count: requests.filter(request => request.status === "Under Review").length,
+            count: summary.under_review,
             detail: "Being reviewed by staff",
             icon: "Under Review Icon (Status Cards).png",
             className: "under-review"
         },
         {
             label: "Approved",
-            count: requests.filter(request => request.status === "Approved").length,
+            count: summary.approved,
             detail: "Ready for processing",
             icon: "Approved Icon (Status Cards).png",
             className: "approved"
@@ -78,13 +91,13 @@ function renderStatusCards(requests) {
     `).join("");
 }
 
-function renderRecentRequests(requests, residents) {
+function renderRecentRequests(requests) {
     const container = document.querySelector(".recent-request-table");
     if (!container) return;
 
     const recentRequests = [...requests]
         .sort((first, second) => second.request_date.localeCompare(first.request_date))
-        .slice(0, 3);
+        .slice(0, 6);
 
     container.innerHTML = `
         <table>
@@ -101,9 +114,9 @@ function renderRecentRequests(requests, residents) {
             <tbody>
                 ${recentRequests.map(request => `
                     <tr>
-                        <td class="request-id">#${request.request_id}</td>
+                        <td class="request-id">${formatId(request.request_id, "REQ", 3)}</td>
                         <td>${request.document_name}</td>
-                        <td>${getResidentName(request, residents)}</td>
+                        <td>${getResidentName(request)}</td>
                         <td>${formatDate(request.request_date)}</td>
                         <td><span class="request-status ${getStatusClass(request.status)}">${request.status}</span></td>
                         <td><button class="review-request-button" type="button" data-request-id="${request.request_id}">Review</button></td>
@@ -125,57 +138,95 @@ function renderNotification(requests) {
     const container = document.querySelector("#notif-detail");
     if (!container) return;
 
-    const pendingCount = requests.filter(request => request.status === "Pending").length;
-    const reviewCount = requests.filter(request => request.status === "Under Review").length;
+    const pendingCount = requests.filter(
+        request => request.status === "Pending"
+    ).length;
+
+    const reviewCount = requests.filter(
+        request => request.status === "Under Review"
+    ).length;
+
     const details = [];
-    if (pendingCount) {
-        details.push(`${pendingCount} pending ${pendingCount === 1 ? "request" : "requests"}`);
+
+    if (pendingCount > 0) {
+        details.push(
+            `${pendingCount} pending ${pendingCount === 1 ? "request" : "requests"}`
+        );
     }
-    if (reviewCount) {
-        details.push(`${reviewCount} ${reviewCount === 1 ? "request" : "requests"} under review`);
+
+    if (reviewCount > 0) {
+        details.push(
+            `${reviewCount} ${reviewCount === 1 ? "request" : "requests"} under review`
+        );
     }
-    container.textContent = details.length
-        ? `${details.join(" and ")}.`
-        : "No requests need staff attention.";
+
+    if (details.length === 0) {
+        container.textContent = "No requests need staff attention.";
+        return;
+    }
+
+    container.textContent =
+        `${details.join(" and ")} need staff attention.`;
 }
 
 function renderAnnouncement(announcements) {
     const container = document.querySelector(".announcement-card");
     const summary = document.querySelector("#announcement-detail");
+
     if (!container || !summary) return;
 
-    const published = announcements
-        .filter(item => item.status === "Published")
-        .sort((first, second) => second.published_at.localeCompare(first.published_at));
-    const announcement = published[0];
-    const draftCount = announcements.filter(item => item.status === "Draft").length;
+    const latestAnnouncement = announcements
+        .filter(item =>
+            item.status === "Published" && item.published_at
+        )
+        .sort((first, second) =>
+            new Date(second.published_at) - new Date(first.published_at)
+        )[0];
 
-    if (!announcement) {
-        container.innerHTML = "<p class=\"empty-announcement\">No announcements have been published.</p>";
-    } else {
+    const publishedCount = announcements.filter(
+        item => item.status === "Published"
+    ).length;
+
+    if (!latestAnnouncement) {
         container.innerHTML = `
-            <div class="announcement-heading">
-                <h2>Barangay Announcements</h2>
-                <p>Published · ${formatDate(announcement.published_at)} · All residents</p>
-            </div>
-            <h3>${announcement.title}</h3>
-            <p class="announcement-content">${announcement.content}</p>
+            <p class="empty-announcement">
+                No published announcements available.
+            </p>
         `;
+
+        summary.textContent = "No published announcements yet.";
+        return;
     }
 
-    const publishedCount = announcements.filter(item => item.status === "Published").length;
-    summary.textContent = `${publishedCount} published ${publishedCount === 1 ? "announcement" : "announcements"} and ${draftCount} ${draftCount === 1 ? "draft are" : "drafts are"} currently available for staff review.`;
+    container.innerHTML = `
+        <div class="announcement-heading">
+            <h2>Barangay Announcement</h2>
+            <p>
+                Status: ${latestAnnouncement.status}
+                · Published: ${formatDate(latestAnnouncement.published_at)}
+            </p>
+        </div>
+
+        <h3>${latestAnnouncement.title}</h3>
+
+        <p class="announcement-content">
+            ${latestAnnouncement.content}
+        </p>
+    `;
+
+    summary.textContent =
+        `${publishedCount} recent published ${publishedCount === 1 ? "announcement" : "announcements"}.`;
 }
 
 async function renderDashboard() {
-    const [requests, announcements, residents] = await Promise.all([
+    const [requests, announcements, summary] = await Promise.all([
         getRequestsWithDocuments(),
         getAnnouncement(),
-        getResidentInfo()
+        getStaffRequestSummary()
     ]);
 
-    renderStatusCards(requests);
-    renderRecentRequests(requests, residents);
+    renderStatusCards(summary);
+    renderRecentRequests(requests);
     renderNotification(requests);
     renderAnnouncement(announcements);
 
@@ -188,4 +239,4 @@ async function renderDashboard() {
     });
 }
 
-renderDashboard();
+renderDashboard().finally(() => window.finishPageSkeleton?.());

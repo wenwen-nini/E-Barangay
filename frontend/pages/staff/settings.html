@@ -24,40 +24,79 @@
         <div class="settings-columns">
             <div class="settings-column">
         <section class="personal-info-card">
-            <form>
+            <form id="staff-profile-form">
+                <div id="profile-message" class="form-message" role="status" aria-live="polite" hidden></div>
                 <fieldset>
                     <h2>Staff Profile</h2>
                     <p>Your role is assigned by an authorized administrator.</p>
-                    <div class="form-row name-field-line">
-                        <div class="form-group">
-                            <label for="display-name">Display Name <span>*</span></label>
-                            <input type="text" id="display-name" name="display-name" placeholder="Staff account" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="staff-role">Staff Role · Read-only</label>
-                            <input type="text" id="staff-role" name="staff-role" placeholder="Barangay Staff">
+                    <div class="profile-image-section">
+                        <img
+                            id="profile-image-preview"
+                            class="profile-image-preview"
+                            src="../../assets/images/profile_images/staff.png"
+                            alt="Profile photo preview"
+                        >
+                        <div class="profile-image-content">
+                            <h3>Profile photo</h3>
+                            <p class="profile-image-help">Choose a JPG or PNG image up to 5 MB.</p>
+                            <input
+                                type="file"
+                                id="profile-image-input"
+                                accept="image/jpeg,image/png"
+                                hidden
+                            >
+                            <div class="profile-image-actions">
+                                <label for="profile-image-input" class="profile-image-select-button">Choose photo</label>
+                                <button type="button" id="upload-profile-image-btn" disabled>Upload photo</button>
+                            </div>
+                            <p id="profile-image-message" class="form-message profile-image-message" role="status" aria-live="polite" hidden></p>
                         </div>
                     </div>
                     <div class="form-row name-field-line">
+                        <div class="form-group">
+                            <label for="first-name">First Name *</label>
+                            <input type="text" id="first-name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="middle-name">Middle Name</label>
+                            <input type="text" id="middle-name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="last-name">Last Name *</label>
+                            <input type="text" id="last-name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="name-extension">Name Extension</label>
+                            <input type="text" id="name-extension" placeholder="Jr., Sr., III">
+                        </div>
+                    </div>
+                    <div class="form-row name-field-line">
+                        <div class="form-group">
+                            <label for="staff-role">Staff Role · Read-only</label>
+                            <input type="text" id="staff-role" readonly>
+                        </div>
                         <div class="form-group">
                             <label for="contact-number">Contact number · Optional</label>
                             <input type="text" id="contact-number" name="contact-number" placeholder="Enter contact number">
                         </div>
                         <div class="form-group">
                             <label for="email-address">Email · Optional</label>
-                            <input type="email" id="email-address" name="email-address" placeholder="Enter email address">
+                            <input type="email" id="email-address" readonly>
                         </div>
                     </div>
                     <div class="form-actions">
-                        <button type="reset">Cancel</button>
+                        <button type="button" id="cancel-profile">Cancel</button>
                         <button type="submit">Save profile</button>
                     </div>
                 </fieldset>
             </form>
         </section>
         <section class="password-security-card">
-            <form>
+            <form id="staff-password-form">
+                <div id="password-message" class="form-message" role="status" aria-live="polite" hidden></div>
                 <fieldset>
                     <h2>Password & Security</h2>
                     <p>Use a strong, unique password for your portal account.</p>
@@ -82,49 +121,11 @@
                 </fieldset>
             </form>
         </section>
-        <section class="office-contact-card">
-            <form>
-                <fieldset>
-                    <h2>Barangay contact &amp; office hours</h2>
-                    <p>Draft configuration · Confirm details before requesting publication.</p>
-
-                    <div class="form-group">
-                        <label for="office-address">Office address</label>
-                        <input type="text" id="office-address" name="office-address" placeholder="Enter confirmed barangay hall address">
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="office-phone">Office phone</label>
-                            <input type="tel" id="office-phone" name="office-phone" placeholder="To be confirmed">
-                        </div>
-                        <div class="form-group">
-                            <label for="office-email">Public contact email</label>
-                            <input type="email" id="office-email" name="office-email" placeholder="To be confirmed">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="office-hours">Office hours</label>
-                        <input type="text" id="office-hours" name="office-hours" placeholder="Enter confirmed service days and hours">
-                    </div>
-
-                    <div class="office-notice">
-                        <span class="office-notice-icon" aria-hidden="true">ⓘ</span>
-                        <p>Staff may submit proposed contact changes. Publication requires authorized review; this does not change your role or permissions.</p>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="reset">Cancel</button>
-                        <button type="submit">Submit office changes</button>
-                    </div>
-                </fieldset>
-            </form>
-        </section>
             </div>
             <div class="settings-column">
         <section class="preferences-card">
-            <form>
+            <form id="staff-notification-form">
+                <div id="notification-message" class="form-message" role="status" aria-live="polite" hidden></div>
                 <fieldset>
                     <h2>In-portal notifications</h2>
                     <p>Manage the operational updates shown in your staff portal.</p>
@@ -154,13 +155,13 @@
                             <p>Ready-for-pickup and release updates.</p>
                         </div>
                         <label class="toggle-switch">
-                            <input type="checkbox" name="request-updates" id="request-updates" checked>
+                            <input type="checkbox" name="announcements" id="announcements" checked>
                             <span class="toggle-slider"></span>
                         </label>
                     </div>
                     <p>No SMS or email delivery is configured.</p>
                     <div class="form-actions">
-                        <button type="reset">Cancel</button>
+                        <button type="button" id="cancel-notifications">Cancel</button>
                         <button type="submit">Save Preferences</button>
                     </div>
                 </fieldset>
@@ -227,7 +228,10 @@
         </div>
     </dialog>
 
+    <script type="module" src="../../js/services/authServices.js"></script>
+    <script type="module" src="../../js/core/staffGuard.js"></script>
     <script type="module" src="../../js/components/staff-sidebar.js"></script>
-    <script type="module" src="../../js/pages/resident/settings.js"></script>
+    <script src="../../js/utils/pageSkeleton.js"></script>
+    <script type="module" src="../../js/pages/staff/settings.js"></script>
 </body>
 </html>

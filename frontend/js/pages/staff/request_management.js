@@ -1,17 +1,30 @@
 import {
     getResidentInfo,
-    recentRequestInfo
+    getRequestsWithDocuments,
+    getStaffRequestDetails,
+    markRequestUnderReview,
+    returnRequest,
+    approveRequest,
+    rejectRequest,
+    verifyUploadedRequirement
 } from "../../services/getServiceForStaff.js";
-import { requirements } from "../../mock-data/requirements.js";
-import { uploadedRequirements } from "../../mock-data/uploadedRequirements.js";
 import { requestStatusConfig } from "../../config/requestStatusConfig.js";
+import { formatId } from "../../utils/idFormatter.js";
 
 let currentStatus = "All";
 let searchQuery = "";
-const [requestData, residentData] = await Promise.all([
-    recentRequestInfo(),
-    getResidentInfo()
-]);
+let requestData;
+let residentData;
+
+try {
+    [requestData, residentData] = await Promise.all([
+        getRequestsWithDocuments(),
+        getResidentInfo()
+    ]);
+} catch (error) {
+    window.finishPageSkeleton?.();
+    throw error;
+}
 
 const tableBody = document.getElementById("table-body");
 const searchInput = document.querySelector("#search-input");
@@ -40,6 +53,7 @@ const filePreviewModal = document.querySelector("#request-file-preview");
 const filePreviewTitle = document.querySelector("#request-file-preview-title");
 const filePreviewContent = document.querySelector("#request-file-preview-content");
 const openOriginalFileLink = document.querySelector("#open-original-file");
+const saveReviewButton = document.querySelector("#save-request-review");
 const pageSize = 6;
 const allViewRowCount = Math.min(requestData.length, pageSize);
 let currentPage = 1;
@@ -47,13 +61,13 @@ let currentDocument = "";
 let currentDateRange = "";
 let selectedRequest = null;
 const statusTransitions = {
-    Pending: ["Pending", "Under Review"],
-    "Under Review": ["Under Review", "Returned"],
-    Returned: ["Returned", "Under Review"],
-    Approved: ["Approved"],
-    Rejected: ["Rejected"],
-    Released: ["Released"],
-    Cancelled: ["Cancelled"]
+    Pending: ["Under Review"],
+    "Under Review": ["Returned"],
+    Returned: [],
+    Approved: [],
+    Rejected: [],
+    Released: [],
+    Cancelled: []
 };
 
 const documentNames = [...new Set(requestData.map(item => item.document_name))].sort();
@@ -108,8 +122,14 @@ function renderStatusCounts() {
 }
 
 function formatRequestDate(value) {
-    const date = getLocalDate(value);
-    if (Number.isNaN(date.getTime())) return value || "Date unavailable";
+    if (!value) return "Date unavailable";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return "Date unavailable";
+    }
+
     return date.toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
@@ -139,117 +159,184 @@ function getResidentName(resident) {
 }
 
 function getRequestRequirements(request) {
-    return requirements
-        .filter(requirement => requirement.document_id === request.document_id)
-        .map(requirement => ({
-            requirement,
-            upload: uploadedRequirements.find(upload =>
-                upload.request_id === request.request_id
-                && upload.requirement_id === requirement.requirement_id
-            )
-        }));
+    return (request.requirements || []).map(requirement => ({
+        requirement,
+        upload: requirement.uploaded_requirement_id
+            ? {
+                ...requirement,
+                request_id: request.request_id,
+                uploaded_requirement_id:
+                    requirement.uploaded_requirement_id
+            }
+            : null
+    }));
 }
 
 function renderRequirementCards(request) {
     const requestRequirements = getRequestRequirements(request);
+
     if (!requestRequirements.length) {
         return `<p class="review-empty-requirements">No requirements are configured for this document.</p>`;
     }
 
     return requestRequirements.map(({ requirement, upload }) => {
-        const isMissing = requirement.is_mandatory && !upload;
-        const isUnverifiedId = upload
-            && requirement.requirement_name.toLowerCase().includes("id")
-            && !request.valid_id_presented;
+        const isMissing = Boolean(requirement.is_mandatory) && !upload;
+
+        const verificationStatus = upload?.verification_status || "Pending";
+
         const statusText = isMissing
             ? "Missing"
-            : isUnverifiedId
-                ? "Unverified"
-                : upload
-                    ? "Uploaded"
-                    : "Optional";
+            : upload
+                ? verificationStatus
+                : "Optional";
+
         const statusClass = isMissing
             ? "missing"
-            : isUnverifiedId
-                ? "unverified"
-                : upload
-                    ? "uploaded"
-                    : "optional";
-        const fileExtension = upload?.original_filename.split(".").pop().toUpperCase() || "FILE";
+            : upload
+                ? verificationStatus.toLowerCase().replace(" ", "-")
+                : "optional";
+
+        const fileExtension = upload?.original_filename
+            ?.split(".")
+            .pop()
+            .toUpperCase() || "FILE";
 
         return `
             <article class="review-requirement-card ${isMissing ? "is-missing" : ""}">
                 <div class="review-requirement-heading">
                     <strong>${requirement.requirement_name}</strong>
-                    <span class="review-requirement-status ${statusClass}">${statusText}</span>
+                    <span class="review-requirement-status ${statusClass}">
+                        ${statusText}
+                    </span>
                 </div>
+
                 ${upload
-                    ? `<div class="review-uploaded-file">
-                        <span class="review-file-type">${fileExtension}</span>
-                        <span class="review-file-details">
-                            <strong>${upload.original_filename}</strong>
-                            <small>${formatUploadedDate(upload.uploaded_at)} · ${formatFileSize(upload.file_size)}</small>
-                        </span>
-                    </div>`
+                    ? `
+                        <div class="review-uploaded-file">
+                            <span class="review-file-type">${fileExtension}</span>
+                            <span class="review-file-details">
+                                <strong>${upload.original_filename}</strong>
+                                <small>
+                                    ${formatUploadedDate(upload.uploaded_at)}
+                                    · ${formatFileSize(upload.file_size)}
+                                </small>
+                            </span>
+                        </div>
+
+                        <button
+                            type="button"
+                            class="review-preview-button"
+                            data-upload-id="${upload.uploaded_requirement_id}"
+                        >
+                            View requirement
+                        </button>
+
+                        <div class="review-verification-controls">
+                            <label>
+                                Staff remarks
+                                <textarea
+                                    class="requirement-staff-remarks"
+                                    data-upload-id="${upload.uploaded_requirement_id}"
+                                    placeholder="Explain what needs correction, if any."
+                                    rows="2"
+                                >${upload.staff_remarks || ""}</textarea>
+                            </label>
+
+                            <div class="review-verification-actions">
+                                <button
+                                    type="button"
+                                    class="verify-requirement-button"
+                                    data-upload-id="${upload.uploaded_requirement_id}"
+                                    data-verification-status="Accepted"
+                                >
+                                    Accept
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="verify-requirement-button"
+                                    data-upload-id="${upload.uploaded_requirement_id}"
+                                    data-verification-status="Needs Correction"
+                                >
+                                    Needs Correction
+                                </button>
+                            </div>
+                        </div>
+                    `
                     : `<p class="review-missing-file">Missing · No file attached</p>`
-                }
-                ${upload
-                    ? `<button type="button" class="review-preview-button" data-upload-id="${upload.uploaded_requirement_id}">View requirement</button>`
-                    : ""
                 }
             </article>
         `;
     }).join("");
 }
 
-async function showFilePreview(upload) {
+async function showFilePreview(upload, requestId) {
     filePreviewTitle.textContent = upload.original_filename;
+
     filePreviewContent.textContent = "Loading file preview...";
     openOriginalFileLink.hidden = true;
     filePreviewModal.showModal();
 
-    if (!upload.storage_path?.startsWith("uploads/requirements/")) {
-        filePreviewContent.textContent = "Preview unavailable: the uploaded file path is missing.";
+    if (
+        !requestId ||
+        !upload.uploaded_requirement_id
+    ) {
+        filePreviewContent.textContent =
+            "Preview unavailable: uploaded file information is incomplete.";
         return;
     }
 
-    const encodedPath = upload.storage_path
-        .split("/")
-        .map(segment => encodeURIComponent(segment))
-        .join("/");
-    const fileUrl = new URL(`../../${encodedPath}`, window.location.href);
+    const fileUrl =
+        `http://127.0.0.1:3000/api/requests/staff/${requestId}/requirements/${upload.uploaded_requirement_id}/preview`;
 
     try {
-        const response = await fetch(fileUrl, { method: "HEAD" });
+        const response = await fetch(fileUrl, {
+            method: "GET",
+            credentials: "include"
+        });
+
         if (!response.ok) {
-            throw new Error("The uploaded file is not available in the file store.");
+            throw new Error(
+                "The uploaded file could not be retrieved."
+            );
         }
 
-        openOriginalFileLink.href = fileUrl.href;
+        const fileBlob = await response.blob();
+        const previewUrl = URL.createObjectURL(fileBlob);
+
+        openOriginalFileLink.href = previewUrl;
+        openOriginalFileLink.target = "_blank";
         openOriginalFileLink.hidden = false;
+
         filePreviewContent.replaceChildren();
 
-        if (upload.mime_type.startsWith("image/")) {
+        if (upload.mime_type?.startsWith("image/")) {
             const image = document.createElement("img");
-            image.src = fileUrl.href;
+            image.src = previewUrl;
             image.alt = `Preview of ${upload.original_filename}`;
-            image.addEventListener("error", () => {
-                filePreviewContent.textContent = "The uploaded image could not be displayed.";
-            }, { once: true });
+
             filePreviewContent.append(image);
+
         } else if (upload.mime_type === "application/pdf") {
             const pdf = document.createElement("iframe");
-            pdf.src = fileUrl.href;
+            pdf.src = previewUrl;
             pdf.title = `Preview of ${upload.original_filename}`;
+
             filePreviewContent.append(pdf);
+
         } else {
-            filePreviewContent.textContent = "This file type cannot be previewed in the browser. Open the original file instead.";
+            filePreviewContent.textContent =
+                "This file type cannot be previewed in the browser. Open the original file instead.";
         }
+
     } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        filePreviewContent.textContent = `Preview unavailable: ${message}`;
+        console.error("File preview error:", error);
+
+        filePreviewContent.textContent =
+            `Preview unavailable: ${error.message}`;
     }
 }
+
 
 function hasMissingRequiredFiles(request) {
     return getRequestRequirements(request).some(({ requirement, upload }) =>
@@ -257,60 +344,136 @@ function hasMissingRequiredFiles(request) {
     );
 }
 
-function openReviewModal(requestId) {
-    selectedRequest = requestData.find(request => request.request_id === requestId);
-    if (!selectedRequest) {
-        throw new Error(`Request ${requestId} could not be found.`);
+function hasUnverifiedUploadedRequirements(request) {
+    return (request.requirements || []).some(requirement =>
+        requirement.uploaded_requirement_id &&
+        requirement.verification_status !== "Accepted"
+    );
+}
+
+function checkReviewChanges() {
+    if (!selectedRequest) return;
+
+    const statusChanged =
+        newStatusSelect.value !== selectedRequest.status;
+
+    const remarksChanged =
+        staffRemarksInput.value.trim() !==
+        (selectedRequest.remarks || "").trim();
+
+    const hasChanges = statusChanged || remarksChanged;
+
+    saveReviewButton.disabled = !hasChanges;
+}
+
+
+async function openReviewModal(requestId) {
+    try {
+        const requestFromList = requestData.find(
+            request => request.request_id === requestId
+        );
+
+        if (!requestFromList) {
+            throw new Error(`Request ${requestId} could not be found.`);
+        }
+
+        const requestDetails = await getStaffRequestDetails(requestId);
+
+        console.log(
+            "Requirements JSON:",
+            JSON.stringify(requestDetails.requirements, null, 2)
+        );
+
+        console.log(
+            "Uploaded Requirements JSON:",
+            JSON.stringify(requestDetails.uploaded_requirements, null, 2)
+        );
+
+        selectedRequest = {
+            ...requestFromList,
+            ...requestDetails
+        };
+
+        if (!selectedRequest) {
+            throw new Error(`Request ${requestId} could not be found.`);
+        }
+
+        const resident = selectedRequest;
+        const residentName = getResidentName(resident);
+        const requiredFilesMissing = hasMissingRequiredFiles(selectedRequest);
+        const isFinalStatus = ["Approved", "Rejected", "Released", "Cancelled"].includes(selectedRequest.status);
+
+        reviewSummary.innerHTML = `
+            <div>
+                <strong>${formatId(selectedRequest.request_id, "REQ", 3)} · ${selectedRequest.document_name}</strong>
+                <span class="review-current-status-badge">${selectedRequest.status}</span>
+            </div>
+            <p>${residentName} · ${formatRequestDate(selectedRequest.request_date)} · ${selectedRequest.number_of_copies} ${selectedRequest.number_of_copies === 1 ? "copy" : "copies"}</p>
+            <small>Purpose: ${selectedRequest.purpose || "Not provided"}</small>
+        `;
+
+        reviewRequirementsList.innerHTML = renderRequirementCards(selectedRequest);
+        reviewResidentIdentity.innerHTML = `
+            <p>Resident identity is read-only:</p>
+            <span>${residentName}</span>
+            <span>${resident?.complete_address || "Address unavailable"}</span>
+            <span>${resident?.contact_number || "Contact number unavailable"}</span>
+        `;
+
+        currentStatusInput.value = selectedRequest.status;
+
+        const availableStatuses =
+            statusTransitions[selectedRequest.status] || [];
+
+        newStatusSelect.innerHTML = availableStatuses
+            .map(status => `
+                <option value="${status}">
+                    ${requestStatusConfig[status]?.label || status}
+                </option>
+            `)
+            .join("");
+
+        newStatusSelect.disabled = availableStatuses.length === 0;
+
+        if (availableStatuses.length > 0) {
+            newStatusSelect.value = availableStatuses[0];
+        }
+
+        staffRemarksInput.value = selectedRequest.remarks || "";
+        followUpNoteInput.value = selectedRequest.internal_follow_up_note || "";
+
+        const isUnderReview = selectedRequest.status === "Under Review";
+        const canUpdateStatus = availableStatuses.length > 0;
+
+        saveReviewButton.hidden = !canUpdateStatus;
+        approveButton.hidden = !isUnderReview;
+        rejectButton.hidden = !isUnderReview;
+
+        saveReviewButton.disabled = true;
+        checkReviewChanges();
+
+        approvalNotice.textContent =
+            selectedRequest.status === "Pending"
+                ? "Move this request to Under Review to begin processing."
+                : isUnderReview
+                    ? "You can return, approve, or reject this request."
+                    : selectedRequest.status === "Returned"
+                        ? "Waiting for the resident to submit corrected requirements."
+                        : "This request is no longer available for review.";
+
+        const hasUnverifiedRequirements =
+            hasUnverifiedUploadedRequirements(selectedRequest);
+
+        approveButton.disabled =
+            requiredFilesMissing ||
+            hasUnverifiedRequirements ||
+            isFinalStatus;
+        rejectButton.disabled = ["Approved", "Rejected", "Released", "Cancelled"].includes(selectedRequest.status);
+        reviewModal.showModal();
+    } catch (error) {
+        console.error("Open request review error:", error);
+        alert(error.message || "Unable to load request details.");
     }
-
-    const resident = residentData.find(item => item.resident_id === selectedRequest.resident_id);
-    const residentName = getResidentName(resident);
-    const requiredFilesMissing = hasMissingRequiredFiles(selectedRequest);
-    const verificationComplete = selectedRequest.valid_id_presented
-        && selectedRequest.identity_matched
-        && selectedRequest.document_and_copies_verified;
-    const isFinalStatus = ["Approved", "Rejected", "Released", "Cancelled"].includes(selectedRequest.status);
-
-    reviewSummary.innerHTML = `
-        <div>
-            <strong>#${selectedRequest.request_id} · ${selectedRequest.document_name}</strong>
-            <span class="review-current-status-badge">${selectedRequest.status}</span>
-        </div>
-        <p>${residentName} · ${formatRequestDate(selectedRequest.request_date)} · ${selectedRequest.number_of_copies} ${selectedRequest.number_of_copies === 1 ? "copy" : "copies"}</p>
-        <small>Purpose: ${selectedRequest.purpose || "Not provided"}</small>
-    `;
-
-    reviewRequirementsList.innerHTML = renderRequirementCards(selectedRequest);
-    reviewResidentIdentity.innerHTML = `
-        <p>Resident identity is read-only:</p>
-        <span>${residentName}</span>
-        <span>${resident?.complete_address || "Address unavailable"}</span>
-        <span>${resident?.contact_number || "Contact number unavailable"}</span>
-    `;
-
-    currentStatusInput.value = selectedRequest.status;
-    const availableStatuses = statusTransitions[selectedRequest.status] || [selectedRequest.status];
-    newStatusSelect.innerHTML = availableStatuses
-        .map(status => `<option value="${status}">${requestStatusConfig[status]?.label || status}</option>`)
-        .join("");
-    newStatusSelect.value = selectedRequest.status;
-    newStatusSelect.disabled = false;
-    staffRemarksInput.value = selectedRequest.remarks || "";
-    followUpNoteInput.value = selectedRequest.internal_follow_up_note || "";
-
-    if (requiredFilesMissing) {
-        approvalNotice.textContent = "Approval is unavailable while a required file is missing.";
-    } else if (!verificationComplete) {
-        approvalNotice.textContent = "Approval is unavailable until the ID, identity, and document details are verified.";
-    } else if (isFinalStatus) {
-        approvalNotice.textContent = "This request is already in a final status. Select a new status to update it.";
-    } else {
-        approvalNotice.textContent = "Required files and verification are complete. Approve to finalize this request.";
-    }
-
-    approveButton.disabled = requiredFilesMissing || !verificationComplete || isFinalStatus;
-    rejectButton.disabled = ["Approved", "Rejected", "Released", "Cancelled"].includes(selectedRequest.status);
-    reviewModal.showModal();
 }
 
 function renderTable() {
@@ -345,13 +508,13 @@ function renderTable() {
         const statusClass = item.status.toLowerCase().replace(/ /g, "-");
         return `
         <tr>
-            <td>#${item.request_id}</td>
+            <td>${formatId(item.request_id, "REQ", 3)}</td>
             <td><strong>${item.first_name} ${item.middle_name ? `${item.middle_name.charAt(0)}.` : ""} ${item.last_name} ${item.name_extension || ""}</strong></td>
             <td>
                 <div>${item.document_name}</div>
                 <small style="color: #667085;">${item.remarks || ""}</small>
             </td>
-            <td>${item.request_date}</td>
+            <td>${formatRequestDate(item.request_date)}</td>
             <td><span class="badge badge-${statusClass}">${item.status}</span></td>
             <td><button type="button" class="action-btn" data-request-id="${item.request_id}">Review</button>
         </tr>
@@ -381,29 +544,86 @@ function getTodayDate() {
     return `${year}-${month}-${day}`;
 }
 
-function saveReview(status) {
+async function saveReview(status) {
     if (!selectedRequest || !reviewForm.reportValidity()) return;
-    if (status === "Approved" && status !== selectedRequest.status && approveButton.disabled) return;
-    if (status === "Rejected" && status !== selectedRequest.status && rejectButton.disabled) return;
 
-    const previousStatus = selectedRequest.status;
-    selectedRequest.status = status;
-    selectedRequest.remarks = staffRemarksInput.value.trim();
-    selectedRequest.internal_follow_up_note = followUpNoteInput.value.trim();
+    const requestId = selectedRequest.request_id;
+    const remarks = staffRemarksInput.value.trim();
 
-    if (status === "Approved" && previousStatus !== "Approved") {
-        selectedRequest.approval_date = getTodayDate();
-    } else if (previousStatus === "Approved") {
-        selectedRequest.approval_date = null;
+    if (
+        (status === "Returned" || status === "Rejected") &&
+        !remarks
+    ) {
+        alert(
+            status === "Returned"
+                ? "Please provide remarks explaining what needs to be corrected."
+                : "Please provide remarks explaining why this request is rejected."
+        );
+
+        staffRemarksInput.focus();
+        return;
     }
-    if (status === "Released" && previousStatus !== "Released") {
-        selectedRequest.release_date = getTodayDate();
-    } else if (previousStatus === "Released") {
-        selectedRequest.release_date = null;
-    }
 
-    reviewModal.close();
-    renderTable();
+    try {
+        saveReviewButton.disabled = true;
+        approveButton.disabled = true;
+        rejectButton.disabled = true;
+
+        if (status === "Under Review") {
+            await markRequestUnderReview(requestId, remarks);
+        } else if (status === "Returned") {
+            await returnRequest(requestId, remarks);
+        } else if (status === "Approved") {
+            await approveRequest(requestId, remarks);
+        } else if (status === "Rejected") {
+            await rejectRequest(requestId, remarks);
+        } else {
+            throw new Error("Invalid request status.");
+        }
+
+        const updatedRequest = await getStaffRequestDetails(requestId);
+
+        selectedRequest = {
+            ...selectedRequest,
+            ...updatedRequest
+        };
+
+        const requestIndex = requestData.findIndex(
+            request => request.request_id === requestId
+        );
+
+        if (requestIndex !== -1) {
+            requestData[requestIndex] = {
+                ...requestData[requestIndex],
+                ...updatedRequest
+            };
+        }
+
+        reviewModal.close();
+        renderTable();
+
+    } catch (error) {
+        console.error("Save request review error:", error);
+        alert(error.message || "Unable to save request update.");
+
+    } finally {
+        const isUnderReview = selectedRequest?.status === "Under Review";
+        const requiredFilesMissing = selectedRequest
+            ? hasMissingRequiredFiles(selectedRequest)
+            : true;
+
+        saveReviewButton.disabled = false;
+
+        const hasUnverifiedRequirements = selectedRequest
+            ? hasUnverifiedUploadedRequirements(selectedRequest)
+            : true;
+
+        approveButton.disabled =
+            !isUnderReview ||
+            requiredFilesMissing ||
+            hasUnverifiedRequirements;
+        rejectButton.disabled = !isUnderReview;
+    }
 }
 
 tableBody.addEventListener("click", event => {
@@ -427,17 +647,122 @@ reviewModal.addEventListener("click", event => {
     if (event.target === reviewModal) reviewModal.close();
 });
 
+
 reviewRequirementsList.addEventListener("click", async event => {
+    // Handle individual requirement verification
+    const verifyButton = event.target.closest(
+        ".verify-requirement-button"
+    );
+
+    if (verifyButton) {
+        if (!selectedRequest) return;
+
+        const uploadId = Number(verifyButton.dataset.uploadId);
+        const verificationStatus = verifyButton.dataset.verificationStatus;
+
+        const remarksInput = reviewRequirementsList.querySelector(
+            `.requirement-staff-remarks[data-upload-id="${uploadId}"]`
+        );
+
+        const remarks = remarksInput.value.trim();
+
+        if (verificationStatus === "Needs Correction" && !remarks) {
+            alert("Please explain what needs correction.");
+            remarksInput.focus();
+            return;
+        }
+
+        try {
+            // Prevent repeated clicks while saving
+            const actionButtons = reviewRequirementsList.querySelectorAll(
+                `.verify-requirement-button[data-upload-id="${uploadId}"]`
+            );
+
+            actionButtons.forEach(button => {
+                button.disabled = true;
+            });
+
+            await verifyUploadedRequirement(
+                selectedRequest.request_id,
+                uploadId,
+                verificationStatus,
+                remarks
+            );
+
+            // Update the requirement in the current request
+            const requirement = selectedRequest.requirements.find(
+                item => item.uploaded_requirement_id === uploadId
+            );
+
+            if (requirement) {
+                requirement.verification_status = verificationStatus;
+                requirement.staff_remarks = remarks || null;
+            }
+
+            // Keep the uploaded_requirements array synchronized
+            const uploadedRequirement = selectedRequest.uploaded_requirements?.find(
+                item => item.uploaded_requirement_id === uploadId
+            );
+
+            if (uploadedRequirement) {
+                uploadedRequirement.verification_status = verificationStatus;
+                uploadedRequirement.staff_remarks = remarks || null;
+            }
+
+            // Refresh the requirement cards
+            reviewRequirementsList.innerHTML =
+                renderRequirementCards(selectedRequest);
+
+            const requiredFilesMissing =
+                hasMissingRequiredFiles(selectedRequest);
+
+            const hasUnverifiedRequirements =
+                hasUnverifiedUploadedRequirements(selectedRequest);
+
+            approveButton.disabled =
+                requiredFilesMissing || hasUnverifiedRequirements;
+
+            alert(
+                verificationStatus === "Accepted"
+                    ? "Requirement marked as Accepted."
+                    : "Requirement marked as Needs Correction."
+            );
+
+        } catch (error) {
+            console.error("Requirement verification error:", error);
+            alert(error.message || "Unable to update requirement verification.");
+            
+            // Re-enable buttons if the operation failed
+            const actionButtons = reviewRequirementsList.querySelectorAll(
+                `.verify-requirement-button[data-upload-id="${uploadId}"]`
+            );
+
+            actionButtons.forEach(button => {
+                button.disabled = false;
+            });
+        }
+
+        return;
+    }
+
+    // Handle file preview
     const previewButton = event.target.closest(".review-preview-button");
+
     if (!previewButton) return;
 
-    const upload = uploadedRequirements.find(
-        item => item.uploaded_requirement_id === Number(previewButton.dataset.uploadId)
+    const uploadId = Number(previewButton.dataset.uploadId);
+
+    const upload = selectedRequest.requirements.find(
+        requirement =>
+            requirement.uploaded_requirement_id === uploadId
     );
+
     if (!upload) {
-        throw new Error("The selected requirement upload could not be found.");
+        alert("Uploaded requirement not found.");
+        return;
     }
-    await showFilePreview(upload);
+
+    await showFilePreview(upload, selectedRequest.request_id);
 });
 
 document.querySelector("#close-file-preview").addEventListener("click", () => {
@@ -531,5 +856,10 @@ resetButton.addEventListener("click", () => {
     renderTable();
 });
 
+newStatusSelect.addEventListener("change", checkReviewChanges);
+
+staffRemarksInput.addEventListener("input", checkReviewChanges);
+
 renderTable();
+window.finishPageSkeleton?.();
 

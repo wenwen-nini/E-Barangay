@@ -99,12 +99,14 @@ header button {
     margin-top: 0;
     height: 6vh;
     width: 8vw;
-    cursor: pointer
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 header button:hover {
-    border: 2px solid var(--tertiary-color);
     background-color: #1d5191;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 header button:active {
@@ -501,4 +503,105 @@ fieldset button:hover {
     padding: 8px 16px;
     border-radius: 999px;
     font-weight: bold;
+}
+
+.profile-image-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid #DCE2EA;
+    border-radius: 12px;
+    background: #F8FAFC;
+}
+
+.profile-image-preview {
+    width: 76px;
+    height: 76px;
+    flex: 0 0 76px;
+    border: 2px solid #DCE2EA;
+    border-radius: 50%;
+    background: #FFFFFF;
+    object-fit: cover;
+}
+
+.profile-image-content {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.profile-image-content h3 {
+    margin: 0;
+    color: #17365D;
+    font-size: 15px;
+}
+
+.profile-image-help {
+    margin: 0;
+    color: #667085;
+    font-size: 12px;
+}
+
+.profile-image-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.profile-image-select-button,
+#upload-profile-image-btn {
+    display: inline-flex;
+    min-height: 36px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+    border: 1px solid #DCE2EA;
+    border-radius: 8px;
+    background: #FFFFFF;
+    color: #17365D;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#upload-profile-image-btn {
+    border-color: #17365D;
+    background: #17365D;
+    color: #FFFFFF;
+}
+
+#upload-profile-image-btn:disabled {
+    border-color: #CBD5E1;
+    background: #CBD5E1;
+    cursor: not-allowed;
+}
+
+.form-message {
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.form-message.success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+}
+
+.form-message.error {
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #ef9a9a;
+}
+
+.profile-image-message {
+    padding: 8px 10px;
+    margin: 4px 0 0;
+    border-radius: 6px;
+    font-size: 12px;
 }

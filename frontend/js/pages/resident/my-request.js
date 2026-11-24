@@ -1,32 +1,37 @@
-import { getRequestsWithDocuments, getRequestStatusHistory } from "../../services/getService.js";
-import { getCurrentUser } from "../../core/session.js";
+import { 
+    getRequestsWithDocuments, 
+    getRequestStatusHistory, 
+    getResidentRequestDetails,
+    getDocumentRequirements,
+    reuploadRequestRequirements,
+    submitRequestFollowUp,
+    cancelResidentRequest
+} from "../../services/requestServices.js";
 import { requestStatusConfig } from "../../config/requestStatusConfig.js";
 import { modalConfig } from "../../config/modalConfig.js";
+import { shortFormatDateTime } from "../../utils/dateFormatter.js";
+import { formatId } from "../../utils/idFormatter.js";
 
-const currentUser = getCurrentUser();
 let residentRequest = [];
 let activeFilter = "all";
 let activeRequestId = null;
+let activeModalAction = null;
 
 async function generateRequestCards() {
-    const container = document.getElementById("request-cards-container");
-
     try {
-        if (!currentUser || !currentUser.resident_id) {
-            container.innerHTML = "<p>Unable to load resident information.</p>";
-            return;
-        }
-
         const requests = await getRequestsWithDocuments();
 
-        residentRequest = requests.filter(
-            request => request.resident_id === currentUser.resident_id
-        );
+        console.log("Retrieved requests:", requests);
 
-        renderRequestCards();
+        residentRequest = Array.isArray(requests)
+            ? requests
+            : [];
+
+        await renderRequestCards();
+
     } catch (error) {
-        console.error("Error loading requests: ", error);
-        container.innerHTML = "<p>Unable to load requests.</p>"
+        console.error("Error loading requests:", error);
+        cardsContainer.innerHTML = "<p>Unable to load requests.</p>";
     }
 }
 
@@ -64,7 +69,7 @@ function renderRequestCards() {
                     </span>
                 </div>
 
-                <p id="id-date-copy-line">#${request.request_id} ${request.request_date} - ${label(request.number_of_copies)}</p>
+                <p id="id-date-copy-line">${formatId(request.request_id, "REQ", 3)} ● ${shortFormatDateTime(request.request_date)} - ${label(request.number_of_copies)}</p>
                 <p>Purpose: ${request.purpose}</p>
 
                 <div class="request-actions">
@@ -74,6 +79,7 @@ function renderRequestCards() {
         `;
     }).join("");
 
+    let timelineLoad = Promise.resolve();
     const selectedRequest = residentRequest.find(
         request => String(request.request_id) === activeRequestId
     );
@@ -85,7 +91,7 @@ function renderRequestCards() {
                 : latest
         );
         activeRequestId = String(latestRequest.request_id);
-        generateRequestTimeline(activeRequestId);
+        timelineLoad = generateRequestTimeline(activeRequestId);
     }
 
     cardsContainer.querySelectorAll(".request-card").forEach(card => {
@@ -96,6 +102,7 @@ function renderRequestCards() {
     });
 
     applyRequestFilter();
+    return timelineLoad;
 }
 
 function applyRequestFilter() {
@@ -126,7 +133,7 @@ async function generateRequestTimeline(requestId) {
         }
 
         document.querySelector("#timeline-request-number").textContent =
-            `Request #${request.request_id}`;
+            `${formatId(request.request_id, "REQ", 3)}`;
 
         document.querySelector("#timeline-document-name").textContent =
             request.document_name;
@@ -222,6 +229,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         button.classList.toggle("active", isActive);
         button.setAttribute("aria-pressed", String(isActive));
     });
+
+    window.finishPageSkeleton?.();
 });
 
 function generateModalRequestInfo(request) {
@@ -233,7 +242,7 @@ function generateModalRequestInfo(request) {
 
             <div class="modal-request-heading">
                 <strong>
-                    #${request.request_id} - ${request.document_name}
+                    #${formatId(request.request_id, "REQ", 3)} - ${request.document_name}
                 </strong>
 
                 <span class="status-badge status-${config?.cssClass ?? ""}">
@@ -258,6 +267,108 @@ const modalForm = document.getElementById("modal-form");
 const modalNotice = document.getElementById("modal-notice");
 const modalContent = document.getElementById("modal-content");
 
+
+async function loadMissingRequirements(requestId) {
+    const container = document.getElementById(
+        "missing-requirements-container"
+    );
+
+    container.innerHTML = "<p>Loading requirements...</p>";
+
+    try {
+        const request = await getResidentRequestDetails(requestId);
+
+        const uploadedRequirements = request.uploaded_requirements || [];
+
+        const uploadedMap = new Map(
+            uploadedRequirements.map(item => [
+                Number(item.requirement_id),
+                item
+            ])
+        );
+
+        const documentRequirements = await getDocumentRequirements(
+            request.document_id
+        );
+
+        container.innerHTML = "";
+
+        documentRequirements.forEach(requirement => {
+            const uploaded = uploadedMap.get(
+                Number(requirement.requirement_id)
+            );
+
+            const isMissing = !uploaded;
+            const verificationStatus =
+                uploaded?.verification_status || null;
+
+            const needsCorrection =
+                verificationStatus === "Needs Correction";
+
+            const canUpload = isMissing || needsCorrection;
+
+            const requirementGroup = document.createElement("div");
+            requirementGroup.classList.add("missing-requirement-group");
+
+            const label = document.createElement("label");
+            label.classList.add("modal-label");
+
+            label.textContent = requirement.requirement_name;
+
+            const status = document.createElement("p");
+            status.classList.add("requirement-upload-status");
+
+            if (isMissing) {
+                status.textContent = "Missing requirement";
+                status.classList.add("missing");
+            } else if (needsCorrection) {
+                status.textContent = "Needs Correction";
+                status.classList.add("needs-correction");
+            } else if (verificationStatus === "Accepted") {
+                status.textContent = "Accepted";
+                status.classList.add("accepted");
+            } else {
+                status.textContent = "Awaiting staff verification";
+                status.classList.add("pending");
+            }
+
+            requirementGroup.append(label, status);
+
+            if (needsCorrection && uploaded.staff_remarks) {
+                const remarks = document.createElement("p");
+                remarks.classList.add("requirement-correction-remarks");
+                remarks.textContent =
+                    `Staff remarks: ${uploaded.staff_remarks}`;
+
+                requirementGroup.appendChild(remarks);
+            }
+
+            if (canUpload) {
+                const input = document.createElement("input");
+
+                input.type = "file";
+                input.name = "requirements";
+                input.accept = ".jpg,.jpeg,.png,.pdf";
+                input.dataset.requirementId = requirement.requirement_id;
+
+                if (Number(requirement.is_mandatory) === 1) {
+                    input.required = true;
+                }
+
+                requirementGroup.appendChild(input);
+            }
+
+            container.appendChild(requirementGroup);
+        });
+
+    } catch (error) {
+        console.error("Load missing requirements error:", error);
+
+        container.innerHTML =
+            "<p>Unable to load document requirements.</p>";
+    }
+}
+
 function openRequestModal(action, requestId) {
 
     const request = residentRequest.find(
@@ -279,6 +390,9 @@ function openRequestModal(action, requestId) {
         console.error(`No modal configuration found for action "${action}".`);
         return;
     }
+
+    activeModalAction = modalAction;
+    activeRequestId = requestId;
 
     document.getElementById("modal-title").textContent =
         config.title;
@@ -302,6 +416,10 @@ function openRequestModal(action, requestId) {
             : "";
     modalNotice.textContent = notice;
     modalNotice.classList.toggle("modal-warning", Boolean(notice));
+
+    if (modalAction === "Submit Missing Documents") {
+        loadMissingRequirements(requestId);
+    }
 
     modal.showModal();
 }
@@ -339,10 +457,117 @@ modal.addEventListener("close", () => {
     modalNotice.classList.remove("modal-warning");
 });
 
-modalForm.addEventListener("submit", event => {
+modalForm.addEventListener("submit", async event => {
     event.preventDefault();
-    modalNotice.textContent = "This action cannot be submitted yet because request actions are not connected to a service.";
-    modalNotice.classList.add("modal-warning");
+
+    const submitButton = document.getElementById("modal-submit");
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Submitting...";
+
+    try {
+        if (activeModalAction === "Follow-up") {
+            const message = document
+                .getElementById("follow-up-message")
+                .value.trim();
+
+            if (!message) {
+                throw new Error("Please enter your follow-up message.");
+            }
+
+            const result = await submitRequestFollowUp(
+                activeRequestId,
+                message
+            );
+
+            modalNotice.textContent = result.message;
+            modalNotice.classList.remove("modal-warning");
+
+            modal.close();
+
+            await generateRequestCards();
+
+            return;
+        }
+
+        if (activeModalAction === "Submit Missing Documents") {
+            const requirementInputs = document.querySelectorAll(
+                "#missing-requirements-container input[type='file']"
+            );
+
+            const formData = new FormData();
+            const requirementIds = [];
+
+            requirementInputs.forEach(input => {
+                const file = input.files[0];
+
+                if (file) {
+                    formData.append("requirements", file);
+                    requirementIds.push(input.dataset.requirementId);
+                }
+            });
+
+            if (requirementIds.length === 0) {
+                throw new Error(
+                    "Please select at least one corrected requirement."
+                );
+            }
+
+            formData.append(
+                "requirement_ids",
+                JSON.stringify(requirementIds)
+            );
+
+            const result = await reuploadRequestRequirements(
+                activeRequestId,
+                formData
+            );
+
+            modalNotice.textContent = result.message;
+            modalNotice.classList.remove("modal-warning");
+
+            modal.close();
+
+            await generateRequestCards();
+
+            return;
+        }
+
+        if (activeModalAction === "Cancel Request") {
+            const reason = document
+                .getElementById("cancellation-reason")
+                .value.trim();
+
+            const result = await cancelResidentRequest(
+                activeRequestId,
+                reason
+            );
+
+            modalNotice.textContent = result.message;
+            modalNotice.classList.remove("modal-warning");
+
+            modal.close();
+
+            await generateRequestCards();
+
+            return;
+        }
+
+        throw new Error("This action is not connected to a service yet.");
+
+    } catch (error) {
+        console.error("Request action error:", error);
+
+        modalNotice.textContent =
+            error.message || "Unable to submit your request.";
+
+        modalNotice.classList.add("modal-warning");
+
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent =
+            modalConfig[activeModalAction]?.submitLabel || "Submit";
+    }
 });
 
 const newRequestBtn = document.getElementById("new-request");

@@ -1,0 +1,134 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports & Analytics | Staff Portal</title>
+
+    <link rel="stylesheet" href="../../css/components/sidebar.css">
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/pages/staff/reports_analytics.css">
+</head>
+<body>
+    <app-staff-sidebar></app-staff-sidebar>
+
+    <main>
+        <header>
+            <div class="introduction">
+                <p>Brgy. Staff / Reports & Analytics</p>
+                <h1>Reports & Analytics</h1>
+                <p>Monitor document request trends and analyze barangay service demand.</p>
+            </div>
+            <div class="report-export">
+                <button type="button" id="export-csv-btn">
+                    Export CSV
+                </button>
+
+                <button type="button" id="export-pdf-btn">
+                    Export PDF
+                </button>
+            </div>
+        </header>
+
+        <!-- Report Filters and Export -->
+        <section class="report-controls-container">
+            <div class="report-filters card">
+                <h2>Report Filters</h2>
+
+                <div class="date-filter-group">
+                    <div class="date-filter">
+                        <label for="date-from">From</label>
+                        <input type="date" id="date-from">
+                    </div>
+
+                    <div class="date-filter">
+                        <label for="date-to">To</label>
+                        <input type="date" id="date-to">
+                    </div>
+
+                    <button type="button" id="apply-filter-btn">
+                        Apply Filter
+                    </button>
+
+                    <button type="button" id="reset-filter-btn">
+                        Reset
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Summary Cards -->
+        <section class="report-summary-container">
+            <div class="report-summary-cards"></div>
+        </section>
+
+        <!-- Monthly Trend and Status Breakdown -->
+        <section class="report-chart-grid" id="line-donut-chart">
+            <div class="chart-card card" id="line-chart">
+                <h2>Monthly Request Trend</h2>
+                <div class="chart-container">
+                    <canvas id="monthly-trend-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card card" id="status-chart">
+                <h2>Requests per Status</h2>
+                <div class="chart-container">
+                    <canvas id="status-breakdown-chart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Document Demand -->
+        <section class="report-chart-grid" id="document-reject-chart">
+            <div class="chart-card card" id="document-chart">
+                <h2>Document Demand</h2>
+                <div class="chart-container">
+                    <canvas id="document-demand-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card card" id="reject-chart">
+                <h2>Reject Rate by Document</h2>
+                <div class="chart-container">
+                    <canvas id="reject-rate-chart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Peak Request Period -->
+        <section class="report-chart-grid" id="peak-chart">
+            <div class="chart-card card">
+                <h2>Requests by Day of the Week</h2>
+                <div class="chart-container">
+                    <canvas id="weekday-request-chart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Export Reminder -->
+        <section class="report-reminder-container">
+            <div class="report-reminder card">
+                <span class="report-reminder-icon" aria-hidden="true">i</span>
+                <p>
+                    Exports contain aggregate reports, not issued document soft copies.
+                    All figures shown are sample data for this concept proposal.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="../../js/services/authServices.js"></script>
+    <script type="module" src="../../js/core/staffGuard.js"></script>
+    <script src="../../js/components/timestamp.js"></script>
+    <script type="module" src="../../js/components/staff-sidebar.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+
+    <!-- jsPDF AutoTable -->
+    <script src="https://unpkg.com/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
+    <script src="../../js/utils/pageSkeleton.js"></script>
+    <script type="module" src="../../js/pages/staff/reports_analytics.js"></script>
+</body>
+</html>
