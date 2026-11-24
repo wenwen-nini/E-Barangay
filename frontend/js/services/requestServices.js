@@ -186,3 +186,156 @@ export async function getRequestStatusHistory(requestId) {
         throw error;
     }
 }
+
+export async function getResidentRequestDetails(requestId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/requests/${requestId}`, {
+            method: "GET",
+            credentials: "include"
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                data.message || "Unable to retrieve request details."
+            );
+        }
+
+        data.request;
+    } catch (error) {
+        console.error("Get resident request details error:", error);
+        throw error;
+    }
+}
+
+export async function reuploadRequestRequirements(requestId, formData) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/requests/${requestId}/requirements`, 
+            {
+                method: "PUT",
+                credentials: "include",
+                body: formData
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                data.message || "Unable to upload corrected requirements"
+            );
+
+            error.missingRequirements = data.missingRequirements || [];
+            throw error;
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Re-upload corrected requirements error:", error);
+        throw error;
+    }
+}
+
+export async function submitRequestFollowUp(requestId, message) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/requests/${requestId}/follow-up`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ message })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            const error = new Error(
+                data.message || "Unable to submit your follow-up message."
+            );
+
+            error.status = response.status;
+            throw error;
+        }
+
+        return data;
+
+    } catch (error) {
+        console.error("Submit request follow-up error:", error);
+        throw error;
+    }
+}
+
+export async function cancelResidentRequest(requestId, reason = "") {
+    try {
+        const response = await fetch(`${API_BASE_URL}/requests/${requestId}/cancel`, {
+            method: "PUT",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ reason })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            const error = new Error(
+                data.message || "Unable to cancel your request"
+            );
+
+            error.status = response.status;
+            throw error;
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Cancel resident request error:", error);
+        throw error;
+    }
+}
+
+export async function getRequestSummary() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/requests/summary`, {
+            method: "GET",
+            credentials: "include"
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                data.message || "Unable to retrieve request summary"
+            );
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Get request summary error:", error);
+        throw error;
+    }
+}
+
+export async function getRecentRequests() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/requests/recent`, {
+            method: "GET",
+            credentials: "include"
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                data.message || "Unable to retrieve recent requests"
+            );
+        }
+
+        return data.summary;
+    } catch (error) {
+        console.error("Get recent requests error:", error);
+        throw error;
+    }
+}

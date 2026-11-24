@@ -1,23 +1,20 @@
 
 import { getCurrentUser } from "../core/session.js";
-import { getResidentInfo } from "../services/getService.js";
-import { users } from "../mock-data/users.js";
+import { getCurrentUserProfile } from "../services/profileServices.js";
 
 async function generateResidentName() {
-    const currentUser = getCurrentUser();
-
     try {
-        if (!currentUser || !currentUser.resident_id) {
+        const profileData = await getCurrentUserProfile();
+
+        if (
+            !profileData.success ||
+            !profileData.profile ||
+            profileData.profile.role !== "Resident"
+        ) {
             return null;
         }
 
-        const residents = await getResidentInfo();
-
-        const residentInfo = residents.find(
-            resident => resident.resident_id === currentUser.resident_id
-        );
-
-        return residentInfo || null;
+        return profileData.profile;
 
     } catch (error) {
         console.error("Error retrieving resident information:", error);
@@ -35,20 +32,18 @@ class Sidebar extends HTMLElement {
 
         const residentName = residentInfo
             ? [
-                residentInfo.first_name,
-                residentInfo.middle_name
-                    ? residentInfo.middle_name.charAt(0) + "."
+                residentInfo.resident_first_name,
+                residentInfo.resident_middle_name
+                    ? residentInfo.resident_middle_name.charAt(0) + "."
                     : "",
-                residentInfo.last_name,
-                residentInfo.name_extension
+                residentInfo.resident_last_name,
+                residentInfo.resident_name_extension
             ].filter(Boolean).join(" ")
             : "Resident";
 
-        const residentUser = users.find(
-            user => user.user_id === currentUser?.user_id
-        );
-        const profileImagePath = residentUser?.profile_image_path
-            || "../../assets/images/profile_images/default.png";
+        const profileImagePath = residentInfo?.profile_image_path
+            ? `http://127.0.0.1:3000${residentInfo.profile_image_path}`
+            : "../../assets/images/profile_images/default.png";
 
         this.innerHTML = `
             <aside>

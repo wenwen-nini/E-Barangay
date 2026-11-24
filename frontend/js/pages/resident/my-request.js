@@ -1,10 +1,19 @@
-import { getRequestsWithDocuments, getRequestStatusHistory } from "../../services/requestServices.js";
+import { 
+    getRequestsWithDocuments, 
+    getRequestStatusHistory, 
+    getResidentRequestDetails,
+    getDocumentRequirements,
+    reuploadRequestRequirements,
+    submitRequestFollowUp,
+    cancelResidentRequest
+} from "../../services/requestServices.js";
 import { requestStatusConfig } from "../../config/requestStatusConfig.js";
 import { modalConfig } from "../../config/modalConfig.js";
 
 let residentRequest = [];
 let activeFilter = "all";
 let activeRequestId = null;
+let activeModalAction = null;
 
 async function generateRequestCards() {
     try {
@@ -252,6 +261,63 @@ const modalForm = document.getElementById("modal-form");
 const modalNotice = document.getElementById("modal-notice");
 const modalContent = document.getElementById("modal-content");
 
+async function loadMissingRequirements(requestId) {
+    const container = document.getElementById(
+        "missing-requirements-container"
+    );
+
+    container.innerHTML = "<p>Loading requirements...</p>";
+
+    try {
+        const request = await getResidentRequestDetails(requestId);
+
+        const uploadedRequirements = request.uploaded_requirements || [];
+
+        const uploadedIds = uploadedRequirements.map(item =>
+            Number(item.requirement_id)
+        );
+
+        const documentRequirements = await getDocumentRequirements(
+            request.document_id
+        );
+
+        container.innerHTML = "";
+
+        documentRequirements.forEach(requirement => {
+            const isUploaded = uploadedIds.includes(
+                Number(requirement.requirement_id)
+            );
+
+            const requirementGroup = document.createElement("div");
+            requirementGroup.classList.add("missing-requirement-group");
+
+            const label = document.createElement("label");
+            label.classList.add("modal-label");
+
+            label.textContent =
+                `${requirement.requirement_name} ${isUploaded ? "(Previously uploaded)" : "(Missing)"}`;
+
+            const input = document.createElement("input");
+            input.type = "file";
+            input.name = "requirements";
+            input.accept = ".jpg,.jpeg,.png,.pdf";
+            input.dataset.requirementId = requirement.requirement_id;
+
+            if (Number(requirement.is_mandatory) === 1) {
+                input.required = !isUploaded;
+            }
+
+            requirementGroup.append(label, input);
+            container.appendChild(requirementGroup);
+        });
+
+    } catch (error) {
+        console.error("Load missing requirements error:", error);
+        container.innerHTML =
+            "<p>Unable to load document requirements.</p>";
+    }
+}
+
 function openRequestModal(action, requestId) {
 
     const request = residentRequest.find(
@@ -273,6 +339,9 @@ function openRequestModal(action, requestId) {
         console.error(`No modal configuration found for action "${action}".`);
         return;
     }
+
+    activeModalAction = modalAction;
+    activeRequestId = requestId;
 
     document.getElementById("modal-title").textContent =
         config.title;
@@ -296,6 +365,10 @@ function openRequestModal(action, requestId) {
             : "";
     modalNotice.textContent = notice;
     modalNotice.classList.toggle("modal-warning", Boolean(notice));
+
+    if (modalAction === "Submit Missing Documents") {
+        loadMissingRequirements(requestId);
+    }
 
     modal.showModal();
 }
@@ -333,10 +406,117 @@ modal.addEventListener("close", () => {
     modalNotice.classList.remove("modal-warning");
 });
 
-modalForm.addEventListener("submit", event => {
+modalForm.addEventListener("submit", async event => {
     event.preventDefault();
-    modalNotice.textContent = "This action cannot be submitted yet because request actions are not connected to a service.";
-    modalNotice.classList.add("modal-warning");
+
+    const submitButton = document.getElementById("modal-submit");
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Submitting...";
+
+    try {
+        if (activeModalAction === "Follow-up") {
+            const message = document
+                .getElementById("follow-up-message")
+                .value.trim();
+
+            if (!message) {
+                throw new Error("Please enter your follow-up message.");
+            }
+
+            const result = await submitRequestFollowUp(
+                activeRequestId,
+                message
+            );
+
+            modalNotice.textContent = result.message;
+            modalNotice.classList.remove("modal-warning");
+
+            modal.close();
+
+            await generateRequestCards();
+
+            return;
+        }
+
+        if (activeModalAction === "Submit Missing Documents") {
+            const requirementInputs = document.querySelectorAll(
+                "#missing-requirements-container input[type='file']"
+            );
+
+            const formData = new FormData();
+            const requirementIds = [];
+
+            requirementInputs.forEach(input => {
+                const file = input.files[0];
+
+                if (file) {
+                    formData.append("requirements", file);
+                    requirementIds.push(input.dataset.requirementId);
+                }
+            });
+
+            if (requirementIds.length === 0) {
+                throw new Error(
+                    "Please select at least one corrected requirement."
+                );
+            }
+
+            formData.append(
+                "requirement_ids",
+                JSON.stringify(requirementIds)
+            );
+
+            const result = await reuploadRequestRequirements(
+                activeRequestId,
+                formData
+            );
+
+            modalNotice.textContent = result.message;
+            modalNotice.classList.remove("modal-warning");
+
+            modal.close();
+
+            await generateRequestCards();
+
+            return;
+        }
+
+        if (activeModalAction === "Cancel Request") {
+            const reason = document
+                .getElementById("cancellation-reason")
+                .value.trim();
+
+            const result = await cancelResidentRequest(
+                activeRequestId,
+                reason
+            );
+
+            modalNotice.textContent = result.message;
+            modalNotice.classList.remove("modal-warning");
+
+            modal.close();
+
+            await generateRequestCards();
+
+            return;
+        }
+
+        throw new Error("This action is not connected to a service yet.");
+
+    } catch (error) {
+        console.error("Request action error:", error);
+
+        modalNotice.textContent =
+            error.message || "Unable to submit your request.";
+
+        modalNotice.classList.add("modal-warning");
+
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent =
+            modalConfig[activeModalAction]?.submitLabel || "Submit";
+    }
 });
 
 const newRequestBtn = document.getElementById("new-request");

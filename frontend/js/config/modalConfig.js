@@ -26,30 +26,23 @@ export const modalConfig = {
         submitLabel: "Resubmit for review",
 
         content: `
-            <label class="modal-label" for="missing-document">
-                Valid ID - Missing requirement
-            </label>
-
-            <input
-                type="file"
-                id="missing-document"
-                name="document"
-                accept=".jpg,.jpeg,.png,.pdf"
-                required>
-            
-            <small>
-                JPG, PNG or PDF. Maximum file size: 5 MB.
-            </small>
+            <div id="missing-requirements-container">
+                <p>Loading requirements...</p>
+            </div>
 
             <label for="replacement-note">
-                Reply to staff - Optional
+                Reply to Staff - Optional
             </label>
 
             <textarea
                 id="replacement-note"
                 name="reply"
-                placeholder="Add a short note about your replacement file">
+                placeholder="Add a short note about your replacement files">
             </textarea>
+
+            <small>
+                JPG, PNG, and PDF. Maximul file size: 5MB per file.
+            </small>
         `
     },
     "Cancel Request": {

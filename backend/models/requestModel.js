@@ -26,18 +26,36 @@ async function getRecentRequests(residentId) {
             r.request_id,
             r.document_id,
             d.document_name,
-            r.number_of_copies,
-            r.purpose,
-            r.request_date,
-            r.status
+            COALESCE(latest.status, r.status) AS status,
+            COALESCE(latest.changed_at, r.request_date) AS activity_date,
+            latest.remarks
         FROM \`Request\` r
         INNER JOIN Document d
             ON r.document_id = d.document_id
+        LEFT JOIN (
+            SELECT
+                h1.request_id,
+                h1.status,
+                h1.changed_at,
+                h1.remarks
+            FROM Request_Status_History h1
+            INNER JOIN (
+                SELECT
+                    request_id,
+                    MAX(history_id) AS latest_history_id
+                FROM Request_Status_History
+                GROUP BY request_id
+            ) h2
+                ON h1.history_id = h2.latest_history_id
+        ) latest
+            ON r.request_id = latest.request_id
         WHERE r.resident_id = ?
-        ORDER BY r.request_date DESC
+        ORDER BY COALESCE(latest.changed_at, r.request_date) DESC
         LIMIT 2`,
         [residentId]
     );
+
+    return rows;
 }
 
 // Retrieves all requests belonging to certain resident, with optional status filtering
@@ -490,8 +508,6 @@ async function reuploadRequestRequirements(
     }
 }
 
-
-
 // Upload files for requirements
 async function getDocumentRequirements(documentId) {
     const [rows] = await pool.execute(
@@ -534,6 +550,132 @@ async function getRequestStatusHistory(requestId, residentId) {
     return rows;
 }
 
+async function submitRequestFollowUp(
+    requestId,
+    residentId,
+    userId,
+    message
+) {
+    const connection = await pool.getConnection();
+
+    try {
+        await connection.beginTransaction();
+
+        const [requests] = await connection.execute(
+            `SELECT request_id, status
+            FROM \`Request\`
+            WHERE request_id = ?
+            AND resident_id = ?
+            FOR UPDATE`,
+            [requestId, residentId]
+        );
+
+        if (requests.length === 0) {
+            throw new Error("REQUEST_NOT_FOUND");
+        }
+
+        const currentStatus = requests[0].status;
+
+        if (currentStatus !== "Pending") {
+            throw new Error("INVALID_REQUEST_STATUS");
+        }
+
+        await connection.execute(
+            `INSERT INTO Request_Status_History
+            (
+                request_id,
+                status,
+                remarks,
+                changed_by_user_id
+            )
+            VALUES (?, ?, ?, ?)`,
+            [
+                requestId,
+                currentStatus,
+                `Resident follow-up: ${message}`,
+                userId
+            ]
+        );
+
+        await connection.commit();
+
+        return true;
+
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+
+    } finally {
+        connection.release();
+    }
+}
+
+async function cancelResidentRequest(
+    requestId,
+    residentId,
+    userId,
+    reason = ""
+) {
+    const connection = await pool.getConnection();
+
+    try {
+        await connection.beginTransaction();
+
+        const [requests] = await connection.execute(
+            `SELECT request_id, status
+            FROM \`Request\`
+            WHERE request_id = ?
+            AND resident_id = ?
+            FOR UPDATE`,
+            [requestId, residentId]
+        );
+
+        if (requests.length === 0) {
+            throw new Error("REQUEST_NOT_FOUND");
+        }
+
+        if (requests[0].status !== "Pending") {
+            throw new Error("INVALID_REQUEST_STATUS");
+        }
+
+        await connection.execute(
+            `UPDATE \`Request\`
+            SET status = 'Cancelled'
+            WHERE request_id = ?`,
+            [requestId]
+        );
+
+        await connection.execute(
+            `INSERT INTO Request_Status_History
+            (
+                request_id,
+                status,
+                remarks,
+                changed_by_user_id
+            )
+            VALUES (?, 'Cancelled', ?, ?)`,
+            [
+                requestId,
+                reason
+                    ? `Resident cancelled request. Reason: ${reason}`
+                    : "Resident cancelled request.",
+                userId
+            ]
+        );
+
+        await connection.commit();
+
+        return true;
+
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+
+    } finally {
+        connection.release();
+    }
+}
+
 module.exports = {
     getRequestSummary,
     getRecentRequests,
@@ -542,5 +684,7 @@ module.exports = {
     createRequest,
     getDocumentRequirements,
     reuploadRequestRequirements,
-    getRequestStatusHistory
+    getRequestStatusHistory,
+    submitRequestFollowUp,
+    cancelResidentRequest
 };

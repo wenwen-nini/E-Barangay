@@ -1,5 +1,5 @@
-import { getAnnouncementOne, getNotificationOne } from "../../services/getService.js";
-import { getCurrentUser } from "../../core/session.js";
+import { getAnnouncements } from "../../services/announcementServices.js";
+import { getNotifications } from "../../services/notificationServices.js";
 
 const announcementList = document.getElementById("announcement-list");
 const searchInput = document.getElementById("announcement-search-input");
@@ -18,7 +18,14 @@ function createTextElement(tagName, className, text) {
 }
 
 function formatAnnouncementDate(value) {
-    const date = new Date(`${value}T00:00:00`);
+    const dateString = String(value);
+
+    const date = new Date(
+        dateString.includes("T")
+            ? dateString
+            : dateString.replace(" ", "T")
+    );
+
     if (Number.isNaN(date.getTime())) {
         return "Date unavailable";
     }
@@ -110,34 +117,30 @@ function renderAnnouncements() {
 
 async function initializeAnnouncements() {
     try {
-        const currentUser = getCurrentUser();
         const [announcements, notifications] = await Promise.all([
-            getAnnouncementOne(),
-            getNotificationOne()
+            getAnnouncements(),
+            getNotifications()
         ]);
 
-        const residentNotifications = currentUser
-            ? notifications.filter(
-                notification => notification.user_id === currentUser.user_id
-            )
-            : [];
         unreadCount.textContent = String(
-            residentNotifications.filter(notification => !notification.is_read).length
+            notifications.filter(
+                notification => !Number(notification.is_read)
+            ).length
         );
 
         publishedAnnouncements = announcements
-            .filter(
-                announcement =>
-                    announcement.status === "Published" && announcement.published_at
-            )
+            .filter(announcement => announcement.published_at)
             .sort(
                 (first, second) =>
-                    new Date(second.published_at) - new Date(first.published_at)
+                    new Date(second.published_at) -
+                    new Date(first.published_at)
             );
 
         renderAnnouncements();
+
     } catch (error) {
         console.error("Error loading announcements:", error);
+
         announcementList.replaceChildren(
             createTextElement(
                 "p",
@@ -145,6 +148,7 @@ async function initializeAnnouncements() {
                 error.message || "Unable to load announcements."
             )
         );
+
         loadOlderButton.disabled = true;
     }
 }

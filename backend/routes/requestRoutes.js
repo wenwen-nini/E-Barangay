@@ -50,6 +50,20 @@ router.get(
     requestController.getDocumentRequirements
 );
 
+router.post(
+    "/:id/follow-up",
+    requireAuth,
+    requireRole("Resident"),
+    requestController.submitRequestFollowUp
+);
+
+router.put(
+    "/:id/cancel",
+    requireAuth,
+    requireRole("Resident"),
+    requestController.cancelResidentRequest
+);
+
 router.get(
     "/:id",
     requireAuth,

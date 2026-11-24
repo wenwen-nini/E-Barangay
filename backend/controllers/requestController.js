@@ -504,6 +504,142 @@ async function getRequestStatusHistory(req, res) {
     }
 }
 
+// Create Follow-up
+async function submitRequestFollowUp(req, res) {
+    try {
+        const residentId = req.session.user.resident_id;
+        const userId = req.session.user.user_id;
+        const requestId = Number(req.params.id);
+        const message = req.body.message?.trim();
+
+        if (!residentId) {
+            return res.status(403).json({
+                success: false,
+                message: "Resident account required."
+            });
+        }
+
+        if (!Number.isInteger(requestId) || requestId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Request ID"
+            });
+        }
+
+        if (!message) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter your follow-up message."
+            });
+        }
+
+        if (message.length > 2000) {
+            return res.status(400).json({
+                success: false,
+                message: "Follow-up message cannot exceed 2000 characters."
+            });
+        }
+
+        await requestModel.submitRequestFollowUp(
+            requestId,
+            residentId,
+            userId,
+            message
+        );
+
+        return res.status(201).json({
+            success: true,
+            message: "Your follow-up message has been submittted"
+        });
+    } catch (error) {
+        console.error("Submit request follow-up message error:", error);
+        
+        if (error.message === "REQUEST_NOT_FOUND") {
+            return res.status(404).json({
+                success: false,
+                message: "Request not found"
+            });
+        }
+
+        if (error.message === "INVALID_REQUEST_STATUS") {
+            return res.status(409).json({
+                success: false,
+                message: "Follow-up is only available for pending requests."
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to submit your follow-up message."    
+        });
+    }
+}
+
+// Cancel a request on pending status
+async function cancelResidentRequest(req, res) {
+    try {
+        const residentId = req.session.user.resident_id;
+        const userId = req.session.user.user_id;
+        const requestId = Number(req.params.id);
+        const reason = req.body.reason?.trim() || "";
+
+        if (!residentId) {
+            return res.status(403).json({
+                success: false,
+                message: "Resident account required."
+            });
+        }
+
+        if (!Number.isInteger(requestId) || requestId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Request ID"
+            });
+        }
+
+        if (reason.length > 1000) {
+            return res.status(400).json({
+                success: false,
+                message: "Cancellation reason message cannot exceed 1000 characters."
+            });
+        }
+
+        await requestModel.cancelResidentRequest(
+            requestId,
+            residentId,
+            userId,
+            reason
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Your request has been cancelled successfully"
+        });
+        
+    } catch (error) {
+        console.error("Cancel resident request error:", error);
+
+        if (error.message === "REQUEST_NOT_FOUND") {
+            return res.status(404).json({
+                success: false,
+                message: "Request not found"
+            });
+        }
+
+        if (error.message === "INVALID_REQUEST_FOUND") {
+            return res.status(409).json({
+                success: false,
+                message: "Only pending requests can be cancelled."
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to cancel your request."
+        });
+    }
+}
+
 module.exports = {
     getRequestSummary,
     getRecentRequests,
@@ -512,5 +648,7 @@ module.exports = {
     submitDocumentRequest,
     getDocumentRequirements,
     reuploadRequestRequirements,
-    getRequestStatusHistory
+    getRequestStatusHistory,
+    submitRequestFollowUp,
+    cancelResidentRequest
 };
