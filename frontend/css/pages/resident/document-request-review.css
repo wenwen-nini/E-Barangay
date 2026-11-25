@@ -373,4 +373,19 @@
     .review-footer-actions {
         gap: 10px;
     }
+
+    .request-progress {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .progress-step {
+        flex: 1 1 125px;
+        min-width: 0;
+        white-space: normal;
+    }
+
+    .progress-line {
+        display: none;
+    }
 }

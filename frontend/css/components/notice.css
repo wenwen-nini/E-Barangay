@@ -1,0 +1,65 @@
+.app-notice-region {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 1400;
+    display: grid;
+    width: min(420px, calc(100vw - 32px));
+    gap: 10px;
+    pointer-events: none;
+}
+
+.app-notice {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 16px;
+    border: 1px solid #E8BFC2;
+    border-radius: 10px;
+    background: #FFF4F4;
+    color: #8D2E37;
+    box-shadow: 0 8px 24px rgba(23, 54, 93, 0.18);
+    font: 14px/1.5 var(--font-family, Arial, sans-serif);
+    pointer-events: auto;
+}
+
+.app-notice p {
+    margin: 0;
+}
+
+.app-notice--success {
+    border-color: #B7DDCA;
+    background: #F0F8F3;
+    color: #246B4B;
+}
+
+.app-notice--warning {
+    border-color: #E8D9A7;
+    background: #FFFBEB;
+    color: #745B12;
+}
+
+.app-notice-dismiss {
+    flex: 0 0 auto;
+    padding: 0 2px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.app-notice-dismiss:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+    .app-notice-region {
+        right: 16px;
+        bottom: 16px;
+    }
+}

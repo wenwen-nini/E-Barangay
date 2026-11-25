@@ -88,17 +88,17 @@ async function getMonthlyRequestTrend(dateFrom, dateTo) {
         ${condition}
 
         GROUP BY
-            YEAR(r.request_date),
-            MONTH(r.request_date)
+            DATE_FORMAT(r.request_date, '%Y-%m'),
+            DATE_FORMAT(r.request_date, '%b %Y')
 
         ORDER BY
-            YEAR(r.request_date),
-            MONTH(r.request_date)`,
+            DATE_FORMAT(r.request_date, '%Y-%m')`,
         params
     );
 
     return rows;
 }
+
 
 // 3. Request Status Breakdown
 async function getRequestStatusBreakdown(dateFrom, dateTo) {
@@ -216,16 +216,16 @@ async function getRequestsByWeekday(dateFrom, dateTo) {
             DAYOFWEEK(r.request_date),
             DAYNAME(r.request_date)
 
-        ORDER BY FIELD(
-            DAYNAME(r.request_date),
-            'Monday',
-            'Tuesday',
-            'Wednesday',
-            'Thursday',
-            'Friday',
-            'Saturday',
-            'Sunday'
-        )`,
+        ORDER BY
+            CASE day_number
+                WHEN 2 THEN 1
+                WHEN 3 THEN 2
+                WHEN 4 THEN 3
+                WHEN 5 THEN 4
+                WHEN 6 THEN 5
+                WHEN 7 THEN 6
+                WHEN 1 THEN 7
+            END`,
         params
     );
 

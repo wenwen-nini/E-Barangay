@@ -10,7 +10,7 @@
 <body>
     <div class="hero-wrapper">
         <header>
-            <nav class="navbar" id="navbar">
+            <nav class="navbar" id="navbar" aria-label="Primary navigation">
                 <div id="logo-name-container">
                     <div id="logo">
                     <img src="../frontend/assets/icons/General Icons/Brgy. Hall Logo (blue).png" alt="">
@@ -20,7 +20,7 @@
                         <h3 id="logo-system">Barangay Hall Management System</h3>
                     </div>
                 </div>
-                <div class="nav-links">
+                <div class="nav-links" id="primary-navigation">
                     <a href="#home" class="active" aria-current="page">Home</a>
                     <a href="#about">About</a>
                     <a href="#documents">Documents</a>
@@ -29,6 +29,11 @@
                 </div>
 
                 <a href="../frontend/pages/public/login.html" id="login-btn">Login</a>
+                <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Open navigation menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
             </nav>
         </header>
         <section class="section" id="home">

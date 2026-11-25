@@ -1,6 +1,8 @@
 
 import { getCurrentUser } from "../core/session.js";
 import { getCurrentUserProfile } from "../services/profileServices.js";
+import { setupSidebarNavigation } from "../utils/sidebarNavigation.js";
+import { API_BASE_URL } from "../config/apiConfig.js";
 
 async function generateResidentName() {
     try {
@@ -89,6 +91,23 @@ class Sidebar extends HTMLElement {
             </aside>
         `;
 
+        setupSidebarNavigation(this, {
+            id: "resident-portal-sidebar",
+            portalLabel: "Resident Portal",
+            actions: [
+                {
+                    href: "../resident/notification.html",
+                    icon: "../../assets/icons/Resident Portal/Navigation Bar/Notification (Navbar).png",
+                    label: "Notifications"
+                },
+                {
+                    href: "../resident/settings.html",
+                    icon: "../../assets/icons/Resident Portal/Navigation Bar/Settings Icon.png",
+                    label: "Settings"
+                }
+            ]
+        });
+
         const profile = this.querySelector(".profile");
         profile.classList.toggle("sidebar-profile-loading", !sidebarLoaded);
         if (!sidebarLoaded) {
@@ -114,7 +133,7 @@ class Sidebar extends HTMLElement {
 
         if (residentInfo?.profile_image_path) {
             this.querySelector(".profile img").src =
-                `http://127.0.0.1:3000${residentInfo.profile_image_path}`;
+                `${new URL(API_BASE_URL).origin}${residentInfo.profile_image_path}`;
         }
 
         profile.classList.remove("sidebar-profile-loading");

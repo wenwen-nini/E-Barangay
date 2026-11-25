@@ -1,5 +1,6 @@
 
 import { getReports } from "../../services/reportServices.js";
+import { showNotice } from "../../utils/notice.js";
 
 const dateFromInput = document.getElementById("date-from");
 const dateToInput = document.getElementById("date-to");
@@ -8,6 +9,13 @@ const applyFilterBtn = document.getElementById("apply-filter-btn");
 const resetFilterBtn = document.getElementById("reset-filter-btn");
 
 const summaryContainer = document.querySelector(".report-summary-cards");
+const reportStateContainer = document.getElementById("reports-state");
+const reportDataSections = [
+    document.querySelector(".report-summary-container"),
+    ...document.querySelectorAll(".report-chart-grid")
+];
+const exportCSVBtn = document.getElementById("export-csv-btn");
+const exportPDFBtn = document.getElementById("export-pdf-btn");
 
 let reportData = null;
 const chartColors = {
@@ -24,25 +32,73 @@ const chartColors = {
 
 // Load report data
 async function loadReports(dateFrom = "", dateTo = "") {
-    try {
-        summaryContainer.innerHTML = "<p>Loading report data...</p>";
+    reportData = null;
+    exportCSVBtn.disabled = true;
+    exportPDFBtn.disabled = true;
+    summaryContainer.innerHTML = "";
+    setReportDataVisible(false);
+    destroyReportCharts();
+    setReportState("loading", "Loading report data...");
 
+    try {
         reportData = await getReports(dateFrom, dateTo);
 
+        if (Number(reportData.summary.total_requests) === 0) {
+            setReportState(
+                "empty",
+                "No requests found for the selected date range. Try adjusting the dates or resetting the filters."
+            );
+            return;
+        }
+
+        setReportDataVisible(true);
         renderSummaryCards(reportData.summary, reportData.statusBreakdown);
         renderMonthlyTrend(reportData.monthlyTrend);
         renderStatusBreakdown(reportData.statusBreakdown);
         renderDocumentDemand(reportData.documentDemand);
         renderRejectRate(reportData.rejectRateByDocument);
         renderWeekdayRequests(reportData.weekdayRequests);
+        exportCSVBtn.disabled = false;
+        exportPDFBtn.disabled = false;
+        setReportState("success", "Reports loaded successfully.");
 
     } catch (error) {
         console.error("Load reports error:", error);
-
-        summaryContainer.innerHTML = `
-            <p>Unable to load report data. Please try again.</p>
-        `;
+        reportData = null;
+        summaryContainer.innerHTML = "";
+        setReportDataVisible(false);
+        destroyReportCharts();
+        setReportState("error", "Unable to load report data. Please try again.");
     }
+}
+
+function setReportState(state, message) {
+    reportStateContainer.className = `report-state report-state--${state}`;
+    reportStateContainer.hidden = state === "success";
+    reportStateContainer.textContent = state === "success" ? "" : message;
+    reportStateContainer.setAttribute("role", state === "error" ? "alert" : "status");
+    reportStateContainer.setAttribute("aria-live", state === "error" ? "assertive" : "polite");
+    reportStateContainer.setAttribute("aria-busy", state === "loading" ? "true" : "false");
+}
+
+function setReportDataVisible(visible) {
+    reportDataSections.forEach(section => {
+        section.classList.toggle("is-hidden", !visible);
+    });
+}
+
+function destroyReportCharts() {
+    monthlyTrendChart?.destroy();
+    statusBreakdownChart?.destroy();
+    documentDemandChart?.destroy();
+    rejectRateChart?.destroy();
+    weekdayRequestChart?.destroy();
+
+    monthlyTrendChart = null;
+    statusBreakdownChart = null;
+    documentDemandChart = null;
+    rejectRateChart = null;
+    weekdayRequestChart = null;
 }
 
 // Render KPI cards
@@ -443,7 +499,7 @@ function renderWeekdayRequests(data) {
 
 function exportReportsCSV() {
     if (!reportData) {
-        alert("No report data available to export.");
+        showNotice("No report data available to export.", "warning");
         return;
     }
 
@@ -542,7 +598,7 @@ function exportReportsCSV() {
 
 function exportReportsPDF() {
     if (!reportData) {
-        alert("No report data available to export.");
+        showNotice("No report data available to export.", "warning");
         return;
     }
 
@@ -710,7 +766,7 @@ applyFilterBtn.addEventListener("click", () => {
     const dateTo = dateToInput.value;
 
     if (dateFrom && dateTo && dateFrom > dateTo) {
-        alert("The start date cannot be later than the end date.");
+        showNotice("The start date cannot be later than the end date.");
         return;
     }
 
@@ -727,9 +783,6 @@ resetFilterBtn.addEventListener("click", () => {
 
 // Initial loading
 loadReports().finally(() => window.finishPageSkeleton?.());
-
-const exportCSVBtn = document.getElementById("export-csv-btn");
-const exportPDFBtn = document.getElementById("export-pdf-btn");
 
 exportCSVBtn.addEventListener("click", exportReportsCSV);
 exportPDFBtn.addEventListener("click", exportReportsPDF);

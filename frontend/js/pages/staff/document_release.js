@@ -9,6 +9,7 @@ import { formatId } from "../../utils/idFormatter.js";
 
 let requestData = [];
 let releaseLogData = [];
+let releaseLogError = null;
 
 let currentPage = 1;
 let totalPages = 0;
@@ -74,15 +75,25 @@ async function loadDocumentReleaseRequests(page = 1) {
 }
 
 async function loadRecentReleaseLog() {
+    releaseLogError = null;
+    releaseLogBody.innerHTML = `
+        <tr>
+            <td class="empty-queue" colspan="3" role="status">
+                Loading recent release history...
+            </td>
+        </tr>
+    `;
+
     try {
         const result = await getRecentReleaseLog();
 
         releaseLogData = result.releases;
-
         renderReleaseLog();
 
     } catch (error) {
         console.error("Unable to load Recent Release Log:", error);
+        releaseLogError = error;
+        renderReleaseLog();
     }
 }
 
@@ -360,6 +371,17 @@ function getStaffName(request) {
 }
 
 function renderReleaseLog() {
+    if (releaseLogError) {
+        releaseLogBody.innerHTML = `
+            <tr>
+                <td class="empty-queue" colspan="3" role="alert">
+                    Unable to load recent release history. Refresh the page to try again.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
     const releasedRequests = releaseLogData.filter(
         request => request.release_date
     );

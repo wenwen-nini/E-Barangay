@@ -367,7 +367,7 @@ header {
     min-height: 0;
     flex: 1 1 0;
     flex-direction: column;
-    overflow: hidden;
+    overflow-y: auto;
     padding: 18px 24px;
 }
 
@@ -449,7 +449,7 @@ header {
 
 .request-review-columns {
     display: grid;
-    min-height: 400px;
+    min-height: 0;
     flex: 1 1 0;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr);
@@ -652,6 +652,7 @@ header {
     min-height: 0;
     flex-direction: column;
     gap: 7px;
+    overflow-y: auto;
 }
 
 .review-status-form label {
@@ -836,12 +837,12 @@ header {
 
 @media (max-width: 640px) {
     .request-review-modal {
-        height: calc(100vh - 16px);
-        max-height: calc(100vh - 16px);
+        height: min(840px, calc(100dvh - 16px));
+        max-height: calc(100dvh - 16px);
     }
 
     .request-review-panel {
-        max-height: calc(100vh - 16px);
+        max-height: calc(100dvh - 16px);
     }
 
     .request-review-header,
@@ -850,14 +851,32 @@ header {
         padding-left: 16px;
     }
 
+    .request-review-content {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
     .request-review-columns {
+        display: flex;
+        flex: 0 0 auto;
+        flex-direction: column;
+        gap: 16px;
         min-height: 0;
-        grid-template-columns: 1fr;
-        grid-template-rows: minmax(0, 1.4fr) minmax(0, 1fr);
+    }
+
+    .review-requirements {
+        overflow: visible;
     }
 
     #review-requirements-list {
+        flex: 0 0 auto;
+        max-height: 220px;
         min-height: 0;
+        overflow-y: auto;
+    }
+
+    .review-status-form {
+        overflow: visible;
     }
 
     .request-review-footer {
@@ -866,6 +885,62 @@ header {
     }
 
     .request-file-preview-modal {
-        height: calc(100vh - 16px);
+        height: calc(100dvh - 16px);
+        max-height: calc(100dvh - 16px);
+    }
+}
+
+@media (max-width: 1100px) {
+    .tabs-container {
+        height: auto;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .tab-btn {
+        min-height: 40px;
+        padding: 8px 12px;
+    }
+
+    .filter-line {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: end;
+        gap: 12px;
+    }
+
+    #reset-filter {
+        grid-column: 1 / -1;
+        justify-self: start;
+        min-height: 42px;
+        margin-top: 0;
+        padding: 0 16px;
+    }
+
+    .main-content {
+        padding: 16px;
+        overflow-x: auto;
+    }
+
+    .request-table {
+        min-width: 720px;
+    }
+
+    .pagination-controls {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .filter-line {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .main-content {
+        padding: 12px;
+    }
+
+    .reminder {
+        align-items: flex-start;
     }
 }

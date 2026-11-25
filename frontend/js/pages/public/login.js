@@ -1,7 +1,9 @@
 import { setCurrentUser } from "../../core/session.js";
+import { showNotice } from "../../utils/notice.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     const loginForm = document.getElementById("form");
+    const loginButton = document.getElementById("login");
 
     loginForm.addEventListener("submit", async event => {
         event.preventDefault();
@@ -15,6 +17,10 @@ document.addEventListener("DOMContentLoaded", () => {
             email,
             password
         };
+
+        loginButton.disabled = true;
+        loginButton.textContent = "Logging in...";
+        loginForm.setAttribute("aria-busy", "true");
 
         try {
             const result = await window.authService.loginUser(loginData);
@@ -30,7 +36,11 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
         } catch (error) {
-            alert(error.message);
+            showNotice(error.message || "Unable to log in.");
+        } finally {
+            loginButton.disabled = false;
+            loginButton.textContent = "Login";
+            loginForm.removeAttribute("aria-busy");
         }
     });
 });

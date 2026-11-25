@@ -9,6 +9,8 @@ import {
     deleteDocument
 } from "../../services/documentServices.js";
 import { formatId } from "../../utils/idFormatter.js";
+import { showNotice } from "../../utils/notice.js";
+import { API_BASE_URL } from "../../config/apiConfig.js";
 
 const defaultDocumentPreviewPath = new URL(
     "../../../assets/images/default.png",
@@ -16,11 +18,13 @@ const defaultDocumentPreviewPath = new URL(
 ).href;
 
 let documents = [];
+let documentsLoadError = false;
 
 try {
     documents = await getDocuments();
 } catch (error) {
     console.error("Error loading documents:", error);
+    documentsLoadError = true;
 }
 let editingDocumentId = null;
 let deletingDocumentId = null;
@@ -78,6 +82,12 @@ function escapeHtml(value) {
     })[character]);
 }
 
+function getBackendImageUrl(path) {
+    if (!path) return defaultDocumentPreviewPath;
+
+    return `${new URL(API_BASE_URL).origin}${path}`;
+}
+
 function getPreviewUrl(path) {
     if (typeof path !== "string" || !path) return defaultDocumentPreviewPath;
     if (/^(data:image\/|https?:\/\/|blob:|file:\/\/)/i.test(path)) return path;
@@ -96,7 +106,7 @@ function setPreviewImage(image, path) {
     };
 
     image.src = path.startsWith("/uploads")
-        ? `http://127.0.0.1:3000${path}`
+        ? getBackendImageUrl(path)
         : getPreviewUrl(path);
 }
 
@@ -152,7 +162,7 @@ function renderTable() {
                     <img
                         src="${escapeHtml(
                             doc.document_preview_path
-                                ? `http://127.0.0.1:3000${doc.document_preview_path}`
+                                ? getBackendImageUrl(doc.document_preview_path)
                                 : defaultDocumentPreviewPath
                         )}"
                         alt="Document sample"
@@ -175,7 +185,12 @@ function renderTable() {
         `;
     }).join("");
 
-    tableBody.innerHTML = htmlRows || `<tr><td colspan="6" style="text-align: center; color: var(--primary-color);">No documents match your filter.</td></tr>`;
+    const emptyMessage = documentsLoadError
+        ? "Unable to load documents. Refresh the page to try again."
+        : documents.length === 0
+            ? "No documents have been added yet."
+            : "No documents match your filter.";
+    tableBody.innerHTML = htmlRows || `<tr><td colspan="6" style="text-align: center; color: var(--primary-color);">${emptyMessage}</td></tr>`;
     showEntries.textContent = `Showing ${totalEntries ? startIndex + 1 : 0}-${endIndex} of ${totalEntries} entries`;
     previousButton.disabled = currentPage === 1;
     currentPageButton.textContent = currentPage;
@@ -480,7 +495,7 @@ async function handleDeleteDocument(documentId) {
         
     } catch (error) {
         console.error("Error deleting document:", error);
-        alert(error.message || "Unable to delete document.");
+        showNotice(error.message || "Unable to delete document.");
     }
 }
 

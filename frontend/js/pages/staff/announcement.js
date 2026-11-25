@@ -7,16 +7,18 @@ import {
 } from "../../services/announcementServices.js";
 import { shortFormatDateTime, formatDateTime } from "../../utils/dateFormatter.js";
 import { formatId } from "../../utils/idFormatter.js";
+import { showNotice } from "../../utils/notice.js";
 
 let searchQuery = "";
 let statusFilter = "";
-let announcements;
+let announcements = [];
+let announcementsLoadError = false;
 
 try {
     announcements = await getAllAnnouncements() ?? [];
 } catch (error) {
-    window.finishPageSkeleton?.();
-    throw error;
+    console.error("Error loading announcements:", error);
+    announcementsLoadError = true;
 }
 
 let editingAnnouncementId = null;
@@ -58,6 +60,12 @@ function escapeHtml(value) {
 }
 
 function renderTable() {
+    if (announcementsLoadError) {
+        tableBody.innerHTML = `<tr><td colspan="5" role="alert">Unable to load announcements. Try adding an announcement or refresh the page.</td></tr>`;
+        showEntries.textContent = "Announcements could not be loaded.";
+        return;
+    }
+
     const filteredAnnouncements = announcements.filter(ann => {
         const matchesSearch = ann.title.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesStatus = !statusFilter || ann.status === statusFilter;
@@ -94,7 +102,10 @@ function renderTable() {
         `;
     }).join("");
 
-    tableBody.innerHTML = htmlRows || `<tr><td colspan="5" style="text-align: center; color: var(--primary-color);">No announcements match your filter.</td></tr>`;
+    const emptyMessage = announcements.length === 0
+        ? "No announcements have been created yet."
+        : "No announcements match your filter.";
+    tableBody.innerHTML = htmlRows || `<tr><td colspan="5" style="text-align: center; color: var(--primary-color);">${emptyMessage}</td></tr>`;
     showEntries.textContent = `Showing ${filteredAnnouncements.length} of ${announcements.length} entries`;
 }
 
@@ -152,7 +163,7 @@ async function saveAnnouncement(event) {
     const status = statusInput.value;
 
     if (!title || !content) {
-        alert("Please complete the announcement title and content.");
+        showNotice("Please complete the announcement title and content.");
         return;
     }
 
@@ -198,7 +209,8 @@ async function saveAnnouncement(event) {
         }
 
         // Retrieve updated records from the database
-        announcements = await getAllAnnouncements();
+        announcements = await getAllAnnouncements() ?? [];
+        announcementsLoadError = false;
 
         selectedId = isEditing
             ? editingAnnouncementId
@@ -215,15 +227,16 @@ async function saveAnnouncement(event) {
             renderPreview(selectedAnnouncement);
         }
 
-        alert(
+        showNotice(
             isEditing
                 ? "Announcement updated successfully."
-                : "Announcement created successfully."
+                : "Announcement created successfully.",
+            "success"
         );
 
     } catch (error) {
         console.error("Save announcement error:", error);
-        alert(error.message || "Unable to save announcement.");
+        showNotice(error.message || "Unable to save announcement.");
 
     } finally {
         saveAnnouncementButton.disabled = false;
@@ -326,6 +339,7 @@ confirmDeleteButton.addEventListener("click", () => {
 
             // Retrieve updated announcements
             announcements = await getAllAnnouncements() ?? [];
+            announcementsLoadError = false;
 
             // Update selected announcement
             if (String(selectedId) === String(announcementId)) {
@@ -352,11 +366,11 @@ confirmDeleteButton.addEventListener("click", () => {
                 document.getElementById("preview-status").className = "";
             }
 
-            alert("Announcement deleted successfully.");
+            showNotice("Announcement deleted successfully.", "success");
 
         } catch (error) {
             console.error("Delete announcement error:", error);
-            alert(error.message || "Unable to delete announcement.");
+            showNotice(error.message || "Unable to delete announcement.");
 
         } finally {
             confirmDeleteButton.disabled = false;

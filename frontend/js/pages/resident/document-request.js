@@ -12,6 +12,7 @@ const contactDisplay = document.getElementById("resident-contact");
 
 const reviewButton = document.getElementById("review-request-btn");
 const requestForm = document.getElementById("request-details-form");
+const requestFormMessage = document.getElementById("request-form-message");
 
 const currentUser = getCurrentUser();
 
@@ -20,6 +21,19 @@ let currentResident = null;
 
 const urlParams = new URLSearchParams(window.location.search);
 const selectedDocumentId = urlParams.get("document_id");
+
+function showRequestMessage(message, type = "error") {
+    requestFormMessage.textContent = message;
+    requestFormMessage.className = `request-form-message${type === "empty" ? " request-form-message--empty" : ""}`;
+    requestFormMessage.setAttribute("role", type === "error" ? "alert" : "status");
+    requestFormMessage.setAttribute("aria-live", type === "error" ? "assertive" : "polite");
+    requestFormMessage.hidden = false;
+}
+
+function clearRequestMessage() {
+    requestFormMessage.hidden = true;
+    requestFormMessage.textContent = "";
+}
 
 async function getResidentInformation() {
     const profileData = await getCurrentUserProfile();
@@ -57,6 +71,22 @@ function populateDocumentDropdown() {
         document => document.availability === "Available"
     );
 
+    if (availableDocuments.length === 0) {
+        documentSelect.add(
+            new Option("No documents are currently available.", "")
+        );
+        documentSelect.disabled = true;
+        reviewButton.disabled = true;
+        showRequestMessage(
+            "There are currently no documents available to request.",
+            "empty"
+        );
+        return;
+    }
+
+    documentSelect.disabled = false;
+    reviewButton.disabled = false;
+
     availableDocuments.forEach(documentInfo => {
         const option = document.createElement("option");
 
@@ -75,7 +105,7 @@ function populateDocumentDropdown() {
         if (selectedDocument) {
             documentSelect.value = selectedDocument.document_id;
         } else {
-            alert("The selected document is currently unavailable.");
+            showRequestMessage("The selected document is currently unavailable.");
         }
     }
 
@@ -122,6 +152,9 @@ async function initializeRequestPage() {
     } catch (error) {
         console.error("Error initializing request page:", error);
 
+        showRequestMessage(
+            "Unable to load your request details. Refresh the page to try again."
+        );
         documentSelect.innerHTML = `
             <option value="">Unable to load documents</option>
         `;
@@ -138,7 +171,7 @@ function reviewRequest(event) {
     const numberOfCopies = Number(copiesSelect.value);
 
     if (!documentId) {
-        alert("Please select a document.");
+        showRequestMessage("Please select a document.");
         documentSelect.focus();
         return;
     }
@@ -149,19 +182,21 @@ function reviewRequest(event) {
     );
 
     if (!selectedDocument) {
-        alert("Selected document could not be found.");
+        showRequestMessage("The selected document could not be found.");
         return;
     }
 
     if (selectedDocument.availability !== "Available") {
-        alert("This document is currently unavailable.");
+        showRequestMessage("This document is currently unavailable.");
         return;
     }
 
     if (!Number.isInteger(numberOfCopies) || numberOfCopies < 1) {
-        alert("Please select a valid number of copies.");
+        showRequestMessage("Please select a valid number of copies.");
         return;
     }
+
+    clearRequestMessage();
 
     const requestDraft = {
         document_id: selectedDocument.document_id,
@@ -184,6 +219,8 @@ function cancelRequest() {
 }
 
 requestForm.addEventListener("submit", reviewRequest);
+requestForm.addEventListener("input", clearRequestMessage);
+requestForm.addEventListener("change", clearRequestMessage);
 
 const cancelButton = document.getElementById("cancel-request-btn");
 
