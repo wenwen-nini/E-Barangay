@@ -1,4 +1,5 @@
 import { setupProfileImageUpload } from "../../utils/profileImageSettings.js";
+import { showNotice } from "../../utils/notice.js";
 
 const logoutModal = document.getElementById("logout-modal");
 const profileImageSettings = setupProfileImageUpload(
@@ -14,6 +15,8 @@ const cancelLogout = document.getElementById("cancel-logout");
 const confirmLogout = document.getElementById("confirm-logout");
 
 async function loadStaffProfile() {
+    const messageElement = document.getElementById("profile-message");
+
     try {
         const response = await window.authService.getUserProfile();
 
@@ -40,9 +43,15 @@ async function loadStaffProfile() {
             profile.email || "";
 
         profileImageSettings.setProfileImage(profile.profile_image_path);
+        return true;
 
     } catch (error) {
         console.error("Unable to load staff profile:", error);
+        messageElement.textContent =
+            error.message || "Unable to load your profile information.";
+        messageElement.className = "form-message error";
+        messageElement.hidden = false;
+        return false;
     }
 }
 
@@ -135,8 +144,16 @@ async function loadStaffNotificationPreferences() {
         document.getElementById("announcements").checked =
             Boolean(profile.notify_announcements);
 
+        return true;
+
     } catch (error) {
         console.error("Unable to load notification preferences:", error);
+        const messageElement = document.getElementById("notification-message");
+        messageElement.textContent =
+            error.message || "Unable to load notification preferences.";
+        messageElement.className = "form-message error";
+        messageElement.hidden = false;
+        return false;
     }
 }
 
@@ -178,24 +195,21 @@ const cancelNotificationsButton =
     document.getElementById("cancel-notifications");
 
 cancelNotificationsButton.addEventListener("click", async () => {
-    await loadStaffNotificationPreferences();
+    const loaded = await loadStaffNotificationPreferences();
 
-    const messageElement =
-        document.getElementById("notification-message");
-
-    messageElement.hidden = true;
+    if (loaded) {
+        document.getElementById("notification-message").hidden = true;
+    }
 });
 
 async function handleLogout() {
     try {
-        const result = await window.authService.logoutResident();
-
-        alert(result.message);
+        await window.authService.logoutResident();
 
         window.location.href = "../public/login.html";
 
     } catch (error) {
-        alert(error.message);
+        showNotice(error.message || "Unable to log out.");
     }
 }
 
@@ -221,15 +235,9 @@ cancelLogout.addEventListener("click", () => {
 confirmLogout.addEventListener("click", handleLogout);
 
 cancelProfileButton.addEventListener("click", async () => {
-    try {
-        await loadStaffProfile();
-
-        const messageElement = document.getElementById("profile-message");
-
-        messageElement.hidden = true;
-
-    } catch (error) {
-        console.error("Unable to reset staff profile:", error);
+    const loaded = await loadStaffProfile();
+    if (loaded) {
+        document.getElementById("profile-message").hidden = true;
     }
 });
 

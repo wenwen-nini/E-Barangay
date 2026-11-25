@@ -280,3 +280,25 @@ header {
     font-size: 12px;
 }
 
+@media (max-width: 900px) {
+    .search-card {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .search-form {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .search-form input {
+        box-sizing: border-box;
+    }
+
+    .frequently-asked-container,
+    .need-more-help {
+        height: auto;
+    }
+}
+

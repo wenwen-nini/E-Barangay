@@ -1,9 +1,14 @@
 import { registerResident } from "../../services/authServices.js";
+import { showNotice } from "../../utils/notice.js";
 
 const registerForm = document.getElementById("registerForm");
 
 registerForm.addEventListener("submit", async function (event) {
     event.preventDefault();
+    const submitButton = registerForm.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.textContent = "Creating account...";
+    registerForm.setAttribute("aria-busy", "true");
 
     const contactNumber = document.getElementById("number").value;
 
@@ -22,13 +27,17 @@ registerForm.addEventListener("submit", async function (event) {
     try {
         const result = await registerResident(registrationData);
 
-        alert(result.message);
+        showNotice(result.message || "Account created successfully.", "success");
 
         console.log("Registration successful", result.data);
 
-        registrationForm.reset();
+        registerForm.reset();
     } catch (error) {
-        alert(error.message);
+        showNotice(error.message || "Unable to create your account.");
         console.log("Registration error:", error);
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Create Account";
+        registerForm.removeAttribute("aria-busy");
     }
 });

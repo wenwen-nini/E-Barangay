@@ -1,5 +1,7 @@
 
 import { getCurrentUserProfile } from "../services/profileServices.js";
+import { setupSidebarNavigation } from "../utils/sidebarNavigation.js";
+import { API_BASE_URL } from "../config/apiConfig.js";
 
 class StaffSidebar extends HTMLElement {
     async connectedCallback() {
@@ -72,6 +74,23 @@ class StaffSidebar extends HTMLElement {
             </aside>
         `;
 
+        setupSidebarNavigation(this, {
+            id: "staff-portal-sidebar",
+            portalLabel: "Staff Portal",
+            actions: [
+                {
+                    href: "../staff/help.html",
+                    icon: "../../assets/icons/Staff Portal/Navigation Bar/Help Icon (white).png",
+                    label: "Help and support"
+                },
+                {
+                    href: "../staff/settings.html",
+                    icon: "../../assets/icons/Staff Portal/Navigation Bar/Settings Icon.png",
+                    label: "Settings"
+                }
+            ]
+        });
+
         const currentPath = window.location.pathname.split("/").pop();
 
         this.querySelectorAll(".nav-links a").forEach(link => {
@@ -112,7 +131,7 @@ class StaffSidebar extends HTMLElement {
             positionElement.textContent = profile.position || "Barangay Staff";
 
             if (profile.profile_image_path) {
-                imageElement.src = `http://127.0.0.1:3000${profile.profile_image_path}`;
+                imageElement.src = `${new URL(API_BASE_URL).origin}${profile.profile_image_path}`;
             }
 
             imageElement.onerror = () => {

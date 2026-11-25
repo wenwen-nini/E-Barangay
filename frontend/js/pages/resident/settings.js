@@ -1,4 +1,5 @@
 import { setupProfileImageUpload } from "../../utils/profileImageSettings.js";
+import { showNotice } from "../../utils/notice.js";
 
 const logoutModal = document.getElementById("logout-modal");
 const profileImageSettings = setupProfileImageUpload(
@@ -57,7 +58,7 @@ async function loadResidentProfile() {
 
     } catch (error) {
         console.error("Unable to load Resident profile:", error);
-        alert(error.message || "Unable to load your profile information.");
+        showNotice(error.message || "Unable to load your profile information.");
     }
 }
 
@@ -80,7 +81,7 @@ async function loadNotificationPreferences() {
 
     } catch (error) {
         console.error("Unable to load notification preferences:", error);
-        alert("Unable to load notification preferences.");
+        showNotice("Unable to load notification preferences.");
     }
 }
 
@@ -104,13 +105,13 @@ async function handleProfileUpdate(event) {
     try {
         const result = await window.authService.updateUserProfile(profileData);
 
-        alert(result.message);
+        showNotice(result.message || "Profile updated successfully.", "success");
 
         await loadResidentProfile();
 
     } catch (error) {
         console.error("Profile update error:", error);
-        alert(error.message);
+        showNotice(error.message || "Unable to update your profile.");
     }
 }
 
@@ -204,13 +205,11 @@ function showPasswordMessage(message, type) {
 
 async function handleLogout() {
     try {
-        const result = await window.authService.logoutResident();
-
-        alert(result.message);
+        await window.authService.logoutResident();
 
         window.location.href = "../public/login.html";
     } catch (error) {
-        alert(error.message);
+        showNotice(error.message || "Unable to log out.");
     }
 }
 

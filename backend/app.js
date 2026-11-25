@@ -18,8 +18,13 @@ const {
 
 const app = express();
 
+const allowedOrigins = [
+    "http://127.0.0.1:5500",
+    "http://192.168.1.22:5500"
+];
+
 app.use(cors({
-    origin: "http://127.0.0.1:5500",
+    origin: allowedOrigins,
     credentials: true
 }));
 

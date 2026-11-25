@@ -1,9 +1,9 @@
 
-CREATE DATABASE IF NOT EXISTS e_barangay_v2
+CREATE DATABASE IF NOT EXISTS e_barangay
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
 
-USE e_barangay_v2;
+USE e_barangay;
 
 CREATE TABLE IF NOT EXISTS `User` (
     user_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

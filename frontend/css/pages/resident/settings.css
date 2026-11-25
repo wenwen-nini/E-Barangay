@@ -605,3 +605,22 @@ fieldset button:hover {
     border-radius: 6px;
     font-size: 12px;
 }
+
+@media (max-width: 900px) {
+    .form-row {
+        flex-wrap: wrap;
+    }
+
+    .form-row > .form-group {
+        flex: 1 1 180px;
+    }
+
+    .form-actions {
+        flex-wrap: wrap;
+        margin-left: 0;
+    }
+
+    .support-card {
+        padding: 18px;
+    }
+}

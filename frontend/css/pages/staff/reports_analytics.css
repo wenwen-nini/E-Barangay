@@ -21,10 +21,11 @@ staff-app-sidebar {
 main {
     display: grid;
     grid-template-columns: 1.50fr 0.50fr;
-    grid-template-rows: auto auto auto auto;
+    grid-template-rows: repeat(8, auto);
     grid-template-areas:
         "header             header"
         "report-filter      report-filter"
+        "report-state       report-state"
         "kpi                kpi"
         "line-donut-chart   line-donut-chart"
         "document-reject-chart document-reject-chart"
@@ -75,6 +76,42 @@ header {
     align-items: stretch;
     gap: 14px;
     margin-bottom: 0;
+}
+
+.report-state {
+    grid-area: report-state;
+    padding: 12px 16px;
+    border: 1px solid #DCE2EA;
+    border-radius: 8px;
+    background: #FFFFFF;
+    color: #52657A;
+    font-size: 14px;
+}
+
+.report-state[hidden] {
+    display: none;
+}
+
+.report-state--success {
+    border-color: #B7DDCA;
+    background: #F0F8F3;
+    color: #246B4B;
+}
+
+.report-state--empty {
+    border-color: #E8D9A7;
+    background: #FFFBEB;
+    color: #745B12;
+}
+
+.report-state--error {
+    border-color: #E8BFC2;
+    background: #FFF4F4;
+    color: #9B343D;
+}
+
+.is-hidden {
+    display: none !important;
 }
 
 .report-filters {

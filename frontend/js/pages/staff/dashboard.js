@@ -95,6 +95,11 @@ function renderRecentRequests(requests) {
     const container = document.querySelector(".recent-request-table");
     if (!container) return;
 
+    if (requests.length === 0) {
+        container.innerHTML = "<p class=\"empty-announcement\">No recent requests yet.</p>";
+        return;
+    }
+
     const recentRequests = [...requests]
         .sort((first, second) => second.request_date.localeCompare(first.request_date))
         .slice(0, 6);
@@ -124,7 +129,7 @@ function renderRecentRequests(requests) {
                 `).join("")}
             </tbody>
         </table>
-        <p class="request-table-footnote">Showing ${recentRequests.length} of ${requests.length} sample requests · Open Request Management to view all.</p>
+        <p class="request-table-footnote">Showing ${recentRequests.length} of ${requests.length} requests · Open Request Management to view all.</p>
     `;
 
     container.querySelectorAll(".review-request-button").forEach(button => {
@@ -219,24 +224,31 @@ function renderAnnouncement(announcements) {
 }
 
 async function renderDashboard() {
-    const [requests, announcements, summary] = await Promise.all([
-        getRequestsWithDocuments(),
-        getAnnouncement(),
-        getStaffRequestSummary()
-    ]);
+    try {
+        const [requests, announcements, summary] = await Promise.all([
+            getRequestsWithDocuments(),
+            getAnnouncement(),
+            getStaffRequestSummary()
+        ]);
 
-    renderStatusCards(summary);
-    renderRecentRequests(requests);
-    renderNotification(requests);
-    renderAnnouncement(announcements);
+        renderStatusCards(summary);
+        renderRecentRequests(requests);
+        renderNotification(requests);
+        renderAnnouncement(announcements);
 
-    document.querySelector("#open-request-managament-btn")?.addEventListener("click", () => {
-        window.location.href = "request_management.html";
-    });
+        document.querySelector("#open-request-managament-btn")?.addEventListener("click", () => {
+            window.location.href = "request_management.html";
+        });
 
-    document.querySelector("#view-announcement-btn")?.addEventListener("click", () => {
-        window.location.href = "announcement.html";
-    });
+        document.querySelector("#view-announcement-btn")?.addEventListener("click", () => {
+            window.location.href = "announcement.html";
+        });
+    } catch (error) {
+        console.error("Error loading staff dashboard:", error);
+        const errorMessage = document.getElementById("dashboard-load-error");
+        errorMessage.textContent = "Unable to load dashboard data. Please refresh the page to try again.";
+        errorMessage.hidden = false;
+    }
 }
 
 renderDashboard().finally(() => window.finishPageSkeleton?.());

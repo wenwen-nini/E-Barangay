@@ -233,9 +233,12 @@ function openDocumentModal(documentId) {
             : `₱${fee.toFixed(2)}`
         : "Confirm with barangay";
 
-    modalDocumentImage.src = documentInfo.document_preview_path
-        ? new URL(documentInfo.document_preview_path, API_BASE_URL).href
+        
+    const imageUrl = documentInfo.document_preview_path
+        ? `${new URL(API_BASE_URL).origin}${documentInfo.document_preview_path}`
         : defaultDocumentPreviewPath;
+
+    modalDocumentImage.src = imageUrl;
 
     modalDocumentImage.alt = `${documentInfo.document_name} sample`;
 

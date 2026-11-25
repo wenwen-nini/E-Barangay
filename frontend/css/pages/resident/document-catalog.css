@@ -500,3 +500,72 @@ form input:focus,
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+@media (max-width: 900px) {
+    .filter-group form input {
+        box-sizing: border-box;
+        width: 100%;
+        min-height: 44px;
+    }
+
+    .filters {
+        flex-wrap: wrap;
+        width: 100%;
+        gap: 12px;
+    }
+
+    .filters > div {
+        flex: 1 1 140px;
+        min-width: 0;
+    }
+
+    #reset-filter {
+        width: auto;
+        min-height: 44px;
+        margin: 0;
+        padding: 0 14px;
+        margin-top: 8px;
+    }
+
+    .available-documents {
+        order: 3;
+        min-height: auto;
+    }
+
+    .need-help-card {
+        order: 4;
+    }
+
+    .quick-steps-card {
+        order: 5;
+        height: auto;
+        overflow: visible;
+    }
+
+    .step-list .step-by-step h3 {
+        width: 32px;
+        min-width: 32px;
+    }
+
+    .document-modal {
+        width: calc(100% - 24px);
+        max-height: calc(100dvh - 24px);
+    }
+
+    .document-modal-body {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
+        max-height: calc(100dvh - 210px);
+        overflow-y: auto;
+    }
+
+    .document-preview,
+    .document-information {
+        grid-column: auto;
+    }
+
+    .document-modal-footer {
+        flex-wrap: wrap;
+        padding: 14px;
+    }
+}

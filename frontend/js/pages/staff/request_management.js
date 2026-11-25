@@ -1,5 +1,4 @@
 import {
-    getResidentInfo,
     getRequestsWithDocuments,
     getStaffRequestDetails,
     markRequestUnderReview,
@@ -10,20 +9,20 @@ import {
 } from "../../services/getServiceForStaff.js";
 import { requestStatusConfig } from "../../config/requestStatusConfig.js";
 import { formatId } from "../../utils/idFormatter.js";
+import { showNotice } from "../../utils/notice.js";
+import { API_BASE_URL } from "../../config/apiConfig.js";
 
 let currentStatus = "All";
 let searchQuery = "";
-let requestData;
-let residentData;
+let requestData = [];
+let requestLoadError = false;
 
 try {
-    [requestData, residentData] = await Promise.all([
-        getRequestsWithDocuments(),
-        getResidentInfo()
-    ]);
+    requestData = await getRequestsWithDocuments();
 } catch (error) {
     window.finishPageSkeleton?.();
-    throw error;
+    console.error("Unable to load requests for review:", error);
+    requestLoadError = true;
 }
 
 const tableBody = document.getElementById("table-body");
@@ -286,9 +285,9 @@ async function showFilePreview(upload, requestId) {
         return;
     }
 
-    const fileUrl =
-        `http://127.0.0.1:3000/api/requests/staff/${requestId}/requirements/${upload.uploaded_requirement_id}/preview`;
-
+   const fileUrl =
+        `${API_BASE_URL}/requests/staff/${requestId}/requirements/${upload.uploaded_requirement_id}/preview`;
+        
     try {
         const response = await fetch(fileUrl, {
             method: "GET",
@@ -472,7 +471,7 @@ async function openReviewModal(requestId) {
         reviewModal.showModal();
     } catch (error) {
         console.error("Open request review error:", error);
-        alert(error.message || "Unable to load request details.");
+        showNotice(error.message || "Unable to load request details.");
     }
 }
 
@@ -521,7 +520,10 @@ function renderTable() {
         `;
     }).join("");
 
-    const emptyResultRow = `<tr><td colspan="6" style="text-align:center; color:var(--primary-color);">No requests found.</td></tr>`;
+    const emptyMessage = requestLoadError
+        ? "Unable to load request management data. Refresh the page to try again."
+        : "No requests found.";
+    const emptyResultRow = `<tr><td colspan="6" role="${requestLoadError ? "alert" : "status"}" style="text-align:center; color:var(--primary-color);">${emptyMessage}</td></tr>`;
     const renderedRowCount = Math.max(pageData.length, 1);
     const placeholderRows = Array.from(
         { length: Math.max(0, allViewRowCount - renderedRowCount) },
@@ -554,7 +556,7 @@ async function saveReview(status) {
         (status === "Returned" || status === "Rejected") &&
         !remarks
     ) {
-        alert(
+        showNotice(
             status === "Returned"
                 ? "Please provide remarks explaining what needs to be corrected."
                 : "Please provide remarks explaining why this request is rejected."
@@ -604,7 +606,7 @@ async function saveReview(status) {
 
     } catch (error) {
         console.error("Save request review error:", error);
-        alert(error.message || "Unable to save request update.");
+        showNotice(error.message || "Unable to save request update.");
 
     } finally {
         const isUnderReview = selectedRequest?.status === "Under Review";
@@ -667,7 +669,7 @@ reviewRequirementsList.addEventListener("click", async event => {
         const remarks = remarksInput.value.trim();
 
         if (verificationStatus === "Needs Correction" && !remarks) {
-            alert("Please explain what needs correction.");
+            showNotice("Please explain what needs correction.");
             remarksInput.focus();
             return;
         }
@@ -722,15 +724,16 @@ reviewRequirementsList.addEventListener("click", async event => {
             approveButton.disabled =
                 requiredFilesMissing || hasUnverifiedRequirements;
 
-            alert(
+            showNotice(
                 verificationStatus === "Accepted"
                     ? "Requirement marked as Accepted."
-                    : "Requirement marked as Needs Correction."
+                    : "Requirement marked as Needs Correction.",
+                "success"
             );
 
         } catch (error) {
             console.error("Requirement verification error:", error);
-            alert(error.message || "Unable to update requirement verification.");
+            showNotice(error.message || "Unable to update requirement verification.");
             
             // Re-enable buttons if the operation failed
             const actionButtons = reviewRequirementsList.querySelectorAll(
@@ -758,7 +761,7 @@ reviewRequirementsList.addEventListener("click", async event => {
     );
 
     if (!upload) {
-        alert("Uploaded requirement not found.");
+        showNotice("Uploaded requirement not found.");
         return;
     }
 

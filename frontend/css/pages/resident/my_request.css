@@ -351,7 +351,25 @@ header button:active {
     .filter-btns {
         width: auto;
         min-width: 6rem;
+        min-height: 40px;
         padding: 0 0.75rem;
+    }
+
+    .request-list-layout {
+        display: flex;
+        flex-direction: column;
+        min-height: auto;
+        overflow: visible;
+    }
+
+    #request-cards-container {
+        min-height: auto;
+        overflow: visible;
+    }
+
+    .request-timeline {
+        max-height: none;
+        overflow: visible;
     }
 }
 

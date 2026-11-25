@@ -552,3 +552,48 @@ select {
     color: #FFFFFF;
     background: #C9363E;
 }
+
+@media (max-width: 1100px) {
+    .announcement-body {
+        padding: 16px;
+        overflow-x: auto;
+    }
+
+    .filter-group {
+        flex-wrap: wrap;
+        flex-direction: column;
+    }
+
+    .search,
+    .status {
+        width: 100%;
+    }
+
+    .announcement-table {
+        min-width: 680px;
+    }
+
+    .status-line {
+        flex-wrap: wrap;
+    }
+
+    .announcement-field-row {
+        flex-direction: column;
+    }
+
+    .announcement-modal-footer button {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 600px) {
+    .announcement-body,
+    .preview-card,
+    .publication-guide {
+        padding: 12px;
+    }
+
+    .preview-card {
+        overflow-wrap: anywhere;
+    }
+}

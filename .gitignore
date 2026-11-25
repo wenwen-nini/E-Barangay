@@ -1,3 +1,12 @@
-backend/node_modules/
+# Environment variables
 backend/.env
+backend/.env.docker
+
+# Docker
+*.log
+
+# Node.js dependencies
+backend/node_modules/
+
+# Uploaded files
 backend/uploads/

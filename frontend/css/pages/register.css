@@ -227,3 +227,174 @@ form h5 {
     color: #667085;
 }
 
+@media (max-width: 900px) {
+    main {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .section {
+        height: auto;
+    }
+
+    #hero-section {
+        min-height: 320px;
+        height: auto;
+        min-width: 0;
+        grid-template-columns: minmax(0, 1fr);
+        padding: 28px 32px 32px;
+        gap: 32px;
+    }
+
+    #logo,
+    #hero-introduction {
+        min-width: 0;
+    }
+
+    #logo {
+        align-items: center;
+        gap: 14px;
+        height: auto;
+        margin: 0;
+    }
+
+    #logo-img {
+        padding: 12px 14px;
+    }
+
+    #logo-img img {
+        display: block;
+        width: 32px;
+        height: 32px;
+    }
+
+    #logo-name {
+        margin: 0;
+        font-size: 22px;
+    }
+
+    #logo-system {
+        font-size: 14px;
+    }
+
+    #hero-introduction {
+        margin: 0;
+    }
+
+    #hero-introduction > p:first-child {
+        margin-bottom: 20px;
+    }
+
+    #hero-introduction h1 {
+        font-size: clamp(36px, 6vw, 48px);
+    }
+
+    #hero-introduction br {
+        display: none;
+    }
+
+    #yellow-line {
+        width: 48px;
+        margin: 0;
+    }
+
+    #register-section {
+        min-height: 0;
+        padding: 36px 24px 24px;
+    }
+
+    #registration-form {
+        width: min(100%, 720px);
+        margin: 0 auto;
+    }
+
+    #registration-highlight h1 {
+        font-size: 34px;
+    }
+
+    #registration-form form input:not([type="checkbox"]) {
+        max-width: 100%;
+    }
+
+    #double {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    #hero-section {
+        min-height: 280px;
+        padding: 24px 20px;
+        gap: 24px;
+    }
+
+    #logo {
+        gap: 10px;
+    }
+
+    #logo-img {
+        padding: 9px 11px;
+    }
+
+    #logo-img img {
+        width: 28px;
+        height: 28px;
+    }
+
+    #logo-name {
+        font-size: 19px;
+    }
+
+    #logo-system {
+        max-width: 200px;
+        font-size: 12px;
+    }
+
+    #hero-introduction h1 {
+        font-size: 36px;
+    }
+
+    #hero-introduction p {
+        font-size: 14px;
+    }
+
+    #register-section {
+        padding: 28px 20px 20px;
+    }
+
+    #registration-highlight h1 {
+        font-size: 30px;
+        line-height: 1.3;
+    }
+
+    #double {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    #registration-form form h5 {
+        margin: 24px 0 16px;
+    }
+
+    #registration-form form input:not([type="checkbox"]) {
+        padding: 14px 16px;
+    }
+
+    #agreement {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    #agreement input {
+        flex: 0 0 auto;
+        margin-top: 3px;
+    }
+
+    #agreement label {
+        line-height: 1.5;
+    }
+
+    #registration-note {
+        text-align: center;
+    }
+}
+

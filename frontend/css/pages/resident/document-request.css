@@ -143,6 +143,27 @@ main {
     color: #64748B;
 }
 
+.request-form-message {
+    margin: 0;
+    padding: 12px 14px;
+    border: 1px solid #E8BFC2;
+    border-radius: 8px;
+    background: #FFF4F4;
+    color: #9B343D;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.request-form-message--empty {
+    border-color: #E8D9A7;
+    background: #FFFBEB;
+    color: #745B12;
+}
+
+.request-form-message[hidden] {
+    display: none;
+}
+
 .form-group {
     display: flex;
     flex-direction: column;
@@ -389,10 +410,6 @@ main {
         grid-template-columns: 1fr;
         grid-template-areas:
             "main";
-    }
-
-    app-navbar {
-        display: none;
     }
 
     main {

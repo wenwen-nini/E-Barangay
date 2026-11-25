@@ -1,8 +1,8 @@
-const API_BASE_URL = "http://127.0.0.1:3000/api/documents";
+import { API_BASE_URL } from "../config/apiConfig.js";
 
 // Retrieve all documents with their requirements
 export async function getDocuments() {
-    const response = await fetch(`${API_BASE_URL}/`, {
+    const response = await fetch(`${API_BASE_URL}/documents/`, {
         method: "GET",
         credentials: "include"
     });
@@ -17,7 +17,7 @@ export async function getDocuments() {
 }
 
 export async function getDocumentDetails(documentId) {
-    const response = await fetch(`${API_BASE_URL}/${documentId}`, {
+    const response = await fetch(`${API_BASE_URL}/documents/${documentId}`, {
         method: "GET",
         credentials: "include"
     });
@@ -55,7 +55,7 @@ export async function addDocument(documentData) {
         );
     }
 
-    const response = await fetch(`${API_BASE_URL}/`, {
+    const response = await fetch(`${API_BASE_URL}/documents/`, {
         method: "POST",
         credentials: "include",
         body: formData
@@ -82,7 +82,7 @@ export async function updateDocument(documentId, documentData) {
         formData.append("document_preview", documentData.document_preview);
     }
     
-    const response = await fetch(`${API_BASE_URL}/${documentId}`, {
+    const response = await fetch(`${API_BASE_URL}/documents/${documentId}`, {
         method: "PUT",
         credentials: "include",
         body: formData
@@ -98,7 +98,7 @@ export async function updateDocument(documentId, documentData) {
 }
 
 export async function addRequirement(documentId, requirementData) {
-    const response = await fetch(`${API_BASE_URL}/${documentId}/requirements`, {
+    const response = await fetch(`${API_BASE_URL}/documents/${documentId}/requirements`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -117,7 +117,7 @@ export async function addRequirement(documentId, requirementData) {
 }
 
 export async function updateRequirement(documentId, requirementId, requirementData) {
-    const response = await fetch(`${API_BASE_URL}/${documentId}/requirements/${requirementId}`, {
+    const response = await fetch(`${API_BASE_URL}/documents/${documentId}/requirements/${requirementId}`, {
         method: "PUT",
         credentials: "include",
         headers: {
@@ -136,7 +136,7 @@ export async function updateRequirement(documentId, requirementId, requirementDa
 }
 
 export async function deleteRequirement(documentId, requirementId) {
-    const response = await fetch(`${API_BASE_URL}/${documentId}/requirements/${requirementId}`, {
+    const response = await fetch(`${API_BASE_URL}/documents/${documentId}/requirements/${requirementId}`, {
         method: "DELETE",
         credentials: "include"
     });
@@ -151,7 +151,7 @@ export async function deleteRequirement(documentId, requirementId) {
 }
 
 export async function deleteDocument(documentId) {
-    const response = await fetch(`${API_BASE_URL}/${documentId}`, {
+    const response = await fetch(`${API_BASE_URL}/documents/${documentId}`, {
         method: "DELETE",
         credentials: "include"
     });
