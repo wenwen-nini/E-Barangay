@@ -1,4 +1,4 @@
-import { documents } from "../../mock-data/document.js";
+import { documents } from "../../config/documentConfig.js";
 
 const documentIcons = {
     "Barangay Clearance": "Barangay Clearance (landing page).png",
