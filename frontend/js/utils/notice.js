@@ -31,10 +31,59 @@ export function showNotice(message, type = "error") {
     closeButton.className = "app-notice-dismiss";
     closeButton.setAttribute("aria-label", "Dismiss message");
     closeButton.textContent = "×";
-    closeButton.addEventListener("click", () => notice.remove());
+    closeButton.addEventListener("click", () => dismissNotice(notice));
 
     notice.append(messageElement, closeButton);
     getNoticeRegion().appendChild(notice);
 
+    startNoticeTimeout(notice);
+
     return notice;
+}
+
+function dismissNotice(notice) {
+    if (!notice.isConnected || notice.classList.contains("app-notice--leaving")) return;
+
+    notice.classList.add("app-notice--leaving");
+    notice.addEventListener("animationend", () => notice.remove(), { once: true });
+}
+
+function startNoticeTimeout(notice) {
+    let timeoutId = null;
+    let remainingTime = 7000;
+    let startedAt = 0;
+    let isHovered = false;
+    let hasFocus = false;
+
+    const resume = () => {
+        if (isHovered || hasFocus || timeoutId !== null) return;
+        startedAt = Date.now();
+        timeoutId = window.setTimeout(() => dismissNotice(notice), remainingTime);
+    };
+
+    const pause = () => {
+        if (timeoutId === null) return;
+        window.clearTimeout(timeoutId);
+        timeoutId = null;
+        remainingTime = Math.max(0, remainingTime - (Date.now() - startedAt));
+    };
+
+    notice.addEventListener("mouseenter", () => {
+        isHovered = true;
+        pause();
+    });
+    notice.addEventListener("mouseleave", () => {
+        isHovered = false;
+        resume();
+    });
+    notice.addEventListener("focusin", () => {
+        hasFocus = true;
+        pause();
+    });
+    notice.addEventListener("focusout", event => {
+        if (notice.contains(event.relatedTarget)) return;
+        hasFocus = false;
+        resume();
+    });
+    resume();
 }

@@ -16,6 +16,7 @@ let residentRequest = [];
 let activeFilter = "all";
 let activeRequestId = null;
 let activeModalAction = null;
+let timelineRequestVersion = 0;
 
 async function generateRequestCards() {
     try {
@@ -31,14 +32,26 @@ async function generateRequestCards() {
 
     } catch (error) {
         console.error("Error loading requests:", error);
-        cardsContainer.innerHTML = "<p>Unable to load requests.</p>";
+        cardsContainer.innerHTML = `
+            <div class="request-empty-state">
+                <p>Unable to load requests.</p>
+            </div>
+        `;
+        hideRequestTimeline();
     }
 }
 
 function renderRequestCards() {
     const container = document.getElementById("request-cards-container");
     if (residentRequest.length === 0) {
-        container.innerHTML = "<p>You have no document requests yet.</p>";
+        container.innerHTML = `
+            <div class="request-empty-state">
+                <img src="../../assets/icons/General Icons/No request match filters.png" alt="">
+                <h3>No document requests yet</h3>
+                <p>New requests you submit will appear here.</p>
+            </div>
+        `;
+        hideRequestTimeline();
         return;
     }
 
@@ -107,8 +120,12 @@ function renderRequestCards() {
 
 function applyRequestFilter() {
     const filter = activeFilter.toLowerCase();
+    const cards = Array.from(
+        cardsContainer.querySelectorAll(".request-card")
+    );
+    let visibleCards = [];
 
-    cardsContainer.querySelectorAll(".request-card").forEach(card => {
+    cards.forEach(card => {
         const status = card.dataset.status;
         const matchesFilter = filter === "all"
             || (filter === "processing"
@@ -116,11 +133,60 @@ function applyRequestFilter() {
                 : status === filter);
 
         card.hidden = !matchesFilter;
+        if (matchesFilter) visibleCards.push(card);
     });
+
+    cardsContainer.querySelector(".request-empty-state")?.remove();
+
+    if (visibleCards.length === 0) {
+        cardsContainer.insertAdjacentHTML("beforeend", `
+            <div class="request-empty-state">
+                <img src="../../assets/icons/General Icons/No request match filters.png" alt="">
+                <h3>No requests found</h3>
+                <p>There are no ${activeFilter === "all" ? "" : activeFilter} requests to display.</p>
+            </div>
+        `);
+        hideRequestTimeline();
+        return;
+    }
+
+    const activeCardIsVisible = visibleCards.some(
+        card => card.dataset.requestId === activeRequestId
+    );
+    const selectedCard = activeCardIsVisible
+        ? visibleCards.find(card => card.dataset.requestId === activeRequestId)
+        : visibleCards[0];
+
+    activeRequestId = selectedCard.dataset.requestId;
+    cards.forEach(card => {
+        card.classList.toggle(
+            "active",
+            card.dataset.requestId === activeRequestId
+        );
+    });
+
+    showRequestTimeline();
+    generateRequestTimeline(activeRequestId);
+}
+
+function showRequestTimeline() {
+    const layout = document.querySelector(".request-list-layout");
+    const timeline = document.querySelector(".request-timeline");
+    layout?.classList.remove("no-results");
+    if (timeline) timeline.hidden = false;
+}
+
+function hideRequestTimeline() {
+    const layout = document.querySelector(".request-list-layout");
+    const timeline = document.querySelector(".request-timeline");
+    timelineRequestVersion++;
+    layout?.classList.add("no-results");
+    if (timeline) timeline.hidden = true;
 }
 
 async function generateRequestTimeline(requestId) {
     const container = document.querySelector(".timeline-list");
+    const requestVersion = ++timelineRequestVersion;
 
     try {
         const request = residentRequest.find(
@@ -132,6 +198,11 @@ async function generateRequestTimeline(requestId) {
             return;
         }
 
+        if (String(activeRequestId) !== String(requestId)
+            || requestVersion !== timelineRequestVersion) {
+            return;
+        }
+
         document.querySelector("#timeline-request-number").textContent =
             `${formatId(request.request_id, "REQ", 3)}`;
 
@@ -139,6 +210,11 @@ async function generateRequestTimeline(requestId) {
             request.document_name;
 
         const history = await getRequestStatusHistory(request.request_id);
+
+        if (String(activeRequestId) !== String(requestId)
+            || requestVersion !== timelineRequestVersion) {
+            return;
+        }
 
         container.innerHTML = history.map((record, index) => {
 
@@ -185,6 +261,10 @@ async function generateRequestTimeline(requestId) {
 
     } catch (error) {
         console.error("Error loading timeline:", error);
+        if (String(activeRequestId) !== String(requestId)
+            || requestVersion !== timelineRequestVersion) {
+            return;
+        }
         container.innerHTML = "<p>Unable to load timeline.</p>";
     }
 }

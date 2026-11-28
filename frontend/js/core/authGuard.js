@@ -1,4 +1,7 @@
 import { getCurrentUser } from "../services/authServices.js";
+import { startSessionAccountMonitor } from "./session.js";
+
+startSessionAccountMonitor();
 
 async function protectResidentGuard() {
     try {

@@ -1,5 +1,6 @@
 import { setupProfileImageUpload } from "../../utils/profileImageSettings.js";
 import { showNotice } from "../../utils/notice.js";
+import { logoutUser } from "../../core/session.js";
 
 const logoutModal = document.getElementById("logout-modal");
 const profileImageSettings = setupProfileImageUpload(
@@ -118,9 +119,6 @@ async function handleProfileUpdate(event) {
 async function handleNotificationUpdate(event) {
     event.preventDefault();
 
-    const messageElement = document.getElementById("notification-message");
-    messageElement.hidden = true;
-
     const preferences = {
         notify_request_updates: document.getElementById("request-updates").checked,
         notify_pickup_reminders: document.getElementById("pickup-reminders").checked,
@@ -130,18 +128,18 @@ async function handleNotificationUpdate(event) {
     try {
         const result = await window.authService.updateNotificationPreferences(preferences);
 
-        messageElement.textContent = result.message;
-        messageElement.className = "form-message success";
-        messageElement.hidden = false;
+        showNotice(
+            result.message || "Notification preferences updated successfully.",
+            "success"
+        );
 
         await loadNotificationPreferences();
 
     } catch (error) {
         console.error("Notification preferences error:", error);
-
-        messageElement.textContent = error.message;
-        messageElement.className = "form-message error";
-        messageElement.hidden = false;
+        showNotice(
+            error.message || "Unable to update notification preferences."
+        );
     }
 }
 
@@ -151,12 +149,8 @@ async function handlePasswordUpdate(event) {
     const currentPassword = document.getElementById("current-password").value;
     const newPassword = document.getElementById("new-password").value;
     const confirmPassword = document.getElementById("confirmation").value;
-    const messageElement = document.getElementById("password-message");
-    messageElement.hidden = true;
-    messageElement.textContent = "";
-
     if (newPassword.length < 8) {
-        showPasswordMessage(
+        showNotice(
             "New password must contain at least 8 characters.",
             "error"
         );
@@ -164,7 +158,7 @@ async function handlePasswordUpdate(event) {
     }
 
     if (newPassword !== confirmPassword) {
-        showPasswordMessage(
+        showNotice(
             "New password and confirmation do not match.",
             "error"
         );
@@ -180,7 +174,7 @@ async function handlePasswordUpdate(event) {
     try {
         const result = await window.authService.changeUserPassword(passwordData);
 
-        showPasswordMessage(
+        showNotice(
             result.message || "Password updated successfully.",
             "success"
         );
@@ -189,23 +183,17 @@ async function handlePasswordUpdate(event) {
 
     } catch (error) {
         console.error("Password update error:", error);
-        showPasswordMessage(
+        showNotice(
             error.message || "Unable to update your password.",
             "error"
         );
     }
 }
 
-function showPasswordMessage(message, type) {
-    const messageElement = document.getElementById("password-message");
-    messageElement.textContent = message;
-    messageElement.className = `form-message ${type}`;
-    messageElement.hidden = false;
-}
-
 async function handleLogout() {
     try {
         await window.authService.logoutResident();
+        logoutUser();
 
         window.location.href = "../public/login.html";
     } catch (error) {

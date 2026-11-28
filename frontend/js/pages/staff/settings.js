@@ -1,5 +1,6 @@
 import { setupProfileImageUpload } from "../../utils/profileImageSettings.js";
 import { showNotice } from "../../utils/notice.js";
+import { logoutUser } from "../../core/session.js";
 
 const logoutModal = document.getElementById("logout-modal");
 const profileImageSettings = setupProfileImageUpload(
@@ -62,10 +63,6 @@ staffPasswordForm.addEventListener("submit", handleStaffPasswordUpdate);
 async function handleStaffPasswordUpdate(event) {
     event.preventDefault();
 
-    const messageElement = document.getElementById("password-message");
-
-    messageElement.hidden = true;
-
     const passwordData = {
         current_password: document.getElementById("current-password").value,
         new_password: document.getElementById("new-password").value,
@@ -74,21 +71,18 @@ async function handleStaffPasswordUpdate(event) {
 
     try {
         const response = await window.authService.changeUserPassword(passwordData);
-
-        messageElement.textContent =
-            response.message || "Password changed successfully.";
-
-        messageElement.className = "form-message success";
-        messageElement.hidden = false;
+        showNotice(
+            response.message || "Password changed successfully.",
+            "success"
+        );
 
         staffPasswordForm.reset();
 
     } catch (error) {
-        messageElement.textContent =
-            error.message || "Unable to change your password.";
-
-        messageElement.className = "form-message error";
-        messageElement.hidden = false;
+        showNotice(
+            error.message || "Unable to change your password.",
+            "error"
+        );
     }
 }
 
@@ -98,10 +92,6 @@ staffProfileForm.addEventListener("submit", handleStaffProfileUpdate);
 
 async function handleStaffProfileUpdate(event) {
     event.preventDefault();
-
-    const messageElement = document.getElementById("profile-message");
-
-    messageElement.hidden = true;
 
     const profileData = {
         first_name: document.getElementById("first-name").value.trim(),
@@ -113,20 +103,18 @@ async function handleStaffProfileUpdate(event) {
     try {
         const response = await window.authService.updateUserProfile(profileData);
 
-        messageElement.textContent =
-            response.message || "Profile updated successfully.";
-
-        messageElement.className = "form-message success";
-        messageElement.hidden = false;
+        showNotice(
+            response.message || "Profile updated successfully.",
+            "success"
+        );
 
         await loadStaffProfile();
 
     } catch (error) {
-        messageElement.textContent = error.message ||
-            "Unable to update your profile.";
-
-        messageElement.className = "form-message error";
-        messageElement.hidden = false;
+        showNotice(
+            error.message || "Unable to update your profile.",
+            "error"
+        );
     }
 }
 
@@ -162,9 +150,6 @@ async function loadStaffNotificationPreferences() {
 async function handleStaffNotificationUpdate(event) {
     event.preventDefault();
 
-    const messageElement = document.getElementById("notification-message");
-    messageElement.hidden = true;
-
     const preferences = {
         notify_request_updates: document.getElementById("request-updates").checked,
         notify_pickup_reminders: document.getElementById("pickup-reminders").checked,
@@ -173,21 +158,19 @@ async function handleStaffNotificationUpdate(event) {
 
     try {
         const result = await window.authService.updateNotificationPreferences(preferences);
-
-        messageElement.textContent = result.message;
-        messageElement.className = "form-message success";
-        messageElement.hidden = false;
+        showNotice(
+            result.message || "Notification preferences updated successfully.",
+            "success"
+        );
 
         await loadStaffNotificationPreferences();
 
     } catch (error) {
         console.error("Notification preferences error:", error);
-
-        messageElement.textContent =
-            error.message || "Unable to update notification preferences.";
-
-        messageElement.className = "form-message error";
-        messageElement.hidden = false;
+        showNotice(
+            error.message || "Unable to update notification preferences.",
+            "error"
+        );
     }
 }
 
@@ -205,6 +188,7 @@ cancelNotificationsButton.addEventListener("click", async () => {
 async function handleLogout() {
     try {
         await window.authService.logoutResident();
+        logoutUser();
 
         window.location.href = "../public/login.html";
 

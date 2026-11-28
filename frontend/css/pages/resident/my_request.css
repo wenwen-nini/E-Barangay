@@ -150,6 +150,41 @@ header button:active {
     overflow-y: auto;
 }
 
+.request-list-layout.no-results {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.request-empty-state {
+    min-height: 280px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    background: #FFFFFF;
+    border: 1px solid #DCE2EA;
+    border-radius: 16px;
+}
+
+.request-empty-state img {
+    width: 40px;
+    max-width: 40%;
+    height: auto;
+    margin-bottom: 0.75rem;
+}
+
+.request-empty-state h3 {
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.request-empty-state p {
+    margin: 0.5rem 0 0;
+    color: #686868;
+}
+
 .request-card {
     box-sizing: border-box;
     background-color: #FFFFFF;
