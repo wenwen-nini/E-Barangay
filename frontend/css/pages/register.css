@@ -171,6 +171,23 @@ form h5 {
     border-radius: 8px;
 }
 
+.fields.registration-field-error,
+.full-fields.registration-field-error {
+    border: 2px solid #C62828;
+    background-color: #FFF8F8;
+}
+
+.fields.registration-field-error:focus,
+.full-fields.registration-field-error:focus {
+    outline: 2px solid rgba(198, 40, 40, 0.2);
+    outline-offset: 1px;
+}
+
+#agreement-group input.registration-field-error {
+    outline: 2px solid #C62828;
+    outline-offset: 2px;
+}
+
 #gray-line {
     display: flex;
     align-items: center;
@@ -193,15 +210,15 @@ form h5 {
     margin-bottom: 16px;
 }
 
-#agreement input {
+#agreement-group input {
     border-radius: 8px;
 }
 
-#agreement label {
+#agreement-group label {
     color: var(--primary-color);
 }
 
-#agreement a {
+#agreement-group a {
     color: var(--primary-color);
     text-decoration: none;
     text-decoration: underline;

@@ -16,8 +16,6 @@ const cancelLogout = document.getElementById("cancel-logout");
 const confirmLogout = document.getElementById("confirm-logout");
 
 async function loadStaffProfile() {
-    const messageElement = document.getElementById("profile-message");
-
     try {
         const response = await window.authService.getUserProfile();
 
@@ -48,10 +46,9 @@ async function loadStaffProfile() {
 
     } catch (error) {
         console.error("Unable to load staff profile:", error);
-        messageElement.textContent =
-            error.message || "Unable to load your profile information.";
-        messageElement.className = "form-message error";
-        messageElement.hidden = false;
+        showNotice(
+            error.message || "Unable to load your profile information."
+        );
         return false;
     }
 }
@@ -136,11 +133,9 @@ async function loadStaffNotificationPreferences() {
 
     } catch (error) {
         console.error("Unable to load notification preferences:", error);
-        const messageElement = document.getElementById("notification-message");
-        messageElement.textContent =
-            error.message || "Unable to load notification preferences.";
-        messageElement.className = "form-message error";
-        messageElement.hidden = false;
+        showNotice(
+            error.message || "Unable to load notification preferences."
+        );
         return false;
     }
 }

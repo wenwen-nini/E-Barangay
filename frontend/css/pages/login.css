@@ -134,6 +134,16 @@ form input {
     border-radius: 8px;
 }
 
+#form input.login-input-error {
+    border: 2px solid #C62828;
+    background-color: #FFF8F8;
+}
+
+#form input.login-input-error:focus {
+    outline: 2px solid rgba(198, 40, 40, 0.2);
+    outline-offset: 1px;
+}
+
 #form-line {
     display: flex;
     flex-direction: row;

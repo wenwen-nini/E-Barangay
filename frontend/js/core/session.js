@@ -45,12 +45,6 @@ export function setCurrentUser(user) {
 
 export function logoutUser() {
     localStorage.removeItem("currentUser");
-
-    if (typeof BroadcastChannel !== "undefined") {
-        const channel = new BroadcastChannel("e-barangay-session");
-        channel.postMessage({ type: "account-logged-out" });
-        channel.close();
-    }
 }
 
 export function startSessionAccountMonitor() {
@@ -157,11 +151,6 @@ export function startSessionAccountMonitor() {
     if (typeof BroadcastChannel !== "undefined") {
         const channel = new BroadcastChannel("e-barangay-session");
         channel.addEventListener("message", event => {
-            if (event.data?.type === "account-logged-out") {
-                monitoredUser = null;
-                showLoggedOutDialog();
-                return;
-            }
             if (event.data?.type !== "account-changed") return;
 
             const previousUser = monitoredUser || event.data.previousUser;

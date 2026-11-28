@@ -34,7 +34,7 @@
                     <p>Register to stay connected with your barangay and access available services.</p>
                     <p>Fields marked * are required.</p>
                 </div>
-                <form id="registerForm">
+                <form id="registerForm" novalidate>
                     <h5>PERSONAL INFORMATION</h5>
                     <div id="double">
                         <div class="lines">
@@ -61,18 +61,18 @@
                     <label for="address">Complete Address <span>*</span></label><br>
                     <input type="text" class="full-fields" id="address" name="address" placeholder="House / Unit, Street, Barangay, City, Province" required><br>
                     <label for="number">Contact Number <span>*</span></label><br>
-                    <input type="tel" class="full-fields" id="number" name="address" pattern="[0-9]{11}" placeholder="Enter your contact number"required><br>
+                    <input type="tel" class="full-fields" id="number" name="address" pattern="[0-9]{11}" placeholder="09123456789"required><br>
 
                     <div id="gray-line"></div>
 
                     <h5>ACCOUNT SECURITY</h5>
                     <label for="password">Password <span>*</span></label><br>
                     <input type="password" class="full-fields" id="password" name="password" placeholder="Create a password" required><br>
-                    <p class="hint">Use at least 8 characters with a mix of letters and numbers.</p>
+                    <p class="hint">Use at least 8 characters and include at least one number.</p>
                     <label for="confirm-password">Confirm Password <span>*</span></label><br>
                     <input type="password" class="full-fields" id="confirm-password" name="confirm-password" placeholder="Re-enter your password" required><br>
                 
-                <div id="agreement">
+                <div id="agreement-group">
                     <input type="checkbox" id="agreement" name="agreement" value="agreement" required>
                     <label for="agreement">I agree to the <a href="...">Terms of Service</a> and <a href="...">Privacy Policy.</a> <span>*</span></label>
                 </div>

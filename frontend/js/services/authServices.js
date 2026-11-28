@@ -13,7 +13,9 @@ export async function registerResident(registrationData) {
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.message || "Registration failed");
+        const error = new Error(data.message || "Registration failed");
+        error.field = data.field;
+        throw error;
     }
 
     return data;
@@ -33,7 +35,11 @@ export async function loginUser(loginData) {
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.message || "Login failed");
+        const error = new Error(data.message || "Login failed");
+        error.status = response.status;
+        error.attemptsRemaining = data.attemptsRemaining;
+        error.retryAfterSeconds = data.retryAfterSeconds;
+        throw error;
     }
 
     return data;
@@ -104,7 +110,9 @@ async function updateUserProfile(profileData) {
         const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(data.message || "Unable to update profile.");
+            const error = new Error(data.message || "Unable to update profile.");
+            error.field = data.field;
+            throw error;
         }
 
         return data;

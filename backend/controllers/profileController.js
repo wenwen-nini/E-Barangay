@@ -4,6 +4,7 @@ const userModel = require("../models/userModel.js");
 const bcrypt = require("bcrypt");
 const fs = require("fs");
 const path = require("path");
+const { isValidNonFutureDate } = require("../utils/dateValidation");
 
 async function getProfile(req, res) {
     try {
@@ -70,6 +71,14 @@ async function updateProfile(req, res) {
                 return res.status(400).json({
                     success: false,
                     message: "Birth date, complete address, and contact number are required."
+                });
+            }
+
+            if (!isValidNonFutureDate(birth_date)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Birthday must be a valid date that is not in the future.",
+                    field: "birth_date"
                 });
             }
 

@@ -3,10 +3,26 @@ import { showNotice } from "../../utils/notice.js";
 import { logoutUser } from "../../core/session.js";
 
 const logoutModal = document.getElementById("logout-modal");
+const birthdayInput = document.getElementById("bday");
 const profileImageSettings = setupProfileImageUpload(
     new URL("../../../assets/images/profile_images/default.png", import.meta.url).href,
     "app-navbar .profile img"
 );
+
+function getTodayDateInputValue() {
+    const today = new Date();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${today.getFullYear()}-${month}-${day}`;
+}
+
+birthdayInput.max = getTodayDateInputValue();
+["input", "change"].forEach(eventName => {
+    birthdayInput.addEventListener(eventName, () => {
+        birthdayInput.classList.remove("birthday-field-error");
+        birthdayInput.removeAttribute("aria-invalid");
+    });
+});
 
 async function loadResidentProfile() {
     const profileForm = document.getElementById("resident-profile-form");
@@ -93,6 +109,15 @@ async function cancelNotificationChanges() {
 async function handleProfileUpdate(event) {
     event.preventDefault();
 
+    if (birthdayInput.value
+        && birthdayInput.value > getTodayDateInputValue()) {
+        birthdayInput.classList.add("birthday-field-error");
+        birthdayInput.setAttribute("aria-invalid", "true");
+        birthdayInput.focus();
+        showNotice("Birthday cannot be in the future.");
+        return;
+    }
+
     const profileData = {
         first_name: document.getElementById("first-name").value.trim(),
         middle_name: document.getElementById("middle-name").value.trim(),
@@ -112,6 +137,11 @@ async function handleProfileUpdate(event) {
 
     } catch (error) {
         console.error("Profile update error:", error);
+        if (error.field === "birth_date") {
+            birthdayInput.classList.add("birthday-field-error");
+            birthdayInput.setAttribute("aria-invalid", "true");
+            birthdayInput.focus();
+        }
         showNotice(error.message || "Unable to update your profile.");
     }
 }

@@ -3,11 +3,57 @@ const pool = require("../config/database");
 
 const userModel = require("../models/userModel");
 const residentModel = require("../models/residentModel");
+const { isValidNonFutureDate } = require("../utils/dateValidation");
+
+const LOGIN_ATTEMPT_LIMIT = 5;
+const LOGIN_ATTEMPT_WINDOW_MS = 15 * 60 * 1000;
+const loginAttempts = new Map();
+
+function getLoginLockout(key) {
+    const attempt = loginAttempts.get(key);
+    if (!attempt) return null;
+
+    const now = Date.now();
+    if (attempt.lockedUntil > now) {
+        return Math.ceil((attempt.lockedUntil - now) / 1000);
+    }
+
+    if (now - attempt.windowStartedAt >= LOGIN_ATTEMPT_WINDOW_MS) {
+        loginAttempts.delete(key);
+    }
+
+    return null;
+}
+
+function recordFailedLogin(key) {
+    const now = Date.now();
+
+    if (loginAttempts.size > 1000) {
+        for (const [attemptKey, attempt] of loginAttempts) {
+            if (now - attempt.windowStartedAt >= LOGIN_ATTEMPT_WINDOW_MS) {
+                loginAttempts.delete(attemptKey);
+            }
+        }
+    }
+
+    let attempt = loginAttempts.get(key);
+
+    if (!attempt || now - attempt.windowStartedAt >= LOGIN_ATTEMPT_WINDOW_MS) {
+        attempt = { count: 0, windowStartedAt: now, lockedUntil: 0 };
+    }
+
+    attempt.count++;
+    if (attempt.count >= LOGIN_ATTEMPT_LIMIT) {
+        attempt.lockedUntil = now + LOGIN_ATTEMPT_WINDOW_MS;
+    }
+
+    loginAttempts.set(key, attempt);
+    return Math.max(0, LOGIN_ATTEMPT_LIMIT - attempt.count);
+}
 
 // Resident Registration
 
 async function registerResident(req, res, next) {
-    console.log("Received registration data:", req.body);
     let connection;
 
     try {
@@ -23,19 +69,29 @@ async function registerResident(req, res, next) {
             contact_number
         } = req.body;
 
-        // Checks for missing values on required fields
-        if (
-            !email?.trim() ||
-            !password?.trim() ||
-            !first_name?.trim() ||
-            !last_name?.trim() ||
-            !birth_date?.trim() ||
-            !complete_address?.trim() ||
-            !contact_number?.trim()
-        ) {
+        const missingField = [
+            [email, "email", "Enter your email address."],
+            [password, "password", "Enter a password."],
+            [first_name, "first_name", "Enter your first name."],
+            [last_name, "last_name", "Enter your last name."],
+            [birth_date, "birth_date", "Enter your birthday."],
+            [complete_address, "complete_address", "Enter your complete address."],
+            [contact_number, "contact_number", "Enter your contact number."]
+        ].find(([value]) => !value?.trim());
+
+        if (missingField) {
             return res.status(400).json({
                 success: false,
-                message: "Please complete all required fields."
+                message: missingField[2],
+                field: missingField[1]
+            });
+        }
+
+        if (!isValidNonFutureDate(birth_date)) {
+            return res.status(400).json({
+                success: false,
+                message: "Birthday must be a valid date that is not in the future.",
+                field: "birth_date"
             });
         }
         
@@ -48,15 +104,16 @@ async function registerResident(req, res, next) {
         if (!emailPattern.test(normalizedEmail)) {
             return res.status(400).json({
                 success: false,
-                message: "Please enter a valid email address"
+                message: "Please enter a valid email address.",
+                field: "email"
             });
         }
 
-        // checks if password at least 8 characters; 
-        if (password.length < 8) {
+        if (password.length < 8 || !/\d/.test(password)) {
             return res.status(400).json({
                 success: false,
-                message: "Password must contain at least 8 characters."
+                message: "Password must be at least 8 characters and include at least one number.",
+                field: "password"
             });
         }
 
@@ -69,7 +126,8 @@ async function registerResident(req, res, next) {
         if (existingUser) {
             return res.status(400).json({
                 success: false,
-                message: "Email is already registered."
+                message: "Email is already registered.",
+                field: "email"
             });
         }
 
@@ -103,7 +161,7 @@ async function registerResident(req, res, next) {
 
         await connection.commit();
 
-        return res.status(400).json({
+        return res.status(201).json({
             success: true,
             message: "Resident account registered successfully.",
             data: {
@@ -121,7 +179,8 @@ async function registerResident(req, res, next) {
         if (error.code === "ER_DUP_ENTRY") {
             return res.status(400).json({
                 success: false,
-                message: "Email is already registered."
+                message: "Email is already registered.",
+                field: "email"
             });
         }
 
@@ -145,6 +204,17 @@ async function loginUser(req, res) {
         }
 
         const normalizedEmail = email.trim().toLowerCase();
+        const attemptKey = normalizedEmail;
+        const retryAfterSeconds = getLoginLockout(attemptKey);
+
+        if (retryAfterSeconds) {
+            res.set("Retry-After", String(retryAfterSeconds));
+            return res.status(429).json({
+                success: false,
+                message: `Too many failed attempts. Try again in ${Math.ceil(retryAfterSeconds / 60)} minutes.`,
+                retryAfterSeconds
+            });
+        }
 
         const user = await userModel.findUserByEmail(
             pool,
@@ -152,9 +222,20 @@ async function loginUser(req, res) {
         );
 
         if (!user) {
-            return res.status(400).json({
+            const attemptsRemaining = recordFailedLogin(attemptKey);
+            const isLocked = attemptsRemaining === 0;
+            const retryAfter = isLocked
+                ? LOGIN_ATTEMPT_WINDOW_MS / 1000
+                : undefined;
+            if (isLocked) res.set("Retry-After", String(retryAfter));
+
+            return res.status(isLocked ? 429 : 401).json({
                 success: false,
-                message: "Invalid email or password"
+                message: isLocked
+                    ? "Too many failed attempts. Try again in 15 minutes."
+                    : "Invalid email or password",
+                attemptsRemaining,
+                ...(isLocked && { retryAfterSeconds: retryAfter })
             });
         }
 
@@ -171,11 +252,24 @@ async function loginUser(req, res) {
         );
 
         if (!passwordMatch) {
-            return res.status(400).json({
+            const attemptsRemaining = recordFailedLogin(attemptKey);
+            const isLocked = attemptsRemaining === 0;
+            const retryAfter = isLocked
+                ? LOGIN_ATTEMPT_WINDOW_MS / 1000
+                : undefined;
+            if (isLocked) res.set("Retry-After", String(retryAfter));
+
+            return res.status(isLocked ? 429 : 401).json({
                 success: false,
-                message: "Invalid email or password"
+                message: isLocked
+                    ? "Too many failed attempts. Try again in 15 minutes."
+                    : "Invalid email or password",
+                attemptsRemaining,
+                ...(isLocked && { retryAfterSeconds: retryAfter })
             });
         }
+
+        loginAttempts.delete(attemptKey);
 
         let residentId = null;
 
